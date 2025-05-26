@@ -143,13 +143,13 @@ const BuildingSetup = () => {
             .from('buildings')
             .insert([
               {
-                name: formData.name,
-                address: formData.address,
-                total_units: formData.totalUnits,
-                building_age: formData.buildingAge,
-                building_type: formData.buildingType,
-                service_charge_frequency: formData.serviceChargeFrequency,
-                management_structure: formData.managementStructure
+                name: buildingData.name,
+                address: buildingData.address,
+                total_units: buildingData.totalUnits,
+                building_age: buildingData.buildingAge,
+                building_type: buildingData.buildingType,
+                service_charge_frequency: buildingData.serviceChargeFrequency,
+                management_structure: buildingData.managementStructure
               }
             ])
             .select();
