@@ -1,0 +1,40 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  environment = { NODE_VERSION = "20", VITE_ENVIRONMENT = "production" }
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = true
+
+# Special redirect for password reset
+[[redirects]]
+  from = "/reset-password"
+  to = "/index.html"
+  status = 200
+  force = true
+
+[build.processing]
+  skip_processing = false
+[build.processing.css]
+  bundle = true
+  minify = true
+[build.processing.js]
+  bundle = true
+  minify = true
+[build.processing.html]
+  pretty_urls = true
+[build.processing.images]
+  compress = true
+
+# Context-specific environment variables
+[context.production]
+  environment = { VITE_ENVIRONMENT = "production" }
+
+[context.development]
+  environment = { VITE_ENVIRONMENT = "development" }
+
+[context.branch-deploy]
+  environment = { VITE_ENVIRONMENT = "development" }
