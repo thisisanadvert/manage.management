@@ -61,11 +61,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session?.user) {
-        const userWithRole = {
+        // Create a user object with metadata from the session
+        const userWithRole: AuthUser = {
           ...session.user,
           role: session.user.user_metadata?.role,
           metadata: session.user.user_metadata
         };
+        
+        // If we don't have a buildingId in metadata, try to fetch it
+        if (!userWithRole.metadata?.buildingId) {
+          // Fetch the building ID from building_users table
+          supabase
+            .from('building_users')
+            .select('building_id')
+            .eq('user_id', session.user.id)
+            .limit(1)
+            .then(({ data, error }) => {
+              if (error) {
+                console.error('Error fetching building ID:', error);
+              } else if (data && data.length > 0) {
+                // Update user metadata with the building ID
+                const buildingId = data[0].building_id;
+                
+                // Update local user state
+                userWithRole.metadata = {
+                  ...userWithRole.metadata,
+                  buildingId
+                };
+                setUser(userWithRole);
+                
+                // Also update the user metadata in Supabase
+                supabase.auth.updateUser({
+                  data: { 
+                    ...session.user.user_metadata,
+                    buildingId 
+                  }
+                }).catch(err => {
+                  console.error('Error updating user metadata:', err);
+                });
+              }
+            });
+        }
+        
         setUser(userWithRole);
       } else {
         setUser(null);
