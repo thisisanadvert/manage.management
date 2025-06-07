@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { 
-  FolderPlus, 
-  Search, 
-  Filter, 
-  FileText, 
+import {
+  FolderPlus,
+  Search,
+  Filter,
+  FileText,
   Download,
   Clock,
   Calendar,
@@ -16,7 +16,11 @@ import {
   X,
   ChevronRight,
   File,
-  CheckCircle2
+  CheckCircle2,
+  Eye,
+  Edit2,
+  Save,
+  MoreVertical
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -32,6 +36,15 @@ const Documents = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [documents, setDocuments] = useState<any[]>([]);
+
+  // Preview modal state
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewDocument, setPreviewDocument] = useState<any>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // Rename state
+  const [editingDocumentId, setEditingDocumentId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
@@ -58,6 +71,63 @@ const Documents = () => {
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
   }, []);
+
+  // Preview functionality
+  const handlePreview = async (doc: any) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('documents')
+        .download(doc.storage_path);
+
+      if (error) throw error;
+
+      const url = URL.createObjectURL(data);
+      setPreviewUrl(url);
+      setPreviewDocument(doc);
+      setShowPreviewModal(true);
+    } catch (error) {
+      console.error('Error loading preview:', error);
+    }
+  };
+
+  // Rename functionality
+  const handleStartRename = (doc: any) => {
+    setEditingDocumentId(doc.id);
+    setEditingName(doc.storage_path.split('/').pop()?.replace(/^\d+-/, '') || '');
+  };
+
+  const handleSaveRename = async (doc: any) => {
+    if (!editingName.trim()) return;
+
+    try {
+      // Create new file path with timestamp prefix
+      const pathParts = doc.storage_path.split('/');
+      const oldFileName = pathParts.pop();
+      const timestamp = oldFileName?.split('-')[0] || new Date().getTime();
+      const newFileName = `${timestamp}-${editingName.trim()}`;
+      const newPath = [...pathParts, newFileName].join('/');
+
+      // Update database record
+      const { error } = await supabase
+        .from('onboarding_documents')
+        .update({ storage_path: newPath })
+        .eq('id', doc.id);
+
+      if (error) throw error;
+
+      // Refresh documents list
+      await fetchDocuments();
+      setEditingDocumentId(null);
+      setEditingName('');
+    } catch (error) {
+      console.error('Error renaming document:', error);
+    }
+  };
+
+  const handleCancelRename = () => {
+    setEditingDocumentId(null);
+    setEditingName('');
+  };
 
   // Check if the documents bucket exists on component mount
   useEffect(() => {
@@ -90,38 +160,39 @@ const Documents = () => {
     checkBucketExists();
   }, []);
 
+  // Fetch documents function
+  const fetchDocuments = async () => {
+    if (!user?.metadata?.buildingId) return;
+
+    setIsLoading(true);
+    try {
+      let query = supabase
+        .from('onboarding_documents')
+        .select('*')
+        .eq('building_id', user.metadata.buildingId);
+
+      if (selectedCategory !== 'all') {
+        query = query.eq('document_type', selectedCategory);
+      }
+
+      if (searchQuery) {
+        query = query.ilike('storage_path', `%${searchQuery}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      setDocuments(data || []);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Fetch documents when component mounts or category changes
   useEffect(() => {
-    const fetchDocuments = async () => {
-      if (!user?.metadata?.buildingId) return;
-      
-      setIsLoading(true);
-      try {
-        let query = supabase
-          .from('onboarding_documents')
-          .select('*')
-          .eq('building_id', user.metadata.buildingId);
-          
-        if (selectedCategory !== 'all') {
-          query = query.eq('document_type', selectedCategory);
-        }
-        
-        if (searchQuery) {
-          query = query.ilike('storage_path', `%${searchQuery}%`);
-        }
-        
-        const { data, error } = await query;
-        
-        if (error) throw error;
-        
-        setDocuments(data || []);
-      } catch (error) {
-        console.error('Error fetching documents:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
     fetchDocuments();
   }, [user?.metadata?.buildingId, selectedCategory, searchQuery]);
 
@@ -201,6 +272,11 @@ const Documents = () => {
         console.log('✅ Document record created successfully');
       }
 
+      // Refresh the documents list
+      console.log('🔄 Refreshing documents list...');
+      await fetchDocuments();
+      console.log('✅ Documents list refreshed');
+
       setShowUploadModal(false);
       setUploadingFiles([]);
     } catch (error: any) {
@@ -208,6 +284,105 @@ const Documents = () => {
     } finally {
       setIsUploading(false);
     }
+  };
+
+  // Preview Modal Component
+  const PreviewModal = () => {
+    if (!showPreviewModal || !previewDocument || !previewUrl) return null;
+
+    const fileName = previewDocument.storage_path.split('/').pop();
+    const fileExtension = fileName?.split('.').pop()?.toLowerCase();
+
+    const renderPreview = () => {
+      if (['pdf'].includes(fileExtension)) {
+        return (
+          <iframe
+            src={previewUrl}
+            className="w-full h-full border-0"
+            title="Document Preview"
+          />
+        );
+      } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
+        return (
+          <img
+            src={previewUrl}
+            alt="Document Preview"
+            className="max-w-full max-h-full object-contain"
+          />
+        );
+      } else if (['txt', 'md'].includes(fileExtension)) {
+        return (
+          <div className="p-4 bg-gray-50 h-full overflow-auto">
+            <p className="text-gray-600">Text file preview not available. Please download to view.</p>
+          </div>
+        );
+      } else {
+        return (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <FileText size={48} className="mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600">Preview not available for this file type</p>
+              <p className="text-sm text-gray-500 mt-2">Please download to view the file</p>
+            </div>
+          </div>
+        );
+      }
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-11/12 h-5/6 max-w-4xl flex flex-col">
+          <div className="flex justify-between items-center p-4 border-b">
+            <h2 className="text-xl font-semibold truncate">{fileName}</h2>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                leftIcon={<Download size={16} />}
+                onClick={async () => {
+                  try {
+                    const { data, error } = await supabase.storage
+                      .from('documents')
+                      .download(previewDocument.storage_path);
+
+                    if (error) throw error;
+
+                    const url = URL.createObjectURL(data);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                  } catch (error) {
+                    console.error('Error downloading file:', error);
+                  }
+                }}
+              >
+                Download
+              </Button>
+              <button
+                onClick={() => {
+                  setShowPreviewModal(false);
+                  setPreviewDocument(null);
+                  if (previewUrl) {
+                    URL.revokeObjectURL(previewUrl);
+                    setPreviewUrl(null);
+                  }
+                }}
+                className="p-2 hover:bg-gray-100 rounded"
+              >
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            {renderPreview()}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const UploadModal = () => (
@@ -387,11 +562,42 @@ const Documents = () => {
                 <div className="p-2 rounded-lg bg-primary-100">
                   <FileText className="h-5 w-5 text-primary-600" />
                 </div>
-                
+
                 <div className="flex-1">
-                  <h3 className="text-lg font-medium">
-                    {doc.storage_path.split('/').pop()}
-                  </h3>
+                  {editingDocumentId === doc.id ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={editingName}
+                        onChange={(e) => setEditingName(e.target.value)}
+                        className="flex-1 px-2 py-1 border border-gray-300 rounded text-lg font-medium"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSaveRename(doc);
+                          if (e.key === 'Escape') handleCancelRename();
+                        }}
+                        autoFocus
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        leftIcon={<Save size={14} />}
+                        onClick={() => handleSaveRename(doc)}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCancelRename}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <h3 className="text-lg font-medium">
+                      {doc.storage_path.split('/').pop()?.replace(/^\d+-/, '') || doc.storage_path.split('/').pop()}
+                    </h3>
+                  )}
                   <div className="mt-2 flex items-center gap-4 text-sm text-gray-500">
                     <div className="flex items-center gap-1">
                       <Calendar size={14} />
@@ -404,34 +610,54 @@ const Documents = () => {
                   </div>
                 </div>
 
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  leftIcon={<Download size={16} />}
-                  onClick={async () => {
-                    try {
-                      const { data, error } = await supabase.storage
-                        .from('documents')
-                        .download(doc.storage_path);
-                        
-                      if (error) throw error;
-                      
-                      // Create a download link
-                      const url = URL.createObjectURL(data);
-                      const a = document.createElement('a');
-                      a.href = url;
-                      a.download = doc.storage_path.split('/').pop();
-                      document.body.appendChild(a);
-                      a.click();
-                      URL.revokeObjectURL(url);
-                      document.body.removeChild(a);
-                    } catch (error) {
-                      console.error('Error downloading file:', error);
-                    }
-                  }}
-                >
-                  Download
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<Eye size={16} />}
+                    onClick={() => handlePreview(doc)}
+                  >
+                    Preview
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<Edit2 size={16} />}
+                    onClick={() => handleStartRename(doc)}
+                  >
+                    Rename
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<Download size={16} />}
+                    onClick={async () => {
+                      try {
+                        const { data, error } = await supabase.storage
+                          .from('documents')
+                          .download(doc.storage_path);
+
+                        if (error) throw error;
+
+                        // Create a download link
+                        const url = URL.createObjectURL(data);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = doc.storage_path.split('/').pop()?.replace(/^\d+-/, '') || doc.storage_path.split('/').pop();
+                        document.body.appendChild(a);
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                      } catch (error) {
+                        console.error('Error downloading file:', error);
+                      }
+                    }}
+                  >
+                    Download
+                  </Button>
+                </div>
               </div>
             </Card>
           ))
@@ -439,6 +665,7 @@ const Documents = () => {
       </div>
 
       {showUploadModal && <UploadModal />}
+      {showPreviewModal && <PreviewModal />}
     </div>
   );
 };

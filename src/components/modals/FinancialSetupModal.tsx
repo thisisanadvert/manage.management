@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Wallet, PiggyBank, Calendar, AlertTriangle, CheckCircle2, ArrowRight, Info, DollarSign, Briefcase, Droplet, Zap, Brush } from 'lucide-react';
+import { X, Wallet, PiggyBank, Calendar, AlertTriangle, CheckCircle2, ArrowRight, Info, DollarSign, Briefcase, Droplet, Zap, Brush, Wrench, Shield } from 'lucide-react';
 import Button from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -20,7 +20,7 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
   const initialFormData = {
     serviceChargeAccountBalance: 0,
     reserveFundBalance: 0,
-    serviceChargeFrequency: '',
+    serviceChargeFrequency: 'Quarterly',
     totalAnnualBudget: 0,
     annualMaintenanceBudget: 0,
     annualInsuranceBudget: 0,
@@ -91,12 +91,14 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    
+
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else if (type === 'number') {
-      setFormData(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
+      // Handle number inputs more carefully
+      const numValue = value === '' ? 0 : parseFloat(value);
+      setFormData(prev => ({ ...prev, [name]: isNaN(numValue) ? 0 : numValue }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -104,26 +106,43 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
 
   const validateStep = (step: number): boolean => {
     setError(null);
-    
+
     if (step === 1) {
-      if (formData.serviceChargeAccountBalance < 0) {
+      // Debug logging to understand the validation issue
+      console.log('Validating step 1:', {
+        serviceChargeAccountBalance: formData.serviceChargeAccountBalance,
+        reserveFundBalance: formData.reserveFundBalance,
+        serviceChargeFrequency: formData.serviceChargeFrequency,
+        serviceChargeAccountBalanceType: typeof formData.serviceChargeAccountBalance,
+        reserveFundBalanceType: typeof formData.reserveFundBalance
+      });
+
+      // Ensure values are numbers and handle potential string/NaN issues
+      const serviceChargeBalance = Number(formData.serviceChargeAccountBalance);
+      const reserveBalance = Number(formData.reserveFundBalance);
+
+      if (isNaN(serviceChargeBalance) || serviceChargeBalance < 0) {
         setError('Service charge account balance must be zero or positive');
         return false;
       }
-      if (formData.reserveFundBalance < 0) {
+      if (isNaN(reserveBalance) || reserveBalance < 0) {
         setError('Reserve fund balance must be zero or positive');
+        return false;
+      }
+      if (!formData.serviceChargeFrequency || formData.serviceChargeFrequency.trim() === '') {
+        setError('Please select a service charge collection frequency');
         return false;
       }
     } else if (step === 2) {
       // Calculate total budget from components
-      const calculatedTotal = 
-        formData.annualMaintenanceBudget + 
-        formData.annualInsuranceBudget + 
-        formData.annualUtilitiesBudget + 
-        formData.annualCleaningBudget + 
-        formData.annualManagementFee + 
-        formData.annualReserveContribution;
-      
+      const calculatedTotal =
+        Number(formData.annualMaintenanceBudget) +
+        Number(formData.annualInsuranceBudget) +
+        Number(formData.annualUtilitiesBudget) +
+        Number(formData.annualCleaningBudget) +
+        Number(formData.annualManagementFee) +
+        Number(formData.annualReserveContribution);
+
       if (calculatedTotal <= 0) {
         setError('At least one budget category must have a value greater than zero');
         return false;
@@ -132,18 +151,27 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
         setError('Please provide a description for the major works');
         return false;
       }
-      if (formData.hasMajorWorks && formData.majorWorksCost <= 0) {
+      if (formData.hasMajorWorks && Number(formData.majorWorksCost) <= 0) {
         setError('Major works cost must be greater than zero');
         return false;
       }
     }
-    
+
     return true;
   };
 
   const handleNext = () => {
-    if (validateStep(currentStep)) {
+    console.log('Next button clicked, current step:', currentStep);
+    console.log('Current form data:', formData);
+
+    const isValid = validateStep(currentStep);
+    console.log('Validation result:', isValid);
+
+    if (isValid) {
+      console.log('Validation passed, moving to next step');
       setCurrentStep(prev => prev + 1);
+    } else {
+      console.log('Validation failed, staying on current step');
     }
   };
 
