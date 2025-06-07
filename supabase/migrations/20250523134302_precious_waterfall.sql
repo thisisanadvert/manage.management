@@ -1,52 +1,24 @@
--- Check if policies exist before creating them
-DO $$ 
-BEGIN
-  -- Check for update policy
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies 
-    WHERE schemaname = 'public' 
-    AND tablename = 'buildings'
-    AND policyname = 'building_admins_update_buildings'
-  ) THEN
-    -- Create policy for building administrators to update buildings
-    CREATE POLICY "building_admins_update_buildings"
-      ON buildings
-      FOR UPDATE
-      TO authenticated
-      USING (is_building_admin(id))
-      WITH CHECK (is_building_admin(id));
-  END IF;
+-- Drop existing policies to recreate them
+DROP POLICY IF EXISTS "building_admins_update_buildings" ON buildings;
+DROP POLICY IF EXISTS "building_admins_insert_buildings" ON buildings;
 
-  -- Check for insert policy
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies 
-    WHERE schemaname = 'public' 
-    AND tablename = 'buildings'
-    AND policyname = 'building_admins_insert_buildings'
-  ) THEN
-    -- Create policy for authenticated users to create buildings
-    CREATE POLICY "building_admins_insert_buildings"
-      ON buildings
-      FOR INSERT
-      TO authenticated
-      WITH CHECK (
-        -- New users can create their first building
-        (NOT EXISTS (
-          SELECT 1 
-          FROM building_users
-          WHERE user_id = auth.uid()
-        ))
-        OR 
-        -- Users with director roles can create buildings
-        (EXISTS (
-          SELECT 1 
-          FROM auth.users
-          WHERE id = auth.uid() 
-          AND (raw_user_meta_data->>'role') = ANY (ARRAY['rtm-director', 'sof-director'])
-        ))
-      );
-  END IF;
-END $$;
+-- Create policy for building administrators to update buildings
+CREATE POLICY "building_admins_update_buildings"
+  ON buildings
+  FOR UPDATE
+  TO authenticated
+  USING (is_building_admin(id))
+  WITH CHECK (is_building_admin(id));
+
+-- Create a more permissive policy for authenticated users to create buildings
+CREATE POLICY "building_admins_insert_buildings"
+  ON buildings
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    -- Allow all authenticated users to create buildings
+    auth.uid() IS NOT NULL
+  );
 
 -- Update the handle_new_user_signup function to run with SECURITY DEFINER
 CREATE OR REPLACE FUNCTION handle_new_user_signup()
