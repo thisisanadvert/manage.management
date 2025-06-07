@@ -221,7 +221,16 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
         onClose();
       }, 2000);
     } catch (err: any) {
-      setError(err.message);
+      console.error('Financial setup error:', err);
+
+      // Handle specific database trigger errors
+      if (err.message && err.message.includes('has no field "role"')) {
+        setError('Database configuration issue detected. Please contact support or try again in a few minutes.');
+      } else if (err.message && err.message.includes('permission denied')) {
+        setError('You do not have permission to complete financial setup. Please ensure you are a director.');
+      } else {
+        setError(err.message || 'An unexpected error occurred. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
