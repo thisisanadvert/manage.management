@@ -156,13 +156,23 @@ const Documents = () => {
       }
 
       for (const file of uploadingFiles) {
-        const filePath = `${user?.metadata?.buildingId}/${selectedCategory}/${file.name}`;
-        
+        // Create unique file path with timestamp to avoid conflicts
+        const timestamp = new Date().getTime();
+        const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const filePath = `${user?.metadata?.buildingId}/${selectedCategory}/${timestamp}-${sanitizedFileName}`;
+
+        console.log('📁 Uploading file to path:', filePath);
+
         const { error: uploadError } = await supabase.storage
           .from('documents')
           .upload(filePath, file);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('💥 Storage upload error:', uploadError);
+          throw new Error(`Failed to upload ${file.name}: ${uploadError.message}`);
+        }
+
+        console.log('✅ File uploaded successfully to storage');
 
         // Create document record in the database
         console.log('🔍 Inserting document record:', {
