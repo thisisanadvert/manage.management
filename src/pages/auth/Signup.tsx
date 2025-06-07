@@ -65,6 +65,7 @@ const signupOptions = [
 
 const Signup = () => {
   const [selectedType, setSelectedType] = useState<SignupType>('rtm-director');
+  const [selectedSubtype, setSelectedSubtype] = useState<string>('');
   const [showWaitlistForm, setShowWaitlistForm] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState<WaitlistFormData>({
@@ -197,27 +198,146 @@ const Signup = () => {
               ))}
             </div>
 
-            {showWaitlistForm ? (
+            {showWaitlistForm && !formSubmitted ? (
               <div className="mt-8 p-6 bg-gray-50 rounded-lg">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Join the Waitlist</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  {selectedOption?.available ? 'Register Interest' : 'Join the Waitlist'}
+                </h3>
+                {error && (
+                  <div className="mb-4 p-3 bg-error-50 border border-error-200 rounded-md">
+                    <p className="text-sm text-error-600">{error}</p>
+                  </div>
+                )}
                 <form onSubmit={handleWaitlistSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="firstName" className="block text-sm font-medium text-gray-900 mb-2">
+                        First Name
+                      </label>
+                      <input
+                        type="text"
+                        id="firstName"
+                        value={formData.firstName}
+                        onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 shadow-sm text-base"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="lastName" className="block text-sm font-medium text-gray-900 mb-2">
+                        Last Name
+                      </label>
+                      <input
+                        type="text"
+                        id="lastName"
+                        value={formData.lastName}
+                        onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 shadow-sm text-base"
+                        required
+                      />
+                    </div>
+                  </div>
                   <div>
-                    <label htmlFor="waitlist-email" className="block text-sm font-medium text-gray-900 mb-2">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-2">
                       Email address
                     </label>
                     <input
                       type="email"
-                      id="waitlist-email"
-                      value={waitlistEmail}
-                      onChange={(e) => setWaitlistEmail(e.target.value)}
+                      id="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                       className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 shadow-sm text-base"
                       required
                     />
                   </div>
-                  <Button type="submit" variant="primary" className="w-full py-3 text-base">
-                    Join Waitlist
+
+                  {selectedOption?.fields?.includes('buildingName') && (
+                    <div>
+                      <label htmlFor="buildingName" className="block text-sm font-medium text-gray-900 mb-2">
+                        Building Name
+                      </label>
+                      <input
+                        type="text"
+                        id="buildingName"
+                        value={formData.buildingName || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, buildingName: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 shadow-sm text-base"
+                        required
+                      />
+                    </div>
+                  )}
+
+                  {selectedOption?.fields?.includes('buildingAddress') && (
+                    <div>
+                      <label htmlFor="buildingAddress" className="block text-sm font-medium text-gray-900 mb-2">
+                        Building Address
+                      </label>
+                      <input
+                        type="text"
+                        id="buildingAddress"
+                        value={formData.buildingAddress || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, buildingAddress: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 shadow-sm text-base"
+                        required
+                      />
+                    </div>
+                  )}
+
+                  {selectedOption?.fields?.includes('unitNumber') && (
+                    <div>
+                      <label htmlFor="unitNumber" className="block text-sm font-medium text-gray-900 mb-2">
+                        Unit Number
+                      </label>
+                      <input
+                        type="text"
+                        id="unitNumber"
+                        value={formData.unitNumber || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, unitNumber: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 shadow-sm text-base"
+                      />
+                    </div>
+                  )}
+
+                  {selectedOption?.fields?.includes('phone') && (
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-medium text-gray-900 mb-2">
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        value={formData.phone || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 shadow-sm text-base"
+                      />
+                    </div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    className="w-full py-3 text-base"
+                    isLoading={isSubmitting}
+                    disabled={isSubmitting}
+                  >
+                    {selectedOption?.available ? 'Register Interest' : 'Join Waitlist'}
                   </Button>
                 </form>
+              </div>
+            ) : formSubmitted ? (
+              <div className="mt-8 p-6 bg-success-50 rounded-lg text-center">
+                <CheckCircle2 className="mx-auto h-12 w-12 text-success-600 mb-4" />
+                <h3 className="text-lg font-medium text-success-900 mb-2">Thank you!</h3>
+                <p className="text-success-700">
+                  We've received your registration. We'll be in touch soon with next steps.
+                </p>
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={() => navigate('/')}
+                >
+                  Return to Home
+                </Button>
               </div>
             ) : null}
           </div>
