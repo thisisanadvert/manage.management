@@ -88,14 +88,8 @@ const Signup = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
-    
+
     try {
-      // Log the form data (without password) for debugging
-      console.log('Submitting signup with data:', {
-        ...formData,
-        password: '[REDACTED]'
-      });
-      
       // Create user account with more detailed error handling
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
@@ -116,7 +110,7 @@ const Signup = () => {
       if (authError) {
         throw authError;
       }
-      
+
       setFormSubmitted(true);
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -142,233 +136,92 @@ const Signup = () => {
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Create your account
         </h2>
-        {!formSubmitted ? (
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
-              Sign in
-            </Link>
-          </p>
-        ) : (
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Thank you for your interest!
-          </p>
-        )}
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Already have an account?{' '}
+          <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
+            Sign in
+          </Link>
+        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
-        {formSubmitted ? (
-          <div className="bg-white py-8 px-4 shadow-xl sm:rounded-lg sm:px-10 text-center">
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="bg-success-50 p-4 rounded-full mb-6">
-                <CheckCircle2 size={48} className="text-success-500" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Thank You for Your Interest!</h3>
-              <p className="text-gray-600 mb-8 max-w-md">
-                We've received your registration for the Manage.Management beta. We'll be in touch soon with more information about accessing the platform.
-              </p>
-              <div className="space-y-4">
-                <Button 
-                  variant="primary" 
-                  onClick={() => navigate('/login')}
-                  className="w-full"
+        <div className="bg-white py-8 px-4 shadow-xl sm:rounded-lg sm:px-10">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-4">
+              {signupOptions.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => handleOptionClick(option.id as SignupType)}
+                  className={`relative p-6 border-2 rounded-lg text-left transition-all ${
+                    selectedType === option.id
+                      ? 'border-primary-500 bg-primary-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
                 >
-                  Sign In
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate('/')}
-                  className="w-full"
-                >
-                  Return to Home
-                </Button>
-              </div>
+                  <div className="flex items-start gap-4">
+                    <div className={`p-3 rounded-lg ${option.color}`}>
+                      <option.icon size={24} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-gray-900">{option.title}</h3>
+                        {!option.available && (
+                          <Badge variant="accent">Coming Soon</Badge>
+                        )}
+                      </div>
+                      <p className="mt-1 text-gray-600">{option.description}</p>
+                      
+                      {option.subtypes && selectedType === option.id && (
+                        <div className="mt-4 space-x-4">
+                          {option.subtypes.map(subtype => (
+                            <button
+                              key={subtype.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedSubtype(subtype.id);
+                              }}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                selectedSubtype === subtype.id
+                                  ? 'bg-primary-100 text-primary-800'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              {subtype.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              ))}
             </div>
-          </div>
-        ) : (
-          <div className="bg-white py-8 px-4 shadow-xl sm:rounded-lg sm:px-10">
-            {!showWaitlistForm ? (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 gap-4">
-                  {signupOptions.map((option) => (
-                    <button
-                      key={option.id}
-                      onClick={() => handleOptionClick(option.id as SignupType)}
-                      className={`relative p-6 border-2 rounded-lg text-left transition-all ${
-                        selectedType === option.id
-                          ? 'border-primary-500 bg-primary-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-lg ${option.color}`}>
-                          <option.icon size={24} />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-lg font-semibold text-gray-900">{option.title}</h3>
-                            {!option.available && (
-                              <Badge variant="accent">Coming Soon</Badge>
-                            )}
-                          </div>
-                          <p className="mt-1 text-gray-600">{option.description}</p>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">Tell us about yourself</h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    We'll notify you when beta access is available for {selectedOption?.title}.
-                  </p>
-                </div>
 
-                <form onSubmit={handleWaitlistSubmit} className="space-y-6">
-                  {error && (
-                    <div className="bg-error-50 border border-error-200 text-error-700 px-4 py-3 rounded-md">
-                      {error}
-                    </div>
-                  )}
-                  
-                  <div className="grid grid-cols-1 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Email Address
-                      </label>
-                      <input
-                        type="email"
-                        required
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          First Name
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.firstName}
-                          onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Last Name
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.lastName}
-                          onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Phone Number
-                      </label>
-                      <input
-                        type="tel"
-                        value={formData.phone || ''}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                      />
-                    </div>
-
-                    {selectedOption?.fields?.includes('buildingName') && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Building Name
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.buildingName || ''}
-                          onChange={(e) => setFormData({ ...formData, buildingName: e.target.value })}
-                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                        />
-                      </div>
-                    )}
-
-                    {selectedOption?.fields?.includes('buildingAddress') && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Building Address
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.buildingAddress || ''}
-                          onChange={(e) => setFormData({ ...formData, buildingAddress: e.target.value })}
-                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                        />
-                      </div>
-                    )}
-
-                    {selectedOption?.fields?.includes('unitNumber') && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Unit Number
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.unitNumber || ''}
-                          onChange={(e) => setFormData({ ...formData, unitNumber: e.target.value })}
-                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                        />
-                      </div>
-                    )}
-
-                    {selectedOption?.fields?.includes('companyName') && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Company Name
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.companyName || ''}
-                          onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                        />
-                      </div>
-                    )}
+            {showWaitlistForm ? (
+              <div className="mt-8 p-6 bg-gray-50 rounded-lg">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Join the Waitlist</h3>
+                <form onSubmit={handleWaitlistSubmit} className="space-y-4">
+                  <div>
+                    <label htmlFor="waitlist-email" className="block text-sm font-medium text-gray-900 mb-2">
+                      Email address
+                    </label>
+                    <input
+                      type="email"
+                      id="waitlist-email"
+                      value={waitlistEmail}
+                      onChange={(e) => setWaitlistEmail(e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 shadow-sm text-base"
+                      required
+                    />
                   </div>
-
-                  <div className="flex justify-end space-x-3">
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowWaitlistForm(false)}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      isLoading={isSubmitting}
-                    >
-                      Register Interest
-                    </Button>
-                  </div>
+                  <Button type="submit" variant="primary" className="w-full py-3 text-base">
+                    Join Waitlist
+                  </Button>
                 </form>
               </div>
-            )}
+            ) : null}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
