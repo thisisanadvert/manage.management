@@ -165,6 +165,13 @@ const Documents = () => {
         if (uploadError) throw uploadError;
 
         // Create document record in the database
+        console.log('🔍 Inserting document record:', {
+          building_id: user?.metadata?.buildingId,
+          document_type: selectedCategory,
+          storage_path: filePath,
+          uploaded_by: user?.id
+        });
+
         const { error: dbError } = await supabase
           .from('onboarding_documents')
           .insert([
@@ -176,7 +183,12 @@ const Documents = () => {
             }
           ]);
 
-        if (dbError) throw dbError;
+        if (dbError) {
+          console.error('❌ Database error:', dbError);
+          throw dbError;
+        }
+
+        console.log('✅ Document record created successfully');
       }
 
       setShowUploadModal(false);
