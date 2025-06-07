@@ -10,11 +10,11 @@ interface BadgeProps {
   className?: string;
 }
 
-export const Badge = ({ 
-  children, 
-  variant = 'primary', 
+const Badge = ({
+  children,
+  variant = 'primary',
   size = 'md',
-  className = '' 
+  className = ''
 }: BadgeProps) => {
   const variantClasses = {
     primary: 'bg-primary-100 text-primary-800',
@@ -46,4 +46,4 @@ export const Badge = ({
   );
 };
 
-export default Badge
+export default Badge;

@@ -21,6 +21,10 @@ import ResetPassword from './pages/auth/ResetPassword';
 import Landing from './pages/Landing';
 import Pricing from './pages/Pricing';
 import BuildingSetup from './pages/BuildingSetup';
+import NotFound from './pages/NotFound';
+import PrivacyPolicy from './pages/legal/PrivacyPolicy';
+import TermsOfService from './pages/legal/TermsOfService';
+import PageLoader from './components/ui/PageLoader';
 import { useAuth } from './contexts/AuthContext';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -47,8 +51,13 @@ function RoleBasedRoute({ children, allowedRoles }: { children: React.ReactNode;
 }
 
 function App() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
+
+  // Show loading screen while auth is initializing
+  if (loading) {
+    return <PageLoader message="Initializing..." />;
+  }
 
   // Prevent landing page access for logged-in users
   if (user && (location.pathname === '/' || location.pathname === '/pricing')) {
@@ -67,6 +76,10 @@ function App() {
       <Route path="/signup" element={!user ? <Signup /> : <Navigate to={`/${user.role?.split('-')[0]}`} replace />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* Legal routes */}
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsOfService />} />
       
       {/* Profile and Settings routes */}
       <Route
@@ -201,14 +214,8 @@ function App() {
         <Route path="suppliers" element={<SupplierNetwork />} />
       </Route>
 
-      {/* Redirect unknown routes to appropriate dashboard */}
-      <Route path="*" element={
-        user ? (
-          <Navigate to={`/${user.role?.split('-')[0]}`} replace />
-        ) : (
-          <Navigate to="/login" replace />
-        )
-      } />
+      {/* 404 page for unknown routes */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

@@ -11,7 +11,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   rightIcon?: React.ReactNode;
 }
 
-export const Button = ({
+const Button = ({
   children,
   variant = 'primary',
   size = 'md',

@@ -21,9 +21,16 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Footer from '../components/layout/Footer';
+import { testSignupFlow, testDatabasePolicies } from '../utils/testSignup';
 
 const Landing = () => {
   const navigate = useNavigate();
+
+  const runTests = async () => {
+    console.log('🚀 Running development tests...');
+    await testSignupFlow();
+    await testDatabasePolicies();
+  };
 
   const features = [
     {
@@ -149,7 +156,7 @@ const Landing = () => {
               The complete platform for residential building management, designed for RTM directors, Share of Freehold directors, and homeowners.
             </p>
             <div className="mt-8 flex justify-center gap-4">
-              <Button 
+              <Button
                 variant="primary"
                 size="lg"
                 rightIcon={<ArrowRight size={16} />}
@@ -157,13 +164,22 @@ const Landing = () => {
               >
                 Register Interest
               </Button>
-              <Button 
+              <Button
                 variant="outline"
                 size="lg"
                 onClick={() => navigate('/signup')}
               >
                 Get Started
               </Button>
+              {import.meta.env.DEV && (
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  onClick={runTests}
+                >
+                  🧪 Run Tests
+                </Button>
+              )}
             </div>
           </div>
 

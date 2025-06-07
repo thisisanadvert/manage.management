@@ -300,7 +300,6 @@ const BuildingSetup = () => {
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                     placeholder="e.g., Waterside Apartments"
                     autoFocus
-                    required
                   />
                 </div>
                 <p className="mt-1 text-xs text-gray-500">
@@ -325,7 +324,6 @@ const BuildingSetup = () => {
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                     placeholder="e.g., 123 Riverside Drive, London SE1"
                     autoComplete="street-address"
-                    required
                   />
                 </div>
                 <p className="mt-1 text-xs text-gray-500">
