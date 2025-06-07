@@ -64,23 +64,29 @@ const Documents = () => {
     const checkBucketExists = async () => {
       try {
         const { data: buckets, error } = await supabase.storage.listBuckets();
-        
+
         if (error) {
           console.error('Error checking storage buckets:', error);
+          console.log('Storage check failed, but continuing anyway for debugging');
           return;
         }
-        
+
         const documentsBucketExists = buckets.some(bucket => bucket.name === 'documents');
-        
+
         if (!documentsBucketExists) {
           console.warn('Documents storage bucket does not exist');
-          setUploadError('Documents storage is not configured. Please contact support.');
+          // Temporarily disabled for debugging
+          // setUploadError('Documents storage is not configured. Please contact support.');
+          console.log('Bucket check failed, but continuing anyway for debugging');
+        } else {
+          console.log('Documents bucket found successfully');
         }
       } catch (error) {
         console.error('Error checking storage buckets:', error);
+        console.log('Storage check failed, but continuing anyway for debugging');
       }
     };
-    
+
     checkBucketExists();
   }, []);
 
@@ -120,6 +126,11 @@ const Documents = () => {
   }, [user?.metadata?.buildingId, selectedCategory, searchQuery]);
 
   const uploadFiles = async () => {
+    console.log('Upload button clicked!');
+    console.log('Files to upload:', uploadingFiles);
+    console.log('Selected category:', selectedCategory);
+    console.log('User building ID:', user?.metadata?.buildingId);
+
     setIsUploading(true);
     setUploadError(null);
 
@@ -128,13 +139,20 @@ const Documents = () => {
       const { data: buckets, error: bucketsError } = await supabase
         .storage
         .listBuckets();
-        
-      if (bucketsError) throw bucketsError;
-      
-      const documentsBucketExists = buckets.some(bucket => bucket.name === 'documents');
-      
-      if (!documentsBucketExists) {
-        throw new Error('Documents storage is not configured. Please contact support.');
+
+      if (bucketsError) {
+        console.error('Bucket check error:', bucketsError);
+        console.log('Continuing with upload despite bucket check error');
+      } else {
+        const documentsBucketExists = buckets.some(bucket => bucket.name === 'documents');
+
+        if (!documentsBucketExists) {
+          console.warn('Documents bucket not found, but continuing anyway for debugging');
+          // Temporarily disabled for debugging
+          // throw new Error('Documents storage is not configured. Please contact support.');
+        } else {
+          console.log('Documents bucket confirmed for upload');
+        }
       }
 
       for (const file of uploadingFiles) {
