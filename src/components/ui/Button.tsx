@@ -26,10 +26,10 @@ const Button = ({
   
   const variantClasses = {
     primary: 'bg-primary-600 hover:bg-primary-700 text-white focus:ring-primary-500',
-    secondary: 'bg-secondary-600 hover:bg-secondary-700 text-white focus:ring-secondary-500',
-    accent: 'bg-accent-500 hover:bg-accent-600 text-white focus:ring-accent-400',
-    success: 'bg-success-500 hover:bg-success-700 text-white focus:ring-success-500',
-    warning: 'bg-warning-500 hover:bg-warning-700 text-white focus:ring-warning-500',
+    secondary: 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500',
+    accent: 'bg-green-500 hover:bg-green-600 text-white focus:ring-green-400',
+    success: 'bg-green-500 hover:bg-green-700 text-white focus:ring-green-500',
+    warning: 'bg-yellow-500 hover:bg-yellow-700 text-white focus:ring-yellow-500',
     outline: 'border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-700 focus:ring-primary-500',
     ghost: 'bg-transparent hover:bg-gray-100 text-gray-700 focus:ring-primary-500',
     link: 'bg-transparent underline text-primary-600 hover:text-primary-800 p-0 focus:ring-0',

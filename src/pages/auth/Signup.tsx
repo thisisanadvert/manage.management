@@ -35,7 +35,7 @@ const signupOptions = [
     title: 'Share of Freehold Director',
     description: 'Manage your Share of Freehold company and building',
     icon: Building,
-    color: 'bg-secondary-100 text-secondary-600',
+    color: 'bg-blue-100 text-blue-600',
     available: true,
     fields: ['buildingName', 'buildingAddress', 'unitNumber', 'phone']
   },
@@ -44,7 +44,7 @@ const signupOptions = [
     title: 'Homeowner',
     description: 'Access your building\'s management platform and participate in decisions',
     icon: Users,
-    color: 'bg-accent-100 text-accent-600',
+    color: 'bg-green-100 text-green-600',
     subtypes: [
       { id: 'leaseholder', label: 'Leaseholder' },
       { id: 'shareholder', label: 'Share of Freeholder' }
@@ -57,7 +57,7 @@ const signupOptions = [
     title: 'Management Company',
     description: 'Manage multiple properties with transparency and efficiency',
     icon: Shield,
-    color: 'bg-warning-100 text-warning-600',
+    color: 'bg-yellow-100 text-yellow-600',
     fields: ['companyName', 'phone'],
     available: false
   }
@@ -167,7 +167,7 @@ const Signup = () => {
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-semibold text-gray-900">{option.title}</h3>
                         {!option.available && (
-                          <Badge variant="accent">Coming Soon</Badge>
+                          <Badge variant="secondary">Coming Soon</Badge>
                         )}
                       </div>
                       <p className="mt-1 text-gray-600">{option.description}</p>
@@ -204,8 +204,8 @@ const Signup = () => {
                   {selectedOption?.available ? 'Register Interest' : 'Join the Waitlist'}
                 </h3>
                 {error && (
-                  <div className="mb-4 p-3 bg-error-50 border border-error-200 rounded-md">
-                    <p className="text-sm text-error-600">{error}</p>
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <p className="text-sm text-red-600">{error}</p>
                   </div>
                 )}
                 <form onSubmit={handleWaitlistSubmit} className="space-y-4">
@@ -325,10 +325,10 @@ const Signup = () => {
                 </form>
               </div>
             ) : formSubmitted ? (
-              <div className="mt-8 p-6 bg-success-50 rounded-lg text-center">
-                <CheckCircle2 className="mx-auto h-12 w-12 text-success-600 mb-4" />
-                <h3 className="text-lg font-medium text-success-900 mb-2">Thank you!</h3>
-                <p className="text-success-700">
+              <div className="mt-8 p-6 bg-green-50 rounded-lg text-center">
+                <CheckCircle2 className="mx-auto h-12 w-12 text-green-600 mb-4" />
+                <h3 className="text-lg font-medium text-green-900 mb-2">Thank you!</h3>
+                <p className="text-green-700">
                   We've received your registration. We'll be in touch soon with next steps.
                 </p>
                 <Button

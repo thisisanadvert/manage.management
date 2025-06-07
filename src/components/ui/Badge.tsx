@@ -18,11 +18,11 @@ const Badge = ({
 }: BadgeProps) => {
   const variantClasses = {
     primary: 'bg-primary-100 text-primary-800',
-    secondary: 'bg-secondary-100 text-secondary-800',
-    accent: 'bg-accent-100 text-accent-800',
-    success: 'bg-success-50 text-success-700',
-    warning: 'bg-warning-50 text-warning-700',
-    error: 'bg-error-50 text-error-700',
+    secondary: 'bg-blue-100 text-blue-800',
+    accent: 'bg-green-100 text-green-800',
+    success: 'bg-green-50 text-green-700',
+    warning: 'bg-yellow-50 text-yellow-700',
+    error: 'bg-red-50 text-red-700',
     gray: 'bg-gray-100 text-gray-800',
   };
   
