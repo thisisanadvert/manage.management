@@ -90,7 +90,13 @@ const Signup = () => {
     setError(null);
     
     try {
-      // Create user account
+      // Log the form data (without password) for debugging
+      console.log('Submitting signup with data:', {
+        ...formData,
+        password: '[REDACTED]'
+      });
+      
+      // Create user account with more detailed error handling
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: 'temp123', // We'll prompt them to change this on first login
