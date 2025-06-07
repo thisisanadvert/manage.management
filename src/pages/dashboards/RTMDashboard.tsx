@@ -11,7 +11,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
+import Card from '../../components/ui/Card';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import OnboardingWizard from '../../components/onboarding/OnboardingWizard';
