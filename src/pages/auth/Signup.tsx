@@ -167,7 +167,7 @@ const Signup = () => {
           }
         }
       } else {
-        // Handle regular waitlist signup
+        // Handle regular waitlist signup - create account but don't auto-login
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: formData.email,
           password: 'temp123', // Temporary password - user will be prompted to set up their own
@@ -187,6 +187,12 @@ const Signup = () => {
 
         if (authError) {
           throw authError;
+        }
+
+        // Sign out immediately after signup to prevent auto-login
+        // User will need to manually login with temp password and get redirected to setup
+        if (authData.session) {
+          await supabase.auth.signOut();
         }
       }
 
@@ -464,15 +470,15 @@ const Signup = () => {
                 <p className="text-green-700">
                   {isInvitation
                     ? 'Your account has been created successfully. You can now access your building\'s management platform.'
-                    : 'We\'ve received your registration. We\'ll be in touch soon with next steps.'
+                    : 'Your account has been created! Please sign in with the temporary password "temp123" to set up your secure password.'
                   }
                 </p>
                 <Button
-                  variant="outline"
+                  variant="primary"
                   className="mt-4"
-                  onClick={() => navigate(isInvitation ? '/login' : '/')}
+                  onClick={() => navigate('/login')}
                 >
-                  {isInvitation ? 'Sign In' : 'Return to Home'}
+                  {isInvitation ? 'Sign In' : 'Sign In to Set Up Password'}
                 </Button>
               </div>
             ) : null}
