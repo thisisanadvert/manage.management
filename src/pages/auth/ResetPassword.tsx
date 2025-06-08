@@ -16,34 +16,58 @@ const ResetPassword = () => {
 
   // Check if we have a hash in the URL (from the reset password email)
   useEffect(() => {
-    // Extract the access token from the URL hash
-    const hash = window.location.hash || window.location.search.replace('?', '#');
-    if (hash && hash.includes('access_token=')) {
-      const hashParams = new URLSearchParams(hash.substring(1));
-      const token = hashParams.get('access_token');
-      if (token) {
-        setAccessToken(token);
-        
-        // Set the access token in the Supabase session
-        const setSession = async () => {
-          const { error } = await supabase.auth.setSession({
-            access_token: token,
-            refresh_token: hashParams.get('refresh_token') || '',
+    const handlePasswordReset = async () => {
+      console.log('Current URL:', window.location.href);
+      console.log('Hash:', window.location.hash);
+      console.log('Search:', window.location.search);
+
+      // Try to extract tokens from both hash and query parameters
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const searchParams = new URLSearchParams(window.location.search);
+
+      const accessToken = hashParams.get('access_token') || searchParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token') || searchParams.get('refresh_token');
+      const type = hashParams.get('type') || searchParams.get('type');
+
+      console.log('Extracted params:', {
+        accessToken: accessToken ? 'present' : 'missing',
+        refreshToken: refreshToken ? 'present' : 'missing',
+        type
+      });
+
+      if (accessToken && type === 'recovery') {
+        try {
+          setAccessToken(accessToken);
+
+          // Set the session with the tokens
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || '',
           });
-          
+
           if (error) {
             console.error('Error setting session:', error);
-            setError('Invalid or expired password reset link. Please request a new one.');
+            setError(`Session error: ${error.message}`);
+          } else {
+            console.log('Session set successfully');
+            // Clear the error if session was set successfully
+            setError(null);
           }
-        };
-        
-        setSession();
+        } catch (err: any) {
+          console.error('Exception in password reset:', err);
+          setError(`Reset error: ${err.message}`);
+        }
       } else {
-        setError('Invalid or expired password reset link. Please request a new one.');
+        const missingParams = [];
+        if (!accessToken) missingParams.push('access_token');
+        if (!type || type !== 'recovery') missingParams.push('type=recovery');
+
+        console.log('Missing required parameters:', missingParams);
+        setError(`Invalid or expired password reset link. Missing: ${missingParams.join(', ')}`);
       }
-    } else {
-      setError('Invalid or expired password reset link. Please request a new one.');
-    }
+    };
+
+    handlePasswordReset();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
