@@ -46,7 +46,15 @@ function RoleBasedRoute({ children, allowedRoles }: { children: React.ReactNode;
   const location = useLocation();
 
   if (!user?.role || !allowedRoles.includes(user.role)) {
-    const redirectPath = user?.role ? `/${user.role.split('-')[0]}` : '/login';
+    let redirectPath = '/login';
+    if (user?.role) {
+      // Handle super-admin role specially
+      if (user.role === 'super-admin') {
+        redirectPath = '/rtm'; // Default to RTM dashboard for super admin
+      } else {
+        redirectPath = `/${user.role.split('-')[0]}`;
+      }
+    }
     return <Navigate to={redirectPath} state={{ from: location }} replace />;
   }
 
@@ -64,19 +72,24 @@ function App() {
 
   // Prevent landing page access for logged-in users
   if (user && (location.pathname === '/' || location.pathname === '/pricing')) {
-    const basePath = user.role?.split('-')[0];
+    let basePath = 'rtm'; // Default fallback
+    if (user.role === 'super-admin') {
+      basePath = 'rtm'; // Super admin goes to RTM dashboard
+    } else if (user.role) {
+      basePath = user.role.split('-')[0];
+    }
     return <Navigate to={`/${basePath}`} replace />;
   }
 
   return (
     <Routes>
       {/* Public routes */}
-      <Route path="/" element={!user ? <Landing /> : <Navigate to={`/${user.role?.split('-')[0]}`} replace />} />
-      <Route path="/pricing" element={!user ? <Pricing /> : <Navigate to={`/${user.role?.split('-')[0]}`} replace />} />
+      <Route path="/" element={!user ? <Landing /> : <Navigate to={`/${user.role === 'super-admin' ? 'rtm' : user.role?.split('-')[0]}`} replace />} />
+      <Route path="/pricing" element={!user ? <Pricing /> : <Navigate to={`/${user.role === 'super-admin' ? 'rtm' : user.role?.split('-')[0]}`} replace />} />
       
       {/* Auth routes */}
       <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={!user ? <Signup /> : <Navigate to={`/${user.role?.split('-')[0]}`} replace />} />
+      <Route path="/signup" element={!user ? <Signup /> : <Navigate to={`/${user.role === 'super-admin' ? 'rtm' : user.role?.split('-')[0]}`} replace />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/setup-password" element={<SetupPassword />} />
@@ -116,7 +129,7 @@ function App() {
         path="/rtm/*"
         element={
           <PrivateRoute>
-            <RoleBasedRoute allowedRoles={['rtm-director']}>
+            <RoleBasedRoute allowedRoles={['rtm-director', 'super-admin']}>
               <MainLayout />
             </RoleBasedRoute>
           </PrivateRoute>
@@ -139,7 +152,7 @@ function App() {
         path="/sof/*"
         element={
           <PrivateRoute>
-            <RoleBasedRoute allowedRoles={['sof-director']}>
+            <RoleBasedRoute allowedRoles={['sof-director', 'super-admin']}>
               <MainLayout />
             </RoleBasedRoute>
           </PrivateRoute>
@@ -162,7 +175,7 @@ function App() {
         path="/shareholder/*"
         element={
           <PrivateRoute>
-            <RoleBasedRoute allowedRoles={['shareholder']}>
+            <RoleBasedRoute allowedRoles={['shareholder', 'super-admin']}>
               <MainLayout />
             </RoleBasedRoute>
           </PrivateRoute>
