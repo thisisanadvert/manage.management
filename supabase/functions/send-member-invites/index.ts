@@ -32,15 +32,15 @@ serve(async (req) => {
       throw new Error('Building not found');
     }
 
-    // Create transporter
-    const transporter = new SmtpClient({
-      host: Deno.env.get("SMTP_HOST") || "",
+    // Create SMTP client
+    const client = new SmtpClient();
+
+    // Connect to SMTP server
+    await client.connectTLS({
+      hostname: Deno.env.get("SMTP_HOST") || "",
       port: parseInt(Deno.env.get("SMTP_PORT") || "587"),
-      secure: false,
-      auth: {
-        user: Deno.env.get("SMTP_USER") || "",
-        pass: Deno.env.get("SMTP_PASS") || "",
-      },
+      username: Deno.env.get("SMTP_USER") || "",
+      password: Deno.env.get("SMTP_PASS") || "",
     });
 
     // Send invitation emails
@@ -154,12 +154,11 @@ Welcome to your building's digital management platform!
 This invitation was sent by ${inviterName} for ${building.name}
       `;
 
-      return transporter.sendMail({
+      return client.send({
         from: Deno.env.get("SMTP_FROM") || "noreply@manage.management",
         to: invite.email,
         subject: `You're invited to join ${building.name} on Manage.Management`,
-        text: emailText,
-        html: emailHtml,
+        content: emailHtml,
       });
     });
 
@@ -167,11 +166,11 @@ This invitation was sent by ${inviterName} for ${building.name}
     await Promise.all(emailPromises);
 
     // Send notification to the inviter
-    await transporter.sendMail({
+    await client.send({
       from: Deno.env.get("SMTP_FROM") || "noreply@manage.management",
       to: inviterEmail,
       subject: `Member invitations sent for ${building.name}`,
-      text: `
+      content: `
 Hello ${inviterName},
 
 Your member invitations for ${building.name} have been successfully sent to:
@@ -184,6 +183,9 @@ Best regards,
 The Manage.Management Team
       `,
     });
+
+    // Close SMTP connection
+    await client.close();
 
     return new Response(
       JSON.stringify({ 
