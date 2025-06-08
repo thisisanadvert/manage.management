@@ -135,7 +135,7 @@ const DevUserSwitcher: React.FC = () => {
   const currentSimulatedUser = user?.metadata?.simulatedEmail;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-4 right-4 z-[9999]">
       {/* Dev Mode Indicator */}
       {user?.metadata?.devMode && (
         <div className="mb-2 rounded-lg bg-yellow-100 border border-yellow-300 px-3 py-2 text-xs text-yellow-800">
@@ -168,7 +168,7 @@ const DevUserSwitcher: React.FC = () => {
 
         {/* Dropdown Menu */}
         {isOpen && (
-          <div className="absolute bottom-full right-0 mb-2 w-80 rounded-lg bg-white shadow-xl border border-gray-200 overflow-hidden">
+          <div className="absolute bottom-full right-0 mb-2 w-80 rounded-lg bg-white shadow-xl border border-gray-200 overflow-hidden z-[9999]">
             <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
               <h3 className="text-sm font-medium text-gray-900">Developer User Switcher</h3>
               <p className="text-xs text-gray-500 mt-1">Switch between user roles for testing</p>
@@ -178,7 +178,12 @@ const DevUserSwitcher: React.FC = () => {
               {DEV_USERS.map((devUser) => (
                 <button
                   key={devUser.email}
-                  onClick={() => switchToUser(devUser)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Button clicked for:', devUser.name);
+                    switchToUser(devUser);
+                  }}
                   disabled={isSwitching}
                   className={`w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors cursor-pointer ${
                     isSwitching ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50'
@@ -223,7 +228,7 @@ const DevUserSwitcher: React.FC = () => {
       {/* Click outside to close */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-30"
           onClick={() => setIsOpen(false)}
         />
       )}
