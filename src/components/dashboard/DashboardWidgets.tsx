@@ -78,8 +78,18 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ stats }) => {
               <p className="text-2xl font-bold text-gray-900">{card.value}</p>
               <p className="text-xs text-gray-500">{card.subtitle}</p>
             </div>
-            <div className={`p-2 rounded-lg bg-${card.color}-100`}>
-              <card.icon className={`h-6 w-6 text-${card.color}-600`} />
+            <div className={`p-2 rounded-lg ${
+              card.color === 'primary' ? 'bg-blue-100' :
+              card.color === 'warning' ? 'bg-yellow-100' :
+              card.color === 'danger' ? 'bg-red-100' :
+              card.color === 'success' ? 'bg-green-100' : 'bg-gray-100'
+            }`}>
+              <card.icon className={`h-6 w-6 ${
+                card.color === 'primary' ? 'text-blue-600' :
+                card.color === 'warning' ? 'text-yellow-600' :
+                card.color === 'danger' ? 'text-red-600' :
+                card.color === 'success' ? 'text-green-600' : 'text-gray-600'
+              }`} />
             </div>
           </div>
         </Card>
@@ -304,8 +314,14 @@ export const QuickActions: React.FC<QuickActionsProps> = ({ userRole }) => {
             onClick={action.onClick}
             className="p-3 text-left rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-colors"
           >
-            <div className={`p-2 rounded-lg bg-${action.color}-100 w-fit mb-2`}>
-              <action.icon className={`h-5 w-5 text-${action.color}-600`} />
+            <div className={`p-2 rounded-lg w-fit mb-2 ${
+              action.color === 'primary' ? 'bg-blue-100' :
+              action.color === 'warning' ? 'bg-yellow-100' : 'bg-gray-100'
+            }`}>
+              <action.icon className={`h-5 w-5 ${
+                action.color === 'primary' ? 'text-blue-600' :
+                action.color === 'warning' ? 'text-yellow-600' : 'text-gray-600'
+              }`} />
             </div>
             <h3 className="font-medium text-gray-900 text-sm">{action.title}</h3>
             <p className="text-xs text-gray-600">{action.description}</p>

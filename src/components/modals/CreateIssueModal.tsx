@@ -93,44 +93,70 @@ const CreateIssueModal = ({ isOpen, onClose, buildingId, onIssueCreated }: Creat
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    
+
     // Final validation
     if (!validateStep(1) || !validateStep(2)) {
       return;
     }
-    
+
+    // Check if buildingId is provided
+    if (!buildingId) {
+      setError('Building ID is required to create an issue');
+      return;
+    }
+
+    // Check if user is available
+    if (!user?.id) {
+      setError('User authentication required to create an issue');
+      return;
+    }
+
     setIsSubmitting(true);
+    console.log('Creating issue with:', {
+      buildingId,
+      userId: user.id,
+      userEmail: user.email,
+      formData
+    });
 
     try {
       // Create the issue
+      const issueData = {
+        building_id: buildingId,
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        priority: formData.priority,
+        status: 'reported',
+        reported_by: user.id,
+        location: formData.location
+      };
+
+      console.log('Inserting issue data:', issueData);
+
       const { data: issue, error: issueError } = await supabase
         .from('issues')
-        .insert([
-          {
-            building_id: buildingId,
-            title: formData.title,
-            description: formData.description,
-            category: formData.category,
-            priority: formData.priority,
-            status: 'reported',
-            reported_by: user?.id,
-            location: formData.location
-          }
-        ])
+        .insert([issueData])
         .select()
         .single();
 
       if (issueError) throw issueError;
 
+      console.log('Issue created successfully:', issue);
+
       // Upload any attached files
       if (formData.files.length > 0 && issue) {
+        console.log('Uploading files:', formData.files.length);
         for (const file of formData.files) {
           const filePath = `issues/${issue.id}/${file.name}`;
           const { error: uploadError } = await supabase.storage
             .from('documents')
             .upload(filePath, file);
 
-          if (uploadError) throw uploadError;
+          if (uploadError) {
+            console.warn('File upload error:', uploadError);
+            // Don't throw here, just log the warning
+          }
         }
       }
       
@@ -149,7 +175,8 @@ const CreateIssueModal = ({ isOpen, onClose, buildingId, onIssueCreated }: Creat
       
       // Reset to first step
       setCurrentStep(1);
-      
+
+      console.log('Issue creation completed, calling callbacks');
       onIssueCreated?.();
       onClose();
     } catch (err: any) {

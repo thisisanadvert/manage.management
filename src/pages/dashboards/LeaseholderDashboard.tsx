@@ -25,6 +25,11 @@ const LeaseholderDashboard = () => {
   const { user } = useAuth();
   const [isOnboarded, setIsOnboarded] = useState(!!user?.metadata?.onboardingComplete);
 
+  const handleIssueCreated = () => {
+    // Refresh the page or update state to show the new issue
+    window.location.reload();
+  };
+
   // If user hasn't completed onboarding, show the onboarding wizard
   if (!isOnboarded) {
     return (
@@ -215,6 +220,8 @@ const LeaseholderDashboard = () => {
       <CreateIssueModal
         isOpen={isCreateIssueModalOpen}
         onClose={() => setIsCreateIssueModalOpen(false)}
+        buildingId={user?.metadata?.buildingId || ''}
+        onIssueCreated={handleIssueCreated}
       />
     </div>
   );
