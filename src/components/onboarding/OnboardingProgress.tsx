@@ -74,11 +74,7 @@ const IssuesManagement = () => {
     try {
       let query = supabase
         .from('issues')
-        .select(`
-          *,
-          reported_by(id, email, raw_user_meta_data),
-          assigned_to(id, email, raw_user_meta_data)
-        `)
+        .select('*')
         .eq('building_id', user?.metadata?.buildingId);
       
       // Apply filters
@@ -107,10 +103,7 @@ const IssuesManagement = () => {
         setIssues(data.map(issue => ({
           ...issue,
           id: `ISS-${issue.id.substring(0, 4)}`,
-          reportedBy: issue.reported_by ? {
-            name: `${issue.reported_by.raw_user_meta_data.firstName || ''} ${issue.reported_by.raw_user_meta_data.lastName || ''}`.trim() || issue.reported_by.email,
-            role: issue.reported_by.raw_user_meta_data.role
-          } : 'Unknown',
+          reportedBy: 'User', // Simplified for now to avoid foreign key error
           reportedAt: new Date(issue.created_at).toLocaleDateString()
         })));
         

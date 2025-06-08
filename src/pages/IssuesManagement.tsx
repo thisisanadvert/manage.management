@@ -58,13 +58,10 @@ const IssuesManagement = () => {
   const fetchIssues = async () => {
     setIsLoading(true);
     try {
+      // First, fetch issues without user relationships to avoid foreign key error
       let query = supabase
         .from('issues')
-        .select(`
-          *,
-          reported_by(id, email, raw_user_meta_data),
-          assigned_to(id, email, raw_user_meta_data)
-        `)
+        .select('*')
         .eq('building_id', user?.metadata?.buildingId);
       
       // Apply filters
@@ -88,15 +85,13 @@ const IssuesManagement = () => {
       const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
-      
+
       if (data) {
+        // For now, just show issues without user details to avoid the foreign key error
         setIssues(data.map(issue => ({
           ...issue,
           id: `ISS-${issue.id.substring(0, 4)}`,
-          reportedBy: issue.reported_by ? {
-            name: `${issue.reported_by.raw_user_meta_data.firstName || ''} ${issue.reported_by.raw_user_meta_data.lastName || ''}`.trim() || issue.reported_by.email,
-            role: issue.reported_by.raw_user_meta_data.role
-          } : 'Unknown',
+          reportedBy: 'User', // Simplified for now
           reportedAt: new Date(issue.created_at).toLocaleDateString()
         })));
         

@@ -54,14 +54,10 @@ const IssueDetail = ({ issueId, onClose, onStatusChange }: IssueDetailProps) => 
     const fetchIssueDetails = async () => {
       setIsLoading(true);
       try {
-        // Fetch issue details
+        // Fetch issue details without user relationships to avoid foreign key error
         const { data: issueData, error: issueError } = await supabase
           .from('issues')
-          .select(`
-            *,
-            reported_by(id, email, raw_user_meta_data),
-            assigned_to(id, email, raw_user_meta_data)
-          `)
+          .select('*')
           .eq('id', actualIssueId)
           .single();
           
