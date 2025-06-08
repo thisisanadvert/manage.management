@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, User, Crown, Building2, Users, Briefcase, Home } from 'lucide-react';
+import { Settings, User, Crown, Building2, Users, Briefcase, Home, Loader2 } from 'lucide-react';
 import Button from '../ui/Button';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -61,10 +61,13 @@ const DevUserSwitcher: React.FC = () => {
   }
 
   const switchToUser = async (devUser: DevUser) => {
+    console.log('Switching to user:', devUser);
     setIsSwitching(true);
+
     try {
       // Update the current user's metadata to simulate being the target user
-      const { error } = await supabase.auth.updateUser({
+      console.log('Updating user metadata...');
+      const { data, error } = await supabase.auth.updateUser({
         data: {
           role: devUser.role,
           firstName: devUser.name.split(' ')[0],
@@ -80,13 +83,21 @@ const DevUserSwitcher: React.FC = () => {
         }
       });
 
-      if (error) throw error;
+      console.log('Update result:', { data, error });
 
+      if (error) {
+        console.error('Supabase error:', error);
+        alert(`Error switching user: ${error.message}`);
+        return;
+      }
+
+      console.log('User metadata updated successfully, reloading page...');
       // Force a page reload to apply the new user context
       window.location.reload();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error switching user:', error);
+      alert(`Error switching user: ${error.message || 'Unknown error'}`);
     } finally {
       setIsSwitching(false);
     }
@@ -169,7 +180,9 @@ const DevUserSwitcher: React.FC = () => {
                   key={devUser.email}
                   onClick={() => switchToUser(devUser)}
                   disabled={isSwitching}
-                  className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 disabled:opacity-50"
+                  className={`w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors cursor-pointer ${
+                    isSwitching ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50'
+                  }`}
                 >
                   <div className="flex items-start gap-3">
                     <div className="flex-shrink-0 p-2 bg-gray-100 rounded-lg">
@@ -182,6 +195,9 @@ const DevUserSwitcher: React.FC = () => {
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
                             Active
                           </span>
+                        )}
+                        {isSwitching && (
+                          <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
                         )}
                       </div>
                       <p className="text-xs text-gray-500 mt-1">{devUser.description}</p>
