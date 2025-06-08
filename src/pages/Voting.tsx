@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
+import React, { useState, useEffect } from 'react';
+import {
+  Plus,
+  Search,
+  Filter,
   VoteIcon,
   Clock,
   Calendar,
@@ -16,12 +16,75 @@ import {
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
+import CreatePollModal from '../components/modals/CreatePollModal';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 const Voting = () => {
+  const { user } = useAuth();
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [polls, setPolls] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState({
+    active: 0,
+    completed: 0,
+    upcoming: 0,
+    participation: 0
+  });
 
-  const polls = [
+  // Fetch polls from database
+  const fetchPolls = async () => {
+    if (!user?.metadata?.buildingId) return;
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('polls')
+        .select(`
+          *,
+          poll_options(*),
+          poll_votes(count),
+          poll_comments(count)
+        `)
+        .eq('building_id', user.metadata.buildingId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data) {
+        setPolls(data);
+
+        // Calculate stats
+        const activeCount = data.filter(p => p.status === 'active').length;
+        const completedCount = data.filter(p => p.status === 'completed').length;
+        const upcomingCount = data.filter(p => p.status === 'upcoming').length;
+
+        setStats({
+          active: activeCount,
+          completed: completedCount,
+          upcoming: upcomingCount,
+          participation: 85 // TODO: Calculate actual participation
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching polls:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPolls();
+  }, [user?.metadata?.buildingId]);
+
+  const handlePollCreated = () => {
+    fetchPolls();
+  };
+
+  // Sample data for fallback (keeping original structure)
+  const samplePolls = [
     {
       id: 1,
       title: 'Electric Vehicle Charging Installation',
@@ -116,7 +179,10 @@ const Voting = () => {
     }
   };
 
-  const filteredPolls = polls.filter(poll => {
+  // Use real polls if available, otherwise fall back to sample data
+  const displayPolls = polls.length > 0 ? polls : samplePolls;
+
+  const filteredPolls = displayPolls.filter(poll => {
     if (selectedFilter !== 'all' && poll.status !== selectedFilter) return false;
     if (searchQuery && !poll.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
@@ -129,9 +195,10 @@ const Voting = () => {
           <h1 className="text-2xl font-bold text-gray-900">Voting & Decision Making</h1>
           <p className="text-gray-600 mt-1">Manage building-wide decisions through transparent voting</p>
         </div>
-        <Button 
+        <Button
           leftIcon={<Plus size={16} />}
           variant="primary"
+          onClick={() => setShowCreateModal(true)}
         >
           Create New Poll
         </Button>
@@ -146,7 +213,7 @@ const Voting = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-warning-600">Active Polls</p>
-              <h3 className="text-xl font-bold text-warning-900">3</h3>
+              <h3 className="text-xl font-bold text-warning-900">{stats.active}</h3>
             </div>
           </div>
         </Card>
@@ -158,7 +225,7 @@ const Voting = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-success-600">Completed</p>
-              <h3 className="text-xl font-bold text-success-900">12</h3>
+              <h3 className="text-xl font-bold text-success-900">{stats.completed}</h3>
             </div>
           </div>
         </Card>
@@ -170,7 +237,7 @@ const Voting = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-accent-600">Upcoming</p>
-              <h3 className="text-xl font-bold text-accent-900">2</h3>
+              <h3 className="text-xl font-bold text-accent-900">{stats.upcoming}</h3>
             </div>
           </div>
         </Card>
@@ -182,7 +249,7 @@ const Voting = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-primary-600">Participation</p>
-              <h3 className="text-xl font-bold text-primary-900">85%</h3>
+              <h3 className="text-xl font-bold text-primary-900">{stats.participation}%</h3>
             </div>
           </div>
         </Card>
@@ -297,6 +364,13 @@ const Voting = () => {
           </Card>
         ))}
       </div>
+
+      {/* Create Poll Modal */}
+      <CreatePollModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onPollCreated={handlePollCreated}
+      />
     </div>
   );
 };
