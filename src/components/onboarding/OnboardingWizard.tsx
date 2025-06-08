@@ -15,6 +15,7 @@ import Card from '../ui/Card';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import BuildingSetupModal from '../modals/BuildingSetupModal';
+import InviteMembersModal from '../modals/InviteMembersModal';
 
 interface OnboardingStep {
   id: string;
@@ -32,6 +33,7 @@ const OnboardingWizard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [completedSteps, setCompletedSteps] = useState(0);
   const [showBuildingSetupModal, setShowBuildingSetupModal] = useState(false);
+  const [showInviteMembersModal, setShowInviteMembersModal] = useState(false);
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
 
   // Function to mark a step as complete
@@ -66,12 +68,21 @@ const OnboardingWizard: React.FC = () => {
     if (step.id === 'building') {
       setActiveStepId(step.id);
       setShowBuildingSetupModal(true);
+    } else if (step.id === 'members') {
+      setActiveStepId(step.id);
+      setShowInviteMembersModal(true);
     } else {
       navigate(step.route);
     }
   };
   
   const handleBuildingSetupComplete = () => {
+    if (activeStepId) {
+      markStepComplete(activeStepId);
+    }
+  };
+
+  const handleInviteMembersComplete = () => {
     if (activeStepId) {
       markStepComplete(activeStepId);
     }
@@ -341,10 +352,16 @@ const OnboardingWizard: React.FC = () => {
         )}
       </div>
       
-      <BuildingSetupModal 
+      <BuildingSetupModal
         isOpen={showBuildingSetupModal}
         onClose={() => setShowBuildingSetupModal(false)}
         onSetupComplete={handleBuildingSetupComplete}
+      />
+
+      <InviteMembersModal
+        isOpen={showInviteMembersModal}
+        onClose={() => setShowInviteMembersModal(false)}
+        onComplete={handleInviteMembersComplete}
       />
     </Card>
   );

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Building2, UserPlus, Building, Users, Shield, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import Button from '../../components/ui/Button';
@@ -64,10 +64,15 @@ const signupOptions = [
 ];
 
 const Signup = () => {
+  const [searchParams] = useSearchParams();
   const [selectedType, setSelectedType] = useState<SignupType>('rtm-director');
   const [selectedSubtype, setSelectedSubtype] = useState<string>('');
   const [showWaitlistForm, setShowWaitlistForm] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isInvitation, setIsInvitation] = useState(false);
+  const [invitationData, setInvitationData] = useState<any>(null);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [formData, setFormData] = useState<WaitlistFormData>({
     email: '',
     firstName: '',
@@ -77,6 +82,31 @@ const Signup = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // Check for invitation parameters on component mount
+  useEffect(() => {
+    const inviteParam = searchParams.get('invite');
+    if (inviteParam) {
+      try {
+        const inviteData = JSON.parse(decodeURIComponent(inviteParam));
+        setIsInvitation(true);
+        setInvitationData(inviteData);
+        setFormData({
+          email: inviteData.email || '',
+          firstName: inviteData.firstName || '',
+          lastName: inviteData.lastName || '',
+          role: inviteData.role || 'leaseholder',
+          buildingName: inviteData.buildingName || '',
+          unitNumber: inviteData.unitNumber || ''
+        });
+        setSelectedType(inviteData.role || 'homeowner');
+        setShowWaitlistForm(true);
+      } catch (error) {
+        console.error('Error parsing invitation data:', error);
+        setError('Invalid invitation link. Please contact the person who invited you.');
+      }
+    }
+  }, [searchParams]);
 
   const handleOptionClick = (type: SignupType) => {
     setSelectedType(type);
@@ -91,25 +121,72 @@ const Signup = () => {
     setError(null);
 
     try {
-      // Create user account with more detailed error handling
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: 'temp123', // We'll prompt them to change this on first login
-        options: {
-          data: {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            role: formData.role,
-            buildingName: formData.buildingName,
-            buildingAddress: formData.buildingAddress,
-            unitNumber: formData.unitNumber,
-            phone: formData.phone
+      if (isInvitation) {
+        // Handle invitation signup
+        if (password !== confirmPassword) {
+          throw new Error('Passwords do not match');
+        }
+        if (password.length < 8) {
+          throw new Error('Password must be at least 8 characters long');
+        }
+
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: password,
+          options: {
+            data: {
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              role: formData.role,
+              buildingId: invitationData.buildingId,
+              buildingName: invitationData.buildingName,
+              unitNumber: formData.unitNumber,
+              invitedBy: invitationData.inviterName
+            }
+          }
+        });
+
+        if (authError) {
+          throw authError;
+        }
+
+        // If successful, add user to building_users table
+        if (authData.user) {
+          const { error: buildingUserError } = await supabase
+            .from('building_users')
+            .insert({
+              building_id: invitationData.buildingId,
+              user_id: authData.user.id,
+              role: formData.role,
+              unit_id: null // We'll handle unit assignment later
+            });
+
+          if (buildingUserError) {
+            console.error('Error adding user to building:', buildingUserError);
+            // Don't throw here as the user account was created successfully
           }
         }
-      });
+      } else {
+        // Handle regular waitlist signup
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: 'temp123', // We'll prompt them to change this on first login
+          options: {
+            data: {
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              role: formData.role,
+              buildingName: formData.buildingName,
+              buildingAddress: formData.buildingAddress,
+              unitNumber: formData.unitNumber,
+              phone: formData.phone
+            }
+          }
+        });
 
-      if (authError) {
-        throw authError;
+        if (authError) {
+          throw authError;
+        }
       }
 
       setFormSubmitted(true);
@@ -135,21 +212,39 @@ const Signup = () => {
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Create your account
+          {isInvitation ? 'Accept Your Invitation' : 'Create your account'}
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Already have an account?{' '}
-          <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
-            Sign in
-          </Link>
-        </p>
+        {isInvitation && invitationData ? (
+          <p className="mt-2 text-center text-sm text-gray-600">
+            You've been invited to join <strong>{invitationData.buildingName}</strong>
+          </p>
+        ) : (
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Already have an account?{' '}
+            <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
+              Sign in
+            </Link>
+          </p>
+        )}
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
         <div className="bg-white py-8 px-4 shadow-xl sm:rounded-lg sm:px-10">
           <div className="space-y-6">
-            <div className="grid grid-cols-1 gap-4">
-              {signupOptions.map((option) => (
+            {isInvitation && invitationData ? (
+              // Show invitation details
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h3 className="text-lg font-medium text-blue-900 mb-4">Invitation Details</h3>
+                <div className="space-y-2 text-sm text-blue-800">
+                  <p><strong>Building:</strong> {invitationData.buildingName}</p>
+                  <p><strong>Your Role:</strong> {invitationData.role.charAt(0).toUpperCase() + invitationData.role.slice(1)}</p>
+                  <p><strong>Unit:</strong> {invitationData.unitNumber}</p>
+                  <p><strong>Invited by:</strong> {invitationData.inviterName}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4">
+                {signupOptions.map((option) => (
                 <button
                   key={option.id}
                   onClick={() => handleOptionClick(option.id as SignupType)}
@@ -196,12 +291,13 @@ const Signup = () => {
                   </div>
                 </button>
               ))}
-            </div>
+              </div>
+            )}
 
             {showWaitlistForm && !formSubmitted ? (
               <div className="mt-8 p-6 bg-gray-50 rounded-lg">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  {selectedOption?.available ? 'Register Interest' : 'Join the Waitlist'}
+                  {isInvitation ? 'Complete Your Account' : (selectedOption?.available ? 'Register Interest' : 'Join the Waitlist')}
                 </h3>
                 {error && (
                   <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
@@ -248,8 +344,42 @@ const Signup = () => {
                       onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                       className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 shadow-sm text-base"
                       required
+                      disabled={isInvitation}
                     />
                   </div>
+
+                  {isInvitation && (
+                    <>
+                      <div>
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-900 mb-2">
+                          Password
+                        </label>
+                        <input
+                          type="password"
+                          id="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 shadow-sm text-base"
+                          required
+                          minLength={8}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-900 mb-2">
+                          Confirm Password
+                        </label>
+                        <input
+                          type="password"
+                          id="confirmPassword"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 shadow-sm text-base"
+                          required
+                          minLength={8}
+                        />
+                      </div>
+                    </>
+                  )}
 
                   {selectedOption?.fields?.includes('buildingName') && (
                     <div>
@@ -320,23 +450,28 @@ const Signup = () => {
                     isLoading={isSubmitting}
                     disabled={isSubmitting}
                   >
-                    {selectedOption?.available ? 'Register Interest' : 'Join Waitlist'}
+                    {isInvitation ? 'Create Account' : (selectedOption?.available ? 'Register Interest' : 'Join Waitlist')}
                   </Button>
                 </form>
               </div>
             ) : formSubmitted ? (
               <div className="mt-8 p-6 bg-green-50 rounded-lg text-center">
                 <CheckCircle2 className="mx-auto h-12 w-12 text-green-600 mb-4" />
-                <h3 className="text-lg font-medium text-green-900 mb-2">Thank you!</h3>
+                <h3 className="text-lg font-medium text-green-900 mb-2">
+                  {isInvitation ? 'Welcome!' : 'Thank you!'}
+                </h3>
                 <p className="text-green-700">
-                  We've received your registration. We'll be in touch soon with next steps.
+                  {isInvitation
+                    ? 'Your account has been created successfully. You can now access your building\'s management platform.'
+                    : 'We\'ve received your registration. We\'ll be in touch soon with next steps.'
+                  }
                 </p>
                 <Button
                   variant="outline"
                   className="mt-4"
-                  onClick={() => navigate('/')}
+                  onClick={() => navigate(isInvitation ? '/login' : '/')}
                 >
-                  Return to Home
+                  {isInvitation ? 'Sign In' : 'Return to Home'}
                 </Button>
               </div>
             ) : null}
