@@ -20,6 +20,7 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import SetupPassword from './pages/auth/SetupPassword';
 import DebugReset from './pages/auth/DebugReset';
+import VerifyReset from './pages/auth/VerifyReset';
 import Landing from './pages/Landing';
 import Pricing from './pages/Pricing';
 import BuildingSetup from './pages/BuildingSetup';
@@ -80,6 +81,8 @@ function App() {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/setup-password" element={<SetupPassword />} />
       <Route path="/debug-reset" element={<DebugReset />} />
+      <Route path="/verify-reset" element={<VerifyReset />} />
+      <Route path="/verify-reset" element={<VerifyReset />} />
 
       {/* Legal routes */}
       <Route path="/privacy" element={<PrivacyPolicy />} />
