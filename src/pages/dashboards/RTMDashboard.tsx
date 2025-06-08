@@ -1,5 +1,5 @@
 import React from 'react';
-import { 
+import {
   Building2,
   AlertTriangle,
   Wallet,
@@ -16,11 +16,19 @@ import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import OnboardingWizard from '../../components/onboarding/OnboardingWizard';
 import { useNavigate } from 'react-router-dom';
+import { useDashboardData } from '../../hooks/useDashboardData';
+import {
+  StatsOverview,
+  ActionItems,
+  RecentActivityWidget,
+  QuickActions
+} from '../../components/dashboard/DashboardWidgets';
 
 const RTMDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isOnboarded, setIsOnboarded] = useState(!!user?.metadata?.onboardingComplete);
+  const dashboardData = useDashboardData();
 
   // If user hasn't completed onboarding, show the onboarding wizard
   if (!isOnboarded) {
@@ -32,8 +40,30 @@ const RTMDashboard = () => {
             <p className="text-gray-600 mt-1">Let's get your building set up</p>
           </div>
         </div>
-        
+
         <OnboardingWizard />
+      </div>
+    );
+  }
+
+  // Show loading state
+  if (dashboardData.loading) {
+    return (
+      <div className="space-y-6 pb-16 lg:pb-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Welcome back, {user?.metadata?.firstName || 'Director'}</h1>
+            <p className="text-gray-600 mt-1">Loading your dashboard...</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="p-4 animate-pulse">
+              <div className="h-16 bg-gray-200 rounded"></div>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
@@ -42,46 +72,19 @@ const RTMDashboard = () => {
     <div className="space-y-6 pb-16 lg:pb-0">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Welcome to your building management dashboard</p>
+          <h1 className="text-2xl font-bold text-gray-900">Welcome back, {user?.metadata?.firstName || 'Director'}</h1>
+          <p className="text-gray-600 mt-1">Here's what's happening with {user?.metadata?.buildingName || 'your building'}</p>
+        </div>
+        <div className="text-sm text-gray-500">
+          Last updated: {new Date().toLocaleDateString()}
         </div>
       </div>
       
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Button 
-          className="flex flex-col items-center justify-center h-24 border border-gray-200 bg-white"
-          variant="ghost"
-          leftIcon={<AlertTriangle className="h-6 w-6 text-warning-600" />}
-          onClick={() => navigate(`/${user?.role?.split('-')[0]}/issues`)}
-        >
-          <span className="mt-2">Manage Issues</span>
-        </Button>
-        <Button 
-          className="flex flex-col items-center justify-center h-24 border border-gray-200 bg-white"
-          variant="ghost"
-          leftIcon={<Wallet className="h-6 w-6 text-primary-600" />}
-          onClick={() => navigate(`/${user?.role?.split('-')[0]}/finances`)}
-        >
-          <span className="mt-2">Financial Management</span>
-        </Button>
-        <Button 
-          className="flex flex-col items-center justify-center h-24 border border-gray-200 bg-white"
-          variant="ghost"
-          leftIcon={<FileText className="h-6 w-6 text-secondary-600" />}
-          onClick={() => navigate(`/${user?.role?.split('-')[0]}/documents`)}
-        >
-          <span className="mt-2">Documents</span>
-        </Button>
-        <Button 
-          className="flex flex-col items-center justify-center h-24 border border-gray-200 bg-white"
-          variant="ghost"
-          leftIcon={<BellRing className="h-6 w-6 text-accent-600" />}
-          onClick={() => navigate(`/${user?.role?.split('-')[0]}/announcements`)}
-        >
-          <span className="mt-2">Announcements</span>
-        </Button>
-      </div>
+      {/* Dashboard Stats Overview */}
+      <StatsOverview stats={dashboardData.stats} />
+
+      {/* Action Items */}
+      <ActionItems actionItems={dashboardData.actionItems} />
 
       {/* Building Overview */}
       <Card className="bg-primary-800 rounded-xl p-6 text-white">
@@ -120,119 +123,17 @@ const RTMDashboard = () => {
         </div>
       </Card>
       
-      {/* Empty States with Call to Action */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Recent Issues</h2>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => navigate(`/${user?.role?.split('-')[0]}/issues`)}
-            >
-              View All
-            </Button>
-          </div>
-          <div className="text-center py-8">
-            <AlertTriangle className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-lg font-medium text-gray-900">No issues reported yet</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Track and manage maintenance issues for your building
-            </p>
-            <Button 
-              variant="primary" 
-              className="mt-4"
-              leftIcon={<Plus size={16} />}
-              onClick={() => navigate(`/${user?.role?.split('-')[0]}/issues`)}
-            >
-              Report First Issue
-            </Button>
-          </div>
-        </Card>
-        
-        <Card>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Announcements</h2>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => navigate(`/${user?.role?.split('-')[0]}/announcements`)}
-            >
-              View All
-            </Button>
-          </div>
-          <div className="text-center py-8">
-            <BellRing className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-lg font-medium text-gray-900">No announcements yet</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Keep residents informed with important updates
-            </p>
-            <Button 
-              variant="primary" 
-              className="mt-4"
-              leftIcon={<Plus size={16} />}
-              onClick={() => navigate(`/${user?.role?.split('-')[0]}/announcements`)}
-            >
-              Create Announcement
-            </Button>
-          </div>
-        </Card>
-        
-        <Card>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Active Polls</h2>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => navigate(`/${user?.role?.split('-')[0]}/voting`)}
-            >
-              View All
-            </Button>
-          </div>
-          <div className="text-center py-8">
-            <Vote className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-lg font-medium text-gray-900">No active polls</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Create polls to make collective decisions
-            </p>
-            <Button 
-              variant="primary" 
-              className="mt-4"
-              leftIcon={<Plus size={16} />}
-              onClick={() => navigate(`/${user?.role?.split('-')[0]}/voting`)}
-            >
-              Create Poll
-            </Button>
-          </div>
-        </Card>
-        
-        <Card>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Upcoming Events</h2>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => navigate(`/${user?.role?.split('-')[0]}/agms`)}
-            >
-              View All
-            </Button>
-          </div>
-          <div className="text-center py-8">
-            <Calendar className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-lg font-medium text-gray-900">No upcoming events</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Schedule and manage building meetings and events
-            </p>
-            <Button 
-              variant="primary" 
-              className="mt-4"
-              leftIcon={<Plus size={16} />}
-              onClick={() => navigate(`/${user?.role?.split('-')[0]}/agms`)}
-            >
-              Schedule Event
-            </Button>
-          </div>
-        </Card>
+      {/* Main Dashboard Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Recent Activity */}
+        <div className="lg:col-span-2">
+          <RecentActivityWidget activities={dashboardData.recentActivity} />
+        </div>
+
+        {/* Right Column - Quick Actions */}
+        <div>
+          <QuickActions userRole={user?.role || 'rtm-director'} />
+        </div>
       </div>
     </div>
   );
