@@ -4,6 +4,8 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import Footer from './Footer';
 import MobileNav from './MobileNav';
+import DevUserSwitcher from '../dev/DevUserSwitcher';
+import DevPanel from '../dev/DevPanel';
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -67,6 +69,10 @@ const MainLayout = () => {
       </div>
       
       <Footer />
+
+      {/* Developer Tools - Only visible to super user */}
+      <DevPanel />
+      <DevUserSwitcher />
     </div>
   );
 };
