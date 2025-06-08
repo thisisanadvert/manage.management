@@ -133,8 +133,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
         setUser(userWithRole);
 
-        const basePath = data.user.user_metadata?.role?.split('-')[0];
-        navigate(`/${basePath}`);
+        // Check if user needs to set up password
+        if (data.user.user_metadata?.needsPasswordSetup) {
+          navigate('/setup-password');
+        } else {
+          const basePath = data.user.user_metadata?.role?.split('-')[0];
+          navigate(`/${basePath}`);
+        }
       }
 
       return {};
@@ -155,7 +160,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const resetPassword = async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `https://app.manage.management/reset-password`,
+        redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) {

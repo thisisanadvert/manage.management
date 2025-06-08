@@ -170,7 +170,7 @@ const Signup = () => {
         // Handle regular waitlist signup
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: formData.email,
-          password: 'temp123', // We'll prompt them to change this on first login
+          password: 'temp123', // Temporary password - user will be prompted to set up their own
           options: {
             data: {
               firstName: formData.firstName,
@@ -179,7 +179,8 @@ const Signup = () => {
               buildingName: formData.buildingName,
               buildingAddress: formData.buildingAddress,
               unitNumber: formData.unitNumber,
-              phone: formData.phone
+              phone: formData.phone,
+              needsPasswordSetup: true // Flag to indicate password setup is needed
             }
           }
         });

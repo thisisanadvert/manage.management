@@ -18,6 +18,7 @@ import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
+import SetupPassword from './pages/auth/SetupPassword';
 import Landing from './pages/Landing';
 import Pricing from './pages/Pricing';
 import BuildingSetup from './pages/BuildingSetup';
@@ -76,6 +77,7 @@ function App() {
       <Route path="/signup" element={!user ? <Signup /> : <Navigate to={`/${user.role?.split('-')[0]}`} replace />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/setup-password" element={<SetupPassword />} />
 
       {/* Legal routes */}
       <Route path="/privacy" element={<PrivacyPolicy />} />
