@@ -31,6 +31,7 @@ import { supabase } from '../lib/supabase';
 const Documents = () => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [uploadCategory, setUploadCategory] = useState('legal'); // Category for upload
   const [searchQuery, setSearchQuery] = useState('');
   const [uploadingFiles, setUploadingFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -49,10 +50,11 @@ const Documents = () => {
   const { user } = useAuth();
 
   const categories = [
-    { id: 'legal', name: 'Legal Documents', icon: Scale },
-    { id: 'financial', name: 'Financial', icon: Wallet },
-    { id: 'insurance', name: 'Insurance', icon: Shield },
-    { id: 'maintenance', name: 'Maintenance', icon: AlertTriangle },
+    { id: 'legal', name: 'Legal Documents', icon: Scale, color: 'text-blue-600' },
+    { id: 'financial', name: 'Financial', icon: Wallet, color: 'text-green-600' },
+    { id: 'insurance', name: 'Insurance', icon: Shield, color: 'text-purple-600' },
+    { id: 'maintenance', name: 'Maintenance', icon: AlertTriangle, color: 'text-orange-600' },
+    { id: 'admin', name: 'Admin', icon: FileText, color: 'text-gray-600' },
   ];
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,6 +131,13 @@ const Documents = () => {
     setEditingName('');
   };
 
+  const handleCloseUploadModal = () => {
+    setShowUploadModal(false);
+    setUploadingFiles([]);
+    setUploadCategory('legal');
+    setUploadError(null);
+  };
+
   // Check if the documents bucket exists on component mount
   useEffect(() => {
     const checkBucketExists = async () => {
@@ -199,7 +208,7 @@ const Documents = () => {
   const uploadFiles = async () => {
     console.log('Upload button clicked!');
     console.log('Files to upload:', uploadingFiles);
-    console.log('Selected category:', selectedCategory);
+    console.log('Upload category:', uploadCategory);
     console.log('User building ID:', user?.metadata?.buildingId);
 
     setIsUploading(true);
@@ -230,7 +239,7 @@ const Documents = () => {
         // Create unique file path with timestamp to avoid conflicts
         const timestamp = new Date().getTime();
         const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const filePath = `${user?.metadata?.buildingId}/${selectedCategory}/${timestamp}-${sanitizedFileName}`;
+        const filePath = `${user?.metadata?.buildingId}/${uploadCategory}/${timestamp}-${sanitizedFileName}`;
 
         console.log('📁 Uploading file to path:', filePath);
 
@@ -248,7 +257,7 @@ const Documents = () => {
         // Create document record in the database
         console.log('🔍 Inserting document record:', {
           building_id: user?.metadata?.buildingId,
-          document_type: selectedCategory,
+          document_type: uploadCategory,
           storage_path: filePath,
           uploaded_by: user?.id
         });
@@ -258,7 +267,7 @@ const Documents = () => {
           .insert([
             {
               building_id: user?.metadata?.buildingId,
-              document_type: selectedCategory,
+              document_type: uploadCategory,
               storage_path: filePath,
               uploaded_by: user?.id
             }
@@ -277,8 +286,7 @@ const Documents = () => {
       await fetchDocuments();
       console.log('✅ Documents list refreshed');
 
-      setShowUploadModal(false);
-      setUploadingFiles([]);
+      handleCloseUploadModal();
     } catch (error: any) {
       setUploadError(error.message);
     } finally {
@@ -387,10 +395,10 @@ const Documents = () => {
 
   const UploadModal = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full m-4">
+      <div className="bg-white rounded-lg p-6 max-w-lg w-full m-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Upload Documents</h2>
-          <button onClick={() => setShowUploadModal(false)}>
+          <button onClick={handleCloseUploadModal}>
             <X size={20} className="text-gray-500" />
           </button>
         </div>
@@ -401,7 +409,34 @@ const Documents = () => {
           </div>
         )}
 
-        <div 
+        {/* Category Selection */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-900 mb-3">
+            Document Category
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            {categories.map(category => {
+              const Icon = category.icon;
+              const isSelected = uploadCategory === category.id;
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => setUploadCategory(category.id)}
+                  className={`flex items-center p-3 rounded-lg border-2 transition-all text-left ${
+                    isSelected
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                  }`}
+                >
+                  <Icon size={18} className={`mr-3 ${category.color}`} />
+                  <span className="text-sm font-medium">{category.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div
           className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -438,19 +473,19 @@ const Documents = () => {
         </div>
 
         <div className="mt-6 flex justify-end space-x-2">
-          <Button 
-            variant="outline" 
-            onClick={() => setShowUploadModal(false)}
+          <Button
+            variant="outline"
+            onClick={handleCloseUploadModal}
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             variant="primary"
             onClick={uploadFiles}
             isLoading={isUploading}
             disabled={uploadingFiles.length === 0}
           >
-            Upload {uploadingFiles.length > 0 ? `(${uploadingFiles.length} files)` : ''}
+            Upload to {categories.find(c => c.id === uploadCategory)?.name} {uploadingFiles.length > 0 ? `(${uploadingFiles.length} files)` : ''}
           </Button>
         </div>
       </div>
