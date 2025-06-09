@@ -31,6 +31,10 @@ import Help from './pages/Help';
 import RTMResources from './pages/RTMResources';
 import About from './pages/About';
 import IssueManagement from './pages/features/IssueManagement';
+import FinancialTracking from './pages/features/FinancialTracking';
+import DocumentManagement from './pages/features/DocumentManagement';
+import VotingSystem from './pages/features/VotingSystem';
+import CommunicationHub from './pages/features/CommunicationHub';
 import PageLoader from './components/ui/PageLoader';
 import { useAuth } from './contexts/AuthContext';
 
@@ -112,6 +116,10 @@ function App() {
 
       {/* Feature pages */}
       <Route path="/features/issue-management" element={<IssueManagement />} />
+      <Route path="/features/financial-tracking" element={<FinancialTracking />} />
+      <Route path="/features/document-management" element={<DocumentManagement />} />
+      <Route path="/features/voting-system" element={<VotingSystem />} />
+      <Route path="/features/communication-hub" element={<CommunicationHub />} />
       
       {/* Profile and Settings routes */}
       <Route

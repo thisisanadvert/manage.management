@@ -10,9 +10,27 @@ const RTMResources = () => {
 
   const governmentResources = [
     {
-      title: 'Right to Manage - GOV.UK',
-      description: 'Official government guidance on Right to Manage applications and requirements',
-      url: 'https://www.gov.uk/right-to-manage-your-building',
+      title: 'Exercising the Right to Manage',
+      description: 'Comprehensive guide to leasehold home ownership and RTM processes',
+      url: 'https://www.gov.uk/government/publications/leasehold-home-ownership-exercising-the-right-to-manage',
+      icon: <Building className="h-5 w-5" />
+    },
+    {
+      title: 'Set Up Property Management Company',
+      description: 'Step-by-step guidance on establishing your RTM company',
+      url: 'https://www.gov.uk/set-up-property-management-company',
+      icon: <Building className="h-5 w-5" />
+    },
+    {
+      title: 'RTM Application Form',
+      description: 'Official forms and guidance for making a Right to Manage application',
+      url: 'https://www.gov.uk/government/publications/make-a-right-to-manage-rtm-application-form-leasehold-8',
+      icon: <FileText className="h-5 w-5" />
+    },
+    {
+      title: 'About RTM Companies',
+      description: 'Detailed information about flat management and RTM company operations',
+      url: 'https://www.gov.uk/government/publications/flat-management-and-right-to-manage-rtm-companies/about-flat-management-companies-rtm-companies-and-commonhold-associations',
       icon: <Building className="h-5 w-5" />
     },
     {
