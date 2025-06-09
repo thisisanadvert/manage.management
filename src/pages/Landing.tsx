@@ -96,79 +96,103 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Navigation */}
-      <nav className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
-        <div className="bg-white/80 backdrop-blur-md rounded-full px-4 py-2 shadow-lg border border-gray-200">
-          <div className="flex items-center space-x-4">
-            <a 
-              href="https://manage.management"
-              className="px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
-              Home
-            </a>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="px-4"
-              onClick={() => navigate('/pricing')}
-            >
-              Pricing
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="px-4"
-              onClick={() => navigate('/login')}
-            >
-              Login
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              className="px-6"
-              onClick={() => navigate('/signup')}
-            >
-              Get Started
-            </Button>
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <a
+                href="https://manage.management"
+                className="text-lg font-bold text-primary-800 pixel-font"
+              >
+                Manage.Management
+              </a>
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-4">
+              <a
+                href="https://manage.management"
+                className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+              >
+                Home
+              </a>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/pricing')}
+              >
+                Pricing
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/login')}
+              >
+                Login
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => navigate('/signup')}
+              >
+                Get Started
+              </Button>
+            </div>
+
+            {/* Mobile Navigation */}
+            <div className="md:hidden">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => navigate('/signup')}
+              >
+                Get Started
+              </Button>
+            </div>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <div className="relative overflow-hidden pt-32 pb-16">
+      <div className="relative overflow-hidden pt-20 sm:pt-24 lg:pt-32 pb-12 sm:pb-16">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 via-accent-500/10 to-secondary-500/10" />
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
               Property Management,{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500">
                 Simplified
               </span>
             </h1>
-            <p className="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="mt-4 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-4">
               The complete platform for residential building management, designed for RTM directors, Share of Freehold directors, and homeowners.
             </p>
-            <div className="mt-8 flex justify-center gap-4">
+            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4 px-4">
               <Button
                 variant="primary"
                 size="lg"
                 rightIcon={<ArrowRight size={16} />}
                 onClick={() => navigate('/signup')}
+                className="w-full sm:w-auto"
               >
                 Get Started
               </Button>
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/pricing')}
+                className="w-full sm:w-auto"
               >
-                Get Started
+                View Pricing
               </Button>
               {import.meta.env.DEV && (
                 <Button
                   variant="ghost"
                   size="lg"
                   onClick={runTests}
+                  className="w-full sm:w-auto"
                 >
                   🧪 Run Tests
                 </Button>
@@ -177,15 +201,15 @@ const Landing = () => {
           </div>
 
           {/* Features Grid */}
-          <div className="mt-24">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+          <div className="mt-16 sm:mt-20 lg:mt-24">
+            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-8 sm:mb-12 px-4">
               Everything you need to manage your building
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {features.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
-                  <div 
+                  <div
                     key={index}
                     className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow"
                   >
@@ -205,13 +229,13 @@ const Landing = () => {
           </div>
 
           {/* Latest Updates Section */}
-          <div className="mt-24">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900">Latest Updates</h2>
-              <p className="mt-4 text-lg text-gray-600">Stay informed about the latest changes in property management</p>
+          <div className="mt-16 sm:mt-20 lg:mt-24">
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 px-4">Latest Updates</h2>
+              <p className="mt-4 text-base sm:text-lg text-gray-600 px-4">Stay informed about the latest changes in property management</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {newsItems.map((item, index) => (
                 <Card key={index} hoverable className="h-full">
                   <div className="flex flex-col h-full">
@@ -219,10 +243,10 @@ const Landing = () => {
                       <Badge variant="primary">{item.category}</Badge>
                       <span className="text-sm text-gray-500">{item.date}</span>
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{item.title}</h3>
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">{item.title}</h3>
                     <p className="text-gray-600 flex-grow">{item.description}</p>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       className="mt-4"
                       rightIcon={<ArrowRight size={16} />}
                     >
