@@ -192,14 +192,19 @@ const Signup = () => {
         // Sign out immediately after signup to prevent auto-login
         // User will need to manually login with temp password and get redirected to setup
         if (authData.session) {
+          console.log('Signing out after signup to prevent auto-login');
           await supabase.auth.signOut();
         }
+
+        console.log('Regular signup completed successfully');
       }
 
+      console.log('Setting formSubmitted to true');
       setFormSubmitted(true);
     } catch (error) {
       console.error('Error submitting form:', error);
       setError(typeof error === 'object' && error !== null ? (error as Error).message : 'Failed to register interest');
+      setFormSubmitted(false); // Make sure we don't show success on error
     } finally {
       setIsSubmitting(false);
     }
