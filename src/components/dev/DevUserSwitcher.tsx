@@ -178,6 +178,14 @@ const DevUserSwitcher: React.FC = () => {
     }
   };
 
+  // Make the fix function available globally for immediate console access
+  React.useEffect(() => {
+    if (user?.email === 'frankie@manage.management') {
+      (window as any).fixUUID = fixFrankieBuildingId;
+      console.log('🚨 UUID Fix Available! Run: fixUUID() in console to fix immediately');
+    }
+  }, [user?.email]);
+
   const currentSimulatedUser = user?.metadata?.simulatedEmail;
 
   return (
