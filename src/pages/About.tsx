@@ -10,22 +10,22 @@ const About = () => {
 
   const timeline = [
     {
-      year: '2024',
-      title: 'Platform Launch',
+      year: 'June 2025',
+      title: 'Platform Soft Launch',
       description: 'Manage.Management launches with core features for RTM companies and Share of Freehold directors'
     },
     {
-      year: '2024',
+      year: 'March 2025',
       title: 'Beta Testing',
       description: 'Extensive testing with real RTM companies and building managers across the UK'
     },
     {
-      year: '2023',
+      year: 'January 2025',
       title: 'Development Begins',
       description: 'Started building the platform after identifying gaps in existing property management solutions'
     },
     {
-      year: '2023',
+      year: 'December 2024',
       title: 'Market Research',
       description: 'Conducted interviews with RTM directors and building managers to understand their challenges'
     }
@@ -100,16 +100,19 @@ const About = () => {
               </h2>
               <div className="space-y-4 text-gray-600">
                 <p>
-                  Manage.Management was born from a simple frustration: building management shouldn't be this complicated.
+                  Manage.Management was born out of a simple frustration: home ownership under building management shouldn't be this complicated.
                 </p>
                 <p>
-                  After experiencing firsthand the challenges of managing a residential building - from tracking service charges to coordinating maintenance - we realized that existing solutions were either too complex, too expensive, or simply not designed for the unique needs of UK residential buildings.
+                  After experiencing first-hand the challenges of owning a property within a managed residential building – from keeping track of service charges expenditure to coordinating essential maintenance – we realised that existing solutions were either overly complex, prohibitively expensive, or simply not designed with the unique needs of UK residential buildings in mind.
                 </p>
                 <p>
-                  We set out to create a platform that would make building management accessible, transparent, and efficient for everyone involved - from RTM directors managing their first building to experienced property managers overseeing multiple developments.
+                  Felipe, a Share of Freeholder, and Frankie, a Leaseholder, both encountered these hurdles in their own homes. Their shared experiences highlighted just how much the sector needed a fresh approach.
                 </p>
                 <p>
-                  Built in Bournemouth with love for homeowners across the UK, our platform combines modern technology with deep understanding of UK property law and building management practices.
+                  So, we set out to create a platform that makes building management accessible, transparent, and efficient for everyone involved – from RTM directors managing their first building, to experienced property managers overseeing multiple developments.
+                </p>
+                <p>
+                  Proudly built in Bournemouth with a genuine passion for homeowners across the UK, our platform blends modern technology with a deep understanding of UK property law and building management best practices.
                 </p>
               </div>
             </div>
@@ -180,8 +183,8 @@ const About = () => {
             {timeline.map((item, index) => (
               <div key={index} className="flex items-start space-x-4">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold">
-                    {item.year.slice(-2)}
+                  <div className="w-16 h-16 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold text-xs text-center leading-tight">
+                    {item.year}
                   </div>
                 </div>
                 <div className="flex-1">
