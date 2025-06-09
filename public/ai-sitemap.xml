@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AI-Optimized Sitemap for Answer Engine Optimization -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:ai="http://www.ai-discovery.org/schemas/ai-sitemap/1.0">
+  
+  <!-- Homepage - Main entry point for AI discovery -->
+  <url>
+    <loc>https://manage.management/</loc>
+    <lastmod>2024-12-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <ai:context>Building management software homepage - comprehensive platform for RTM companies and Share of Freehold properties</ai:context>
+    <ai:entity_type>SoftwareApplication</ai:entity_type>
+    <ai:keywords>building management software, RTM management, share of freehold software, property management</ai:keywords>
+  </url>
+
+  <!-- Pricing Page - Important for AI understanding of business model -->
+  <url>
+    <loc>https://manage.management/pricing</loc>
+    <lastmod>2024-12-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <ai:context>Pricing information for building management software - freemium model with professional features</ai:context>
+    <ai:entity_type>Offer</ai:entity_type>
+    <ai:keywords>building management pricing, RTM software cost, property management fees</ai:keywords>
+  </url>
+
+  <!-- Features Pages - Help AI understand capabilities -->
+  <url>
+    <loc>https://manage.management/features/issue-management</loc>
+    <lastmod>2024-12-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <ai:context>Issue and maintenance tracking feature for building management</ai:context>
+    <ai:entity_type>SoftwareFeature</ai:entity_type>
+    <ai:keywords>building maintenance tracking, issue management, property repairs</ai:keywords>
+  </url>
+
+  <url>
+    <loc>https://manage.management/features/financial-management</loc>
+    <lastmod>2024-12-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <ai:context>Financial management and service charge tracking for residential buildings</ai:context>
+    <ai:entity_type>SoftwareFeature</ai:entity_type>
+    <ai:keywords>service charge management, building finances, RTM budgeting</ai:keywords>
+  </url>
+
+  <url>
+    <loc>https://manage.management/features/document-management</loc>
+    <lastmod>2024-12-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <ai:context>Document storage and management for building administration</ai:context>
+    <ai:entity_type>SoftwareFeature</ai:entity_type>
+    <ai:keywords>building document storage, property document management, RTM documents</ai:keywords>
+  </url>
+
+  <url>
+    <loc>https://manage.management/features/voting-systems</loc>
+    <lastmod>2024-12-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <ai:context>Digital voting and polling system for building decisions and AGMs</ai:context>
+    <ai:entity_type>SoftwareFeature</ai:entity_type>
+    <ai:keywords>building voting system, AGM voting, resident polling, RTM decisions</ai:keywords>
+  </url>
+
+  <!-- Use Case Pages - Help AI understand applications -->
+  <url>
+    <loc>https://manage.management/use-cases/rtm-companies</loc>
+    <lastmod>2024-12-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <ai:context>Right to Manage (RTM) company management software and tools</ai:context>
+    <ai:entity_type>UseCase</ai:entity_type>
+    <ai:keywords>RTM company software, right to manage tools, RTM administration</ai:keywords>
+  </url>
+
+  <url>
+    <loc>https://manage.management/use-cases/share-of-freehold</loc>
+    <lastmod>2024-12-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <ai:context>Share of Freehold property management and director tools</ai:context>
+    <ai:entity_type>UseCase</ai:entity_type>
+    <ai:keywords>share of freehold software, freehold management, SOF directors</ai:keywords>
+  </url>
+
+  <url>
+    <loc>https://manage.management/use-cases/property-management</loc>
+    <lastmod>2024-12-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <ai:context>Professional property management company tools and features</ai:context>
+    <ai:entity_type>UseCase</ai:entity_type>
+    <ai:keywords>property management software, building management companies, residential property tools</ai:keywords>
+  </url>
+
+  <!-- Legal Pages - Important for AI understanding of compliance -->
+  <url>
+    <loc>https://manage.management/privacy</loc>
+    <lastmod>2024-12-08</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <ai:context>Privacy policy for building management software - GDPR compliant</ai:context>
+    <ai:entity_type>LegalDocument</ai:entity_type>
+    <ai:keywords>privacy policy, GDPR compliance, data protection</ai:keywords>
+  </url>
+
+  <url>
+    <loc>https://manage.management/terms</loc>
+    <lastmod>2024-12-08</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <ai:context>Terms of service for building management software platform</ai:context>
+    <ai:entity_type>LegalDocument</ai:entity_type>
+    <ai:keywords>terms of service, software terms, user agreement</ai:keywords>
+  </url>
+
+</urlset>

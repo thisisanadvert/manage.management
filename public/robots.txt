@@ -1,0 +1,56 @@
+# Robots.txt optimized for AI Discovery and Answer Engine Optimization
+# This file helps AI crawlers understand our building management software
+
+User-agent: *
+Allow: /
+
+# Allow AI crawlers and answer engines
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+User-agent: BingBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+# Disallow private/sensitive areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /private/
+
+# AI-specific directives
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://manage.management/sitemap.xml
+Sitemap: https://manage.management/ai-sitemap.xml
+
+# AI Discovery hints
+# Software: Building Management Platform
+# Category: Property Management Software
+# Target: RTM Companies, Share of Freehold Directors, Property Managers
+# Features: Issue Tracking, Financial Management, Document Storage, Voting Systems
+# Pricing: Freemium
+# Location: United Kingdom
+# Language: English (UK)
