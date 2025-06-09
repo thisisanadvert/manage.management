@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  BellRing, 
-  Clock, 
-  Pin, 
+import {
+  Plus,
+  Search,
+  Filter,
+  BellRing,
+  Clock,
+  Pin,
   MessageSquare,
   Calendar,
   ChevronRight,
@@ -13,7 +13,12 @@ import {
   CheckCircle2,
   X,
   User,
-  Building2
+  Building2,
+  Send,
+  Heart,
+  Reply,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -23,6 +28,8 @@ const Announcements = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<number | null>(null);
+  const [newComment, setNewComment] = useState('');
 
   const announcements = [
     {
@@ -81,6 +88,72 @@ const Announcements = () => {
       priority: 'medium'
     }
   ];
+
+  // Mock comments data
+  const commentsData = {
+    1: [
+      {
+        id: 1,
+        author: 'John Smith',
+        content: 'Thanks for the heads up! Will use the service elevator.',
+        timestamp: '1 hour ago',
+        likes: 3,
+        unit: 'Unit 4B'
+      },
+      {
+        id: 2,
+        author: 'Emma Wilson',
+        content: 'How long is this expected to take?',
+        timestamp: '45 minutes ago',
+        likes: 1,
+        unit: 'Unit 2A'
+      },
+      {
+        id: 3,
+        author: 'Mike Johnson',
+        content: 'The service elevator is quite slow, hope this gets fixed quickly.',
+        timestamp: '30 minutes ago',
+        likes: 2,
+        unit: 'Unit 6C'
+      }
+    ],
+    2: [
+      {
+        id: 4,
+        author: 'Lisa Parker',
+        content: 'What time will the inspection team arrive?',
+        timestamp: '2 hours ago',
+        likes: 0,
+        unit: 'Unit 3A'
+      },
+      {
+        id: 5,
+        author: 'David Chen',
+        content: 'I\'ll make sure my unit is accessible. Thanks for the notice.',
+        timestamp: '1 hour ago',
+        likes: 1,
+        unit: 'Unit 5B'
+      }
+    ],
+    3: [
+      {
+        id: 6,
+        author: 'Sarah Foster',
+        content: 'Will the new key fobs work with the parking garage as well?',
+        timestamp: '1 day ago',
+        likes: 4,
+        unit: 'Unit 1A'
+      },
+      {
+        id: 7,
+        author: 'Robert Thompson',
+        content: 'Great improvement! The current system is quite outdated.',
+        timestamp: '1 day ago',
+        likes: 2,
+        unit: 'Unit 7D'
+      }
+    ]
+  };
 
   const CreateAnnouncementModal = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -174,6 +247,94 @@ const Announcements = () => {
     }
   };
 
+  const handleAnnouncementClick = (announcementId: number) => {
+    setSelectedAnnouncement(selectedAnnouncement === announcementId ? null : announcementId);
+  };
+
+  const handleAddComment = (announcementId: number) => {
+    if (!newComment.trim()) return;
+
+    // In a real app, this would make an API call
+    console.log('Adding comment:', newComment, 'to announcement:', announcementId);
+    setNewComment('');
+  };
+
+  const CommentsSection = ({ announcementId }: { announcementId: number }) => {
+    const comments = commentsData[announcementId] || [];
+
+    return (
+      <div className="mt-4 border-t border-gray-200 pt-4">
+        <h4 className="font-medium text-gray-900 mb-4">
+          Comments ({comments.length})
+        </h4>
+
+        {/* Add Comment Form */}
+        <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+          <div className="flex gap-3">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+                <User size={16} className="text-primary-600" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Add a comment..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 resize-none"
+                rows={2}
+              />
+              <div className="flex justify-end mt-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  leftIcon={<Send size={14} />}
+                  onClick={() => handleAddComment(announcementId)}
+                  disabled={!newComment.trim()}
+                >
+                  Post Comment
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Comments List */}
+        <div className="space-y-3">
+          {comments.map((comment) => (
+            <div key={comment.id} className="flex gap-3">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                  <User size={16} className="text-gray-600" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="bg-white border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-medium text-sm text-gray-900">{comment.author}</span>
+                    <span className="text-xs text-gray-500">{comment.unit}</span>
+                    <span className="text-xs text-gray-400">•</span>
+                    <span className="text-xs text-gray-500">{comment.timestamp}</span>
+                  </div>
+                  <p className="text-sm text-gray-700">{comment.content}</p>
+                  <div className="flex items-center gap-4 mt-2">
+                    <button className="flex items-center gap-1 text-xs text-gray-500 hover:text-primary-600">
+                      <Heart size={12} />
+                      <span>{comment.likes}</span>
+                    </button>
+                    <button className="text-xs text-gray-500 hover:text-primary-600">
+                      Reply
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6 pb-16 lg:pb-0">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -228,55 +389,71 @@ const Announcements = () => {
       </div>
 
       <div className="space-y-4">
-        {announcements.map((announcement) => (
-          <Card key={announcement.id} hoverable className="animate-slide-up">
-            <div className="flex items-start gap-4">
-              <div className={`p-2 rounded-lg ${
-                announcement.isPinned ? 'bg-primary-100' : 'bg-gray-100'
-              }`}>
-                {announcement.isPinned ? (
-                  <Pin className="h-5 w-5 text-primary-600" />
-                ) : (
-                  <BellRing className="h-5 w-5 text-gray-600" />
-                )}
-              </div>
-              
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge 
-                    variant={getPriorityColor(announcement.priority)} 
-                    size="sm"
-                  >
-                    {announcement.category}
-                  </Badge>
-                  {announcement.isPinned && (
-                    <Badge variant="primary" size="sm">Pinned</Badge>
+        {announcements.map((announcement) => {
+          const isExpanded = selectedAnnouncement === announcement.id;
+          return (
+            <Card key={announcement.id} hoverable className="animate-slide-up">
+              <div className="flex items-start gap-4">
+                <div className={`p-2 rounded-lg ${
+                  announcement.isPinned ? 'bg-primary-100' : 'bg-gray-100'
+                }`}>
+                  {announcement.isPinned ? (
+                    <Pin className="h-5 w-5 text-primary-600" />
+                  ) : (
+                    <BellRing className="h-5 w-5 text-gray-600" />
                   )}
                 </div>
 
-                <h3 className="text-lg font-medium">{announcement.title}</h3>
-                <p className="mt-1 text-gray-600">{announcement.content}</p>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge
+                      variant={getPriorityColor(announcement.priority)}
+                      size="sm"
+                    >
+                      {announcement.category}
+                    </Badge>
+                    {announcement.isPinned && (
+                      <Badge variant="primary" size="sm">Pinned</Badge>
+                    )}
+                  </div>
 
-                <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <User size={14} />
-                    <span>{announcement.postedBy}</span>
+                  <h3 className="text-lg font-medium">{announcement.title}</h3>
+                  <p className="mt-1 text-gray-600">{announcement.content}</p>
+
+                  <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <User size={14} />
+                      <span>{announcement.postedBy}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock size={14} />
+                      <span>{announcement.postedAt}</span>
+                    </div>
+                    <button
+                      onClick={() => handleAnnouncementClick(announcement.id)}
+                      className="flex items-center gap-1 hover:text-primary-600 transition-colors"
+                    >
+                      <MessageSquare size={14} />
+                      <span>{announcement.comments} comments</span>
+                    </button>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Clock size={14} />
-                    <span>{announcement.postedAt}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <MessageSquare size={14} />
-                    <span>{announcement.comments} comments</span>
-                  </div>
+
+                  {/* Comments Section */}
+                  {isExpanded && <CommentsSection announcementId={announcement.id} />}
                 </div>
-              </div>
 
-              <Button variant="outline" size="sm">View Details</Button>
-            </div>
-          </Card>
-        ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  leftIcon={isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  onClick={() => handleAnnouncementClick(announcement.id)}
+                >
+                  {isExpanded ? 'Hide Comments' : 'View Comments'}
+                </Button>
+              </div>
+            </Card>
+          );
+        })}
       </div>
 
       {showCreateModal && <CreateAnnouncementModal />}
