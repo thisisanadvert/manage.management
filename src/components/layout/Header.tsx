@@ -23,6 +23,20 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.dropdown-container')) {
+        setShowDropdown(false);
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleLogout = async () => {
     try {
       await signOut();
@@ -107,8 +121,8 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
           {/* Right-side actions */}
           <div className="flex items-center space-x-4">
             {/* Notifications */}
-            <div className="relative">
-              <button 
+            <div className="relative dropdown-container">
+              <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="p-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors relative"
                 aria-label="Notifications"
@@ -116,7 +130,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
                 <Bell size={20} />
                 <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-accent-500 rounded-full"></span>
               </button>
-              
+
               {/* Notification dropdown */}
               {showNotifications && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200 animate-slide-down">
@@ -138,8 +152,8 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
             </div>
             
             {/* User profile */}
-            <div className="relative">
-              <button 
+            <div className="relative dropdown-container">
+              <button
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center space-x-2 hover:bg-gray-100 rounded-full p-1 transition-colors"
               >
@@ -152,24 +166,26 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
               {/* Dropdown menu */}
               {showDropdown && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200 animate-slide-down">
-                  <a 
-                    href="#profile" 
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  <Link
+                    to="/profile"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    onClick={() => setShowDropdown(false)}
                   >
                     <User size={16} className="mr-2" />
                     Profile
-                  </a>
-                  <a 
-                    href="#settings" 
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  </Link>
+                  <Link
+                    to="/settings"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    onClick={() => setShowDropdown(false)}
                   >
                     <Settings size={16} className="mr-2" />
                     Settings
-                  </a>
+                  </Link>
                   <div className="border-t border-gray-100 my-1"></div>
-                  <button 
+                  <button
                     onClick={handleLogout}
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full transition-colors"
                   >
                     <LogOut size={16} className="mr-2" />
                     Log out
