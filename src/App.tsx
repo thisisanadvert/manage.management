@@ -27,6 +27,10 @@ import BuildingSetup from './pages/BuildingSetup';
 import NotFound from './pages/NotFound';
 import PrivacyPolicy from './pages/legal/PrivacyPolicy';
 import TermsOfService from './pages/legal/TermsOfService';
+import Help from './pages/Help';
+import RTMResources from './pages/RTMResources';
+import About from './pages/About';
+import IssueManagement from './pages/features/IssueManagement';
 import PageLoader from './components/ui/PageLoader';
 import { useAuth } from './contexts/AuthContext';
 
@@ -100,6 +104,14 @@ function App() {
       {/* Legal routes */}
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
+
+      {/* Public info pages */}
+      <Route path="/help" element={<Help />} />
+      <Route path="/rtm-resources" element={<RTMResources />} />
+      <Route path="/about" element={<About />} />
+
+      {/* Feature pages */}
+      <Route path="/features/issue-management" element={<IssueManagement />} />
       
       {/* Profile and Settings routes */}
       <Route

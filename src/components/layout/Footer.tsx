@@ -16,26 +16,31 @@ const Footer = () => {
           </div>
           
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Platform</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">Features</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/dashboard" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
-                  Dashboard
+                <Link to="/features/issue-management" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
+                  Issue Management
                 </Link>
               </li>
               <li>
-                <Link to="/issues" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
-                  Issues Management
+                <Link to="/features/financial-tracking" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
+                  Financial Tracking
                 </Link>
               </li>
               <li>
-                <Link to="/finances" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
-                  Finances
+                <Link to="/features/document-management" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
+                  Document Management
                 </Link>
               </li>
               <li>
-                <Link to="/documents" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
-                  Documents
+                <Link to="/features/voting-system" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
+                  Voting System
+                </Link>
+              </li>
+              <li>
+                <Link to="/features/communication-hub" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
+                  Communication Hub
                 </Link>
               </li>
             </ul>
@@ -100,9 +105,9 @@ const Footer = () => {
               © {new Date().getFullYear()} Manage.Management. All rights reserved.
             </p>
             <div className="flex items-center space-x-1 text-sm text-gray-500">
-              <span>Made with</span>
+              <span>Made in Bournemouth with</span>
               <Heart size={14} className="text-error-500 fill-error-500" />
-              <span>for homeowners</span>
+              <span>for homeowners across the UK</span>
             </div>
           </div>
         </div>

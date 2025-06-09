@@ -3,6 +3,7 @@ import { X, Upload, AlertTriangle, PenTool as Tool, Building2, MapPin, FileText 
 import Button from '../ui/Button';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { validateUUIDSafe } from '../../utils/uuid';
 
 interface CreateIssueModalProps {
   isOpen: boolean;
@@ -99,9 +100,17 @@ const CreateIssueModal = ({ isOpen, onClose, buildingId, onIssueCreated }: Creat
       return;
     }
 
-    // Check if buildingId is provided
+    // Check if buildingId is provided and valid
     if (!buildingId) {
       setError('Building ID is required to create an issue');
+      return;
+    }
+
+    // Validate UUID format
+    const uuidValidation = validateUUIDSafe(buildingId);
+    if (!uuidValidation.isValid) {
+      setError(`Invalid building ID format: ${uuidValidation.error}`);
+      console.error('UUID validation failed:', { buildingId, error: uuidValidation.error });
       return;
     }
 

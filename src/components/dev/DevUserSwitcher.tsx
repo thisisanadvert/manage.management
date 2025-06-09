@@ -77,7 +77,7 @@ const DevUserSwitcher: React.FC = () => {
       // Determine building info based on user
       const isRealFrankie = devUser.email === 'frankie@manage.management';
       const buildingInfo = isRealFrankie ? {
-        buildingId: 'c1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6', // Central Park building ID
+        buildingId: 'c1a2b3c4-d5e6-f7a8-b9c0-d1e2f3a4b5c6', // Central Park building ID (fixed UUID)
         buildingName: 'Central Park',
         buildingAddress: 'Central Park, London',
         unitNumber: 'Penthouse'
@@ -131,7 +131,7 @@ const DevUserSwitcher: React.FC = () => {
           role: 'super-admin',
           firstName: 'Frankie',
           lastName: 'Baeza',
-          buildingId: 'c1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6', // Central Park building ID
+          buildingId: 'c1a2b3c4-d5e6-f7a8-b9c0-d1e2f3a4b5c6', // Central Park building ID (fixed UUID)
           buildingName: 'Central Park',
           buildingAddress: 'Central Park, London',
           unitNumber: 'Super Admin',
@@ -163,7 +163,7 @@ const DevUserSwitcher: React.FC = () => {
       const { error } = await supabase.auth.updateUser({
         data: {
           ...user.metadata,
-          buildingId: 'c1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6', // Replace the old placeholder
+          buildingId: 'c1a2b3c4-d5e6-f7a8-b9c0-d1e2f3a4b5c6', // Replace the old placeholder (fixed UUID)
         }
       });
 

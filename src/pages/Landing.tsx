@@ -21,6 +21,7 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Footer from '../components/layout/Footer';
+import RoleSelector from '../components/landing/RoleSelector';
 import { testSignupFlow, testDatabasePolicies } from '../utils/testSignup';
 
 const Landing = () => {
@@ -120,21 +121,13 @@ const Landing = () => {
             >
               Login
             </Button>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="px-4"
-              onClick={() => navigate('/signup')}
-            >
-              Get Started
-            </Button>
-            <Button 
-              variant="primary" 
+            <Button
+              variant="primary"
               size="sm"
               className="px-6"
               onClick={() => navigate('/signup')}
             >
-              Register Interest
+              Get Started
             </Button>
           </div>
         </div>
@@ -162,7 +155,7 @@ const Landing = () => {
                 rightIcon={<ArrowRight size={16} />}
                 onClick={() => navigate('/signup')}
               >
-                Register Interest
+                Get Started
               </Button>
               <Button
                 variant="outline"
@@ -242,6 +235,9 @@ const Landing = () => {
           </div>
         </div>
       </div>
+
+      {/* Role-based Features Section */}
+      <RoleSelector />
 
       <Footer />
     </div>
