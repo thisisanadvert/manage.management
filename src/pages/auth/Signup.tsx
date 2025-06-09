@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Building2, UserPlus, Building, Users, Shield, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import Button from '../../components/ui/Button';
@@ -65,6 +65,7 @@ const signupOptions = [
 
 const Signup = () => {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const [selectedType, setSelectedType] = useState<SignupType>('rtm-director');
   const [selectedSubtype, setSelectedSubtype] = useState<string>('');
   const [showWaitlistForm, setShowWaitlistForm] = useState(false);
@@ -81,9 +82,10 @@ const Signup = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [qualificationData, setQualificationData] = useState<any>(null);
   const navigate = useNavigate();
 
-  // Check for invitation parameters on component mount
+  // Check for invitation parameters and qualification data on component mount
   useEffect(() => {
     const inviteParam = searchParams.get('invite');
     if (inviteParam) {
@@ -106,7 +108,23 @@ const Signup = () => {
         setError('Invalid invitation link. Please contact the person who invited you.');
       }
     }
-  }, [searchParams]);
+
+    // Check for qualification data from RTM qualify lead magnet
+    if (location.state?.qualificationData) {
+      const qualData = location.state.qualificationData;
+      setQualificationData(qualData);
+      setSelectedType('rtm-director');
+      setFormData(prev => ({
+        ...prev,
+        email: qualData.contactInfo?.email || '',
+        firstName: qualData.contactInfo?.name?.split(' ')[0] || '',
+        lastName: qualData.contactInfo?.name?.split(' ').slice(1).join(' ') || '',
+        role: 'rtm-director',
+        phone: qualData.contactInfo?.phone || ''
+      }));
+      setShowWaitlistForm(true);
+    }
+  }, [searchParams, location.state]);
 
   const handleOptionClick = (type: SignupType) => {
     setSelectedType(type);
@@ -185,7 +203,12 @@ const Signup = () => {
               unitNumber: formData.unitNumber,
               phone: formData.phone,
               needsBuildingSetup: true, // Flag to indicate building setup is needed
-              onboardingComplete: false
+              onboardingComplete: false,
+              // Include RTM qualification data if available
+              ...(qualificationData && {
+                rtmQualificationData: qualificationData,
+                signupSource: 'rtm-qualify'
+              })
             }
           }
         });
@@ -229,11 +252,15 @@ const Signup = () => {
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          {isInvitation ? 'Accept Your Invitation' : 'Create your account'}
+          {isInvitation ? 'Accept Your Invitation' : qualificationData ? 'Complete Your RTM Account' : 'Create your account'}
         </h2>
         {isInvitation && invitationData ? (
           <p className="mt-2 text-center text-sm text-gray-600">
             You've been invited to join <strong>{invitationData.buildingName}</strong>
+          </p>
+        ) : qualificationData ? (
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Your RTM qualification data will be saved to your profile
           </p>
         ) : (
           <p className="mt-2 text-center text-sm text-gray-600">
@@ -258,6 +285,30 @@ const Signup = () => {
                   <p><strong>Unit:</strong> {invitationData.unitNumber}</p>
                   <p><strong>Invited by:</strong> {invitationData.inviterName}</p>
                 </div>
+              </div>
+            ) : qualificationData ? (
+              // Show RTM qualification summary
+              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                <h3 className="text-lg font-medium text-green-900 mb-4">Your RTM Assessment Summary</h3>
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-800">{qualificationData.totalFlats}</div>
+                    <div className="text-xs text-green-700">Total Flats</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-800">{qualificationData.leaseLength}</div>
+                    <div className="text-xs text-green-700">Years Remaining</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-800">
+                      {Math.round((qualificationData.interestedLeaseholders / qualificationData.totalFlats) * 100)}%
+                    </div>
+                    <div className="text-xs text-green-700">Participation</div>
+                  </div>
+                </div>
+                <p className="text-sm text-green-800">
+                  This data will be saved to your profile and you'll have access to the complete RTM formation toolkit.
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4">

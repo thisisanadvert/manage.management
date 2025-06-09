@@ -30,6 +30,7 @@ import TermsOfService from './pages/legal/TermsOfService';
 import Help from './pages/Help';
 import RTMResources from './pages/RTMResources';
 import About from './pages/About';
+import RTMQualify from './pages/RTMQualify';
 import IssueManagement from './pages/features/IssueManagement';
 import FinancialTracking from './pages/features/FinancialTracking';
 import DocumentManagement from './pages/features/DocumentManagement';
@@ -113,6 +114,9 @@ function App() {
       <Route path="/help" element={<Help />} />
       <Route path="/rtm-resources" element={<RTMResources />} />
       <Route path="/about" element={<About />} />
+
+      {/* RTM Qualification Lead Magnet */}
+      <Route path="/qualify" element={<RTMQualify />} />
 
       {/* Feature pages */}
       <Route path="/features/issue-management" element={<IssueManagement />} />
