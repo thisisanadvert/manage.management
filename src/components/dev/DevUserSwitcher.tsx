@@ -152,6 +152,32 @@ const DevUserSwitcher: React.FC = () => {
     }
   };
 
+  // Quick fix function to update Frankie's building ID
+  const fixFrankieBuildingId = async () => {
+    if (user?.email !== 'frankie@manage.management') return;
+
+    console.log('Fixing Frankie building ID...');
+    setIsSwitching(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          ...user.metadata,
+          buildingId: 'c1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6', // Replace the old placeholder
+        }
+      });
+
+      if (error) throw error;
+
+      console.log('Successfully fixed building ID');
+      window.location.reload();
+    } catch (error) {
+      console.error('Error fixing building ID:', error);
+    } finally {
+      setIsSwitching(false);
+    }
+  };
+
   const currentSimulatedUser = user?.metadata?.simulatedEmail;
 
   return (
@@ -168,6 +194,23 @@ const DevUserSwitcher: React.FC = () => {
               disabled={isSwitching}
             >
               Reset
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* UUID Fix Button - Only show if user has the old placeholder */}
+      {user?.email === 'frankie@manage.management' && user?.metadata?.buildingId === 'your-real-building-id' && (
+        <div className="mb-2 rounded-lg bg-red-100 border border-red-300 px-3 py-2 text-xs text-red-800">
+          <div className="flex items-center gap-2">
+            <Settings className="h-3 w-3" />
+            <span>UUID Error Detected</span>
+            <button
+              onClick={fixFrankieBuildingId}
+              className="ml-2 text-red-600 hover:text-red-800 underline font-medium"
+              disabled={isSwitching}
+            >
+              Fix Now
             </button>
           </div>
         </div>
