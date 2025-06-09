@@ -47,7 +47,7 @@ const PrivacyPolicy = () => {
               <li>Process transactions and send related information</li>
               <li>Send technical notices and support messages</li>
               <li>Communicate with you about products, services, and events</li>
-              <li>Monitor and analyze trends and usage</li>
+              <li>Monitor and analyse trends and usage</li>
             </ul>
 
             <h2>3. Information Sharing</h2>

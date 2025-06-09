@@ -80,7 +80,7 @@ SELECT
   created_at
 FROM (VALUES
   -- High priority
-  ('Emergency Maintenance: Elevator Repair', 'Main elevator will undergo emergency repairs on Tuesday. Engineers will be on site from 9 AM.', 'Maintenance', true, NOW() - INTERVAL '2 days'),
+  ('Emergency Maintenance: Lift Repair', 'Main lift will undergo emergency repairs on Tuesday. Engineers will be on site from 9 AM.', 'Maintenance', true, NOW() - INTERVAL '2 days'),
   ('Important: Fire Safety Inspection', 'Annual fire safety inspection scheduled for next week. Access required to all units.', 'Safety', true, NOW() - INTERVAL '4 days'),
   ('Security System Upgrade Notice', 'Building security system will be upgraded next month. New key fobs will be distributed.', 'Security', true, NOW() - INTERVAL '6 days'),
 

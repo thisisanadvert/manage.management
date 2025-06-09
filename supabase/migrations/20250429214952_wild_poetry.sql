@@ -28,7 +28,7 @@ FROM (VALUES
   (2500.00, 'Q2 Service Charge Collection', 'Income', NOW() - INTERVAL '5 days'),
   (-350.00, 'Garden Maintenance', 'Maintenance', NOW() - INTERVAL '2 days'),
   (-750.00, 'Fire Safety Inspection', 'Safety', NOW() - INTERVAL '7 days'),
-  (-980.00, 'Elevator Maintenance Contract', 'Maintenance', NOW() - INTERVAL '12 days'),
+  (-980.00, 'Lift Maintenance Contract', 'Maintenance', NOW() - INTERVAL '12 days'),
   (-250.00, 'Window Cleaning', 'Cleaning', NOW() - INTERVAL '3 days'),
   (1200.00, 'Late Service Charge Payment', 'Income', NOW() - INTERVAL '1 day')
 ) AS t(amount, description, category, transaction_date)

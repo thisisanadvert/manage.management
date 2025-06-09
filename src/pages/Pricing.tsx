@@ -79,7 +79,7 @@ const Pricing = () => {
         'Communication tools',
         'Analytics dashboard',
         'Supplier management',
-        'AGM organization',
+        'AGM organisation',
         'API access'
       ],
       cta: 'Contact Sales',

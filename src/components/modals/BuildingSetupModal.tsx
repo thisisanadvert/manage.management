@@ -250,7 +250,7 @@ const BuildingSetupModal = ({ isOpen, onClose, onSetupComplete }: BuildingSetupM
                     <div>
                       <h3 className="text-primary-800 font-medium">Why is this information important?</h3>
                       <p className="text-primary-700 text-sm mt-1">
-                        Providing accurate building information helps us customize your dashboard and provide relevant features for your specific building type.
+                        Providing accurate building information helps us customise your dashboard and provide relevant features for your specific building type.
                       </p>
                     </div>
                   </div>

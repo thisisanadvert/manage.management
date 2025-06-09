@@ -23,7 +23,7 @@ const roles: Role[] = [
     features: [
       {
         title: 'Board Management',
-        description: 'Organize meetings, track decisions, and manage director responsibilities',
+        description: 'Organise meetings, track decisions, and manage director responsibilities',
         icon: <Users className="h-5 w-5" />
       },
       {

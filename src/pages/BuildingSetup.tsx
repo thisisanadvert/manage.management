@@ -248,7 +248,7 @@ const BuildingSetup = () => {
             </div>
             <h3 className="mb-2 text-xl font-semibold text-gray-900">Building Setup Complete!</h3>
             <p className="text-center text-gray-600">
-              Your building information has been saved successfully. This data will be used to customize your dashboard and provide relevant features.
+              Your building information has been saved successfully. This data will be used to customise your dashboard and provide relevant features.
             </p>
             <Button 
               variant="primary" 
@@ -276,7 +276,7 @@ const BuildingSetup = () => {
                 <div>
                   <h3 className="text-primary-800 font-medium">Building Information</h3>
                   <p className="text-primary-700 text-sm mt-1">
-                    This information will be used to set up your building profile and customize your experience. You can update these details later if needed.
+                    This information will be used to set up your building profile and customise your experience. You can update these details later if needed.
                   </p>
                 </div>
               </div>

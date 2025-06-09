@@ -34,8 +34,8 @@ const Announcements = () => {
   const announcements = [
     {
       id: 1,
-      title: 'Emergency Maintenance: Elevator Repair',
-      content: 'Main elevator will undergo emergency repairs on Tuesday. Engineers will be on site from 9 AM. Please use the service elevator during this time.',
+      title: 'Emergency Maintenance: Lift Repair',
+      content: 'Main lift will undergo emergency repairs on Tuesday. Engineers will be on site from 9 AM. Please use the service lift during this time.',
       category: 'Maintenance',
       isPinned: true,
       postedBy: 'Sarah Foster',
