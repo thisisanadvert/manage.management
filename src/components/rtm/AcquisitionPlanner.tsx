@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle2, Circle, Calendar, FileText, Pound, Users, Building2, AlertTriangle, Clock } from 'lucide-react';
+import { CheckCircle2, Circle, Calendar, FileText, PoundSterling, Users, Building2, AlertTriangle, Clock } from 'lucide-react';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 
@@ -129,7 +129,7 @@ const AcquisitionPlanner: React.FC = () => {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'legal': return <FileText className="h-4 w-4" />;
-      case 'financial': return <Pound className="h-4 w-4" />;
+      case 'financial': return <PoundSterling className="h-4 w-4" />;
       case 'operational': return <Building2 className="h-4 w-4" />;
       case 'handover': return <Users className="h-4 w-4" />;
       default: return <Circle className="h-4 w-4" />;
