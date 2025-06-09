@@ -243,5 +243,8 @@ const RTMManagement = () => {
 
       {/* Main Content */}
       {renderActiveView()}
+    </div>
+  );
+};
 
 export default RTMManagement;
