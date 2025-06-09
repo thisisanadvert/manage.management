@@ -1,6 +1,6 @@
 import React from 'react';
-import { Building2 } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
+import Logo from './Logo';
 
 export interface LoadingStateProps {
   type?: 'page' | 'section' | 'inline' | 'overlay';
@@ -22,13 +22,8 @@ const LoadingState: React.FC<LoadingStateProps> = ({
   const renderContent = () => (
     <>
       {showLogo && (
-        <div className="flex items-center space-x-2 mb-6">
-          <div className="bg-primary-600 text-white p-2 rounded">
-            <Building2 size={24} />
-          </div>
-          <span className="text-2xl font-bold text-primary-800 pixel-font">
-            Manage.Management
-          </span>
+        <div className="mb-6">
+          <Logo size="lg" showText={true} />
         </div>
       )}
       

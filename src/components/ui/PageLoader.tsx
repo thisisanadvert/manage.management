@@ -1,6 +1,6 @@
 import React from 'react';
-import { Building2 } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
+import Logo from './Logo';
 
 interface PageLoaderProps {
   message?: string;
@@ -14,13 +14,8 @@ const PageLoader = ({
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center py-12 sm:px-6 lg:px-8">
       {showLogo && (
-        <div className="flex items-center space-x-2 mb-8">
-          <div className="bg-primary-600 text-white p-2 rounded">
-            <Building2 size={24} />
-          </div>
-          <span className="text-2xl font-bold text-primary-800 pixel-font">
-            Manage.Management
-          </span>
+        <div className="mb-8">
+          <Logo size="xl" showText={true} />
         </div>
       )}
       

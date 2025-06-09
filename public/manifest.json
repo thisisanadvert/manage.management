@@ -1,25 +1,32 @@
 {
   "short_name": "Manage.Management",
-  "name": "Manage.Management - Property Management Platform",
+  "name": "Manage.Management - Building Management Platform",
+  "description": "Professional building management software for RTM companies, Share of Freehold directors, and property management companies",
   "icons": [
     {
       "src": "favicon.svg",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/svg+xml"
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "logo192.png",
+      "src": "apple-touch-icon.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "180x180",
+      "purpose": "apple touch icon"
     },
     {
-      "src": "logo512.png",
+      "src": "favicon-32x32.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "32x32"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-GB",
+  "categories": ["business", "productivity", "utilities"],
   "theme_color": "#2563EB",
   "background_color": "#ffffff"
 }

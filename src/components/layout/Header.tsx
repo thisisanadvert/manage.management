@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Bell, Search, Menu, Settings, User, LogOut, Building2 } from 'lucide-react';
+import { Bell, Search, Menu, Settings, User, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import Logo from '../ui/Logo';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -90,16 +91,11 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
               <Menu size={24} />
             </button>
             
-            <a 
-              href="https://manage.management" 
-              className="flex items-center space-x-2"
+            <a
+              href="https://manage.management"
+              className="flex items-center"
             >
-              <img 
-                src="/favicon.svg" 
-                alt="Manage.Management Logo" 
-                className="w-8 h-8" 
-              />
-              <span className="text-xl font-bold text-primary-800 pixel-font">Manage.Management</span>
+              <Logo size="md" showText={true} />
             </a>
           </div>
           
