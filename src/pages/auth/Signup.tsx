@@ -121,19 +121,21 @@ const Signup = () => {
     setError(null);
 
     try {
-      if (isInvitation) {
-        // Handle invitation signup
-        if (password !== confirmPassword) {
-          throw new Error('Passwords do not match');
-        }
-        if (password.length < 8) {
-          throw new Error('Password must be at least 8 characters long');
-        }
+      // Validate passwords for all signups
+      if (password !== confirmPassword) {
+        throw new Error('Passwords do not match');
+      }
+      if (password.length < 8) {
+        throw new Error('Password must be at least 8 characters long');
+      }
 
+      if (isInvitation) {
+        // Handle invitation signup - allow immediate login
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: formData.email,
           password: password,
           options: {
+            emailRedirectTo: `${window.location.origin}/login`,
             data: {
               firstName: formData.firstName,
               lastName: formData.lastName,
@@ -141,7 +143,8 @@ const Signup = () => {
               buildingId: invitationData.buildingId,
               buildingName: invitationData.buildingName,
               unitNumber: formData.unitNumber,
-              invitedBy: invitationData.inviterName
+              invitedBy: invitationData.inviterName,
+              onboardingComplete: true
             }
           }
         });
@@ -167,11 +170,12 @@ const Signup = () => {
           }
         }
       } else {
-        // Handle regular waitlist signup - create account but don't auto-login
+        // Handle regular signup - create account with user's chosen password
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: formData.email,
-          password: 'temp123', // Temporary password - user will be prompted to set up their own
+          password: password,
           options: {
+            emailRedirectTo: `${window.location.origin}/login`,
             data: {
               firstName: formData.firstName,
               lastName: formData.lastName,
@@ -180,7 +184,8 @@ const Signup = () => {
               buildingAddress: formData.buildingAddress,
               unitNumber: formData.unitNumber,
               phone: formData.phone,
-              needsPasswordSetup: true // Flag to indicate password setup is needed
+              needsBuildingSetup: true, // Flag to indicate building setup is needed
+              onboardingComplete: false
             }
           }
         });
@@ -190,7 +195,7 @@ const Signup = () => {
         }
 
         // Sign out immediately after signup to prevent auto-login
-        // User will need to manually login with temp password and get redirected to setup
+        // User will need to manually login and complete onboarding
         if (authData.session) {
           console.log('Signing out after signup to prevent auto-login');
           await supabase.auth.signOut();
@@ -360,38 +365,40 @@ const Signup = () => {
                     />
                   </div>
 
-                  {isInvitation && (
-                    <>
-                      <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-900 mb-2">
-                          Password
-                        </label>
-                        <input
-                          type="password"
-                          id="password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 shadow-sm text-base"
-                          required
-                          minLength={8}
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-900 mb-2">
-                          Confirm Password
-                        </label>
-                        <input
-                          type="password"
-                          id="confirmPassword"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 shadow-sm text-base"
-                          required
-                          minLength={8}
-                        />
-                      </div>
-                    </>
-                  )}
+                  {/* Always show password fields for all signups */}
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-900 mb-2">
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      id="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 shadow-sm text-base"
+                      required
+                      minLength={8}
+                      placeholder="At least 8 characters"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Must be at least 8 characters long
+                    </p>
+                  </div>
+                  <div>
+                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-900 mb-2">
+                      Confirm Password
+                    </label>
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 shadow-sm text-base"
+                      required
+                      minLength={8}
+                      placeholder="Confirm your password"
+                    />
+                  </div>
 
                   {selectedOption?.fields?.includes('buildingName') && (
                     <div>
@@ -472,18 +479,32 @@ const Signup = () => {
                 <h3 className="text-lg font-medium text-green-900 mb-2">
                   {isInvitation ? 'Welcome!' : 'Thank you!'}
                 </h3>
-                <p className="text-green-700">
-                  {isInvitation
-                    ? 'Your account has been created successfully. You can now access your building\'s management platform.'
-                    : 'Your account has been created! Please sign in with the temporary password "temp123" to set up your secure password.'
-                  }
-                </p>
+                <div className="space-y-4">
+                  <p className="text-green-700">
+                    {isInvitation
+                      ? 'Your account has been created successfully! You can now access your building\'s management platform.'
+                      : 'Welcome to Manage.Management! Your account has been created successfully.'
+                    }
+                  </p>
+
+                  {!isInvitation && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h4 className="font-medium text-blue-900 mb-2">Next Steps:</h4>
+                      <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+                        <li>Click "Sign In" below to access your account</li>
+                        <li>Use the password you just created</li>
+                        <li>Complete your building setup to get started</li>
+                      </ol>
+                    </div>
+                  )}
+                </div>
+
                 <Button
                   variant="primary"
-                  className="mt-4"
-                  onClick={() => navigate('/login')}
+                  className="mt-6"
+                  onClick={() => navigate('/login?newUser=true')}
                 >
-                  {isInvitation ? 'Sign In' : 'Sign In to Set Up Password'}
+                  {isInvitation ? 'Sign In to Your Building' : 'Sign In to Continue Setup'}
                 </Button>
               </div>
             ) : null}

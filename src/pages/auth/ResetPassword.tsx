@@ -32,7 +32,9 @@ const ResetPassword = () => {
       console.log('Extracted params:', {
         accessToken: accessToken ? 'present' : 'missing',
         refreshToken: refreshToken ? 'present' : 'missing',
-        type
+        type,
+        hashLength: window.location.hash.length,
+        searchLength: window.location.search.length
       });
 
       if (accessToken && type === 'recovery') {
@@ -49,7 +51,7 @@ const ResetPassword = () => {
             console.error('Error setting session:', error);
             setError(`Session error: ${error.message}`);
           } else {
-            console.log('Session set successfully');
+            console.log('Session set successfully:', data);
             // Clear the error if session was set successfully
             setError(null);
           }
@@ -63,7 +65,14 @@ const ResetPassword = () => {
         if (!type || type !== 'recovery') missingParams.push('type=recovery');
 
         console.log('Missing required parameters:', missingParams);
-        setError(`Invalid or expired password reset link. Missing: ${missingParams.join(', ')}`);
+        console.log('Full URL breakdown:', {
+          href: window.location.href,
+          hash: window.location.hash,
+          search: window.location.search,
+          pathname: window.location.pathname
+        });
+
+        setError(`Invalid or expired password reset link. Missing: ${missingParams.join(', ')}. Please request a new password reset link.`);
       }
     };
 

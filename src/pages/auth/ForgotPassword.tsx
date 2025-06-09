@@ -35,15 +35,21 @@ const ForgotPassword = () => {
     setIsSubmitting(true);
 
     try {
+      console.log('Attempting password reset for:', email);
+      console.log('Current origin:', window.location.origin);
+
       const { error } = await resetPassword(email);
 
       if (error) {
+        console.error('Password reset error:', error);
         throw error;
       }
 
+      console.log('Password reset email sent successfully');
       setSuccess(true);
       startCountdown();
     } catch (err: any) {
+      console.error('Password reset failed:', err);
       setError(err.message || 'Failed to send password reset email');
     } finally {
       setIsSubmitting(false);

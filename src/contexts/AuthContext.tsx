@@ -32,6 +32,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error?: { message: string } }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error?: { message: string } }>;
+  signInWithMagicLink: (email: string) => Promise<{ error?: { message: string } }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -136,6 +137,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Check if user needs to set up password
         if (data.user.user_metadata?.needsPasswordSetup) {
           navigate('/setup-password');
+        } else if (data.user.user_metadata?.needsBuildingSetup) {
+          // New users need to complete building setup
+          navigate('/building-setup');
         } else {
           const basePath = data.user.user_metadata?.role?.split('-')[0];
           navigate(`/${basePath}`);
@@ -177,14 +181,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signInWithMagicLink = async (email: string) => {
+    try {
+      const redirectUrl = `${window.location.origin}/login`;
+      console.log('Sending magic link with redirect URL:', redirectUrl);
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: redirectUrl,
+        },
+      });
+
+      if (error) {
+        return { error };
+      }
+
+      return {};
+    } catch (error: any) {
+      return { error };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      session, 
-      loading, 
+    <AuthContext.Provider value={{
+      user,
+      session,
+      loading,
       signIn,
       signOut,
-      resetPassword
+      resetPassword,
+      signInWithMagicLink
     }}>
       {children}
     </AuthContext.Provider>
