@@ -48,38 +48,95 @@ const LeaseholderDashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Building Overview */}
-      <div className="bg-primary-800 rounded-xl p-6 text-white">
-        <div className="flex flex-col md:flex-row md:items-center justify-between">
-          <div className="flex items-start space-x-4">
-            <div className="p-3 bg-white/10 rounded-lg">
-              <Building2 size={32} />
+      {/* Enhanced Building Overview */}
+      <Card className="bg-gradient-to-br from-primary-800 to-primary-900 rounded-xl p-6 text-white overflow-hidden relative">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-16 translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-12 -translate-x-12"></div>
+        </div>
+
+        <div className="relative">
+          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+            {/* Building Info */}
+            <div className="flex items-start space-x-4 flex-1">
+              <div className="p-3 bg-white/10 rounded-lg backdrop-blur-sm">
+                <Building2 size={32} />
+              </div>
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold">{user?.metadata?.buildingName || 'Your Building'}</h1>
+                <p className="text-primary-200 text-sm">
+                  {user?.metadata?.unitNumber ? `Unit ${user.metadata.unitNumber}` : 'Add unit number'}
+                  {user?.metadata?.buildingAddress && ` • ${user.metadata.buildingAddress}`}
+                </p>
+                <div className="flex flex-wrap items-center gap-2 mt-3">
+                  <span className="text-xs px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm">Leaseholder</span>
+                  <span className="text-xs px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm">2 bed apartment</span>
+                  <span className="text-xs px-3 py-1 bg-blue-500/30 rounded-full backdrop-blur-sm">
+                    Resident
+                  </span>
+                </div>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">{user?.metadata?.buildingName || 'Your Building'}</h1>
-              <p className="text-primary-200">{user?.metadata?.unitNumber ? `Unit ${user.metadata.unitNumber}` : 'Add unit number'}</p>
-              <div className="flex items-center space-x-2 mt-1">
-                <span className="text-sm px-2 py-0.5 bg-white/20 rounded-full">Leaseholder</span>
-                <span className="text-sm px-2 py-0.5 bg-white/20 rounded-full">2 bed apartment</span>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:w-auto w-full">
+              <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm text-center">
+                <div className="text-lg font-bold">0</div>
+                <div className="text-xs text-primary-200">Open Issues</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm text-center">
+                <div className="text-lg font-bold">0</div>
+                <div className="text-xs text-primary-200">Active Votes</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm text-center">
+                <div className="text-lg font-bold">£0</div>
+                <div className="text-xs text-primary-200">Outstanding</div>
               </div>
             </div>
           </div>
-          <div className="mt-4 md:mt-0 flex space-x-2">
-            <Button 
-              variant="outline" 
-              className="border-white/30 text-white hover:bg-white/10"
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3 mt-6">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
+              onClick={() => setIsCreateIssueModalOpen(true)}
             >
+              <AlertTriangle size={16} className="mr-2" />
+              Report Issue
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
+              onClick={() => navigate('/leaseholder/documents')}
+            >
+              <FileText size={16} className="mr-2" />
               My Documents
             </Button>
-            <Button 
-              variant="accent" 
-              rightIcon={<ArrowUpRight size={16} />}
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
+              onClick={() => navigate('/leaseholder/voting')}
             >
+              <Vote size={16} className="mr-2" />
+              Active Votes
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
+              onClick={() => navigate('/leaseholder/announcements')}
+            >
+              <MessageSquare size={16} className="mr-2" />
               Contact RTM
             </Button>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -86,38 +86,94 @@ const RTMDashboard = () => {
       {/* Action Items */}
       <ActionItems actionItems={dashboardData.actionItems} />
 
-      {/* Building Overview */}
-      <Card className="bg-primary-800 rounded-xl p-6 text-white">
-        <div className="flex flex-col md:flex-row md:items-center justify-between">
-          <div className="flex items-start space-x-4">
-            <div className="p-3 bg-white/10 rounded-lg">
-              <Building2 size={32} />
+      {/* Enhanced Building Overview */}
+      <Card className="bg-gradient-to-br from-primary-800 to-primary-900 rounded-xl p-6 text-white overflow-hidden relative">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-16 translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-12 -translate-x-12"></div>
+        </div>
+
+        <div className="relative">
+          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+            {/* Building Info */}
+            <div className="flex items-start space-x-4 flex-1">
+              <div className="p-3 bg-white/10 rounded-lg backdrop-blur-sm">
+                <Building2 size={32} />
+              </div>
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold">{user?.metadata?.buildingName || 'Your Building'}</h1>
+                <p className="text-primary-200 text-sm">{user?.metadata?.buildingAddress || 'Add your building address'}</p>
+                <div className="flex flex-wrap items-center gap-2 mt-3">
+                  <span className="text-xs px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm">RTM Director</span>
+                  <span className="text-xs px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm">
+                    {user?.metadata?.unitNumber ? `Unit ${user.metadata.unitNumber}` : 'Add unit number'}
+                  </span>
+                  <span className="text-xs px-3 py-1 bg-green-500/30 rounded-full backdrop-blur-sm">
+                    RTM Active
+                  </span>
+                </div>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">{user?.metadata?.buildingName || 'Your Building'}</h1>
-              <p className="text-primary-200">{user?.metadata?.buildingAddress || 'Add your building address'}</p>
-              <div className="flex items-center space-x-2 mt-1">
-                <span className="text-sm px-2 py-0.5 bg-white/20 rounded-full">RTM Director</span>
-                <span className="text-sm px-2 py-0.5 bg-white/20 rounded-full">
-                  {user?.metadata?.unitNumber ? `Unit ${user.metadata.unitNumber}` : 'Add unit number'}
-                </span>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:w-auto w-full">
+              <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm text-center">
+                <div className="text-lg font-bold">{dashboardData.stats.totalUnits}</div>
+                <div className="text-xs text-primary-200">Total Units</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm text-center">
+                <div className="text-lg font-bold">{dashboardData.stats.openIssues}</div>
+                <div className="text-xs text-primary-200">Open Issues</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm text-center">
+                <div className="text-lg font-bold">£{(dashboardData.stats.totalBudget / 1000).toFixed(0)}k</div>
+                <div className="text-xs text-primary-200">Annual Budget</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm text-center">
+                <div className="text-lg font-bold">{dashboardData.stats.complianceItems}</div>
+                <div className="text-xs text-primary-200">Compliance</div>
               </div>
             </div>
           </div>
-          <div className="mt-4 md:mt-0 flex space-x-2">
-            <Button 
-              variant="outline" 
-              className="border-white/30 text-white hover:bg-white/10"
-              onClick={() => navigate(`/${user?.role?.split('-')[0]}/documents`)}
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3 mt-6">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
+              onClick={() => navigate(`/${user?.role?.split('-')[0]}/building-setup`)}
             >
-              View Documents
+              <Building2 size={16} className="mr-2" />
+              Manage Building
             </Button>
-            <Button 
-              variant="accent" 
-              rightIcon={<ArrowRight size={16} />}
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
               onClick={() => navigate(`/${user?.role?.split('-')[0]}/issues`)}
             >
+              <AlertTriangle size={16} className="mr-2" />
               Manage Issues
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
+              onClick={() => navigate(`/${user?.role?.split('-')[0]}/finances`)}
+            >
+              <Wallet size={16} className="mr-2" />
+              View Finances
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
+              onClick={() => navigate(`/${user?.role?.split('-')[0]}/documents`)}
+            >
+              <FileText size={16} className="mr-2" />
+              Documents
             </Button>
           </div>
         </div>
