@@ -13,38 +13,47 @@ interface DevUser {
 }
 
 const DEV_USERS: DevUser[] = [
+  // Real Frankie's Central Park Building
+  {
+    email: 'frankie@manage.management',
+    role: 'rtm-director',
+    name: 'Frankie (Central Park)',
+    icon: <Crown className="h-4 w-4 text-blue-600" />,
+    description: 'Your real Central Park building account'
+  },
+  // Demo Users for Testing
   {
     email: 'rtm@demo.com',
     role: 'rtm-director',
-    name: 'RTM Director',
+    name: 'RTM Director (Demo)',
     icon: <Crown className="h-4 w-4" />,
     description: 'Right to Manage Director - Full building control'
   },
   {
     email: 'sof@demo.com',
     role: 'sof-director',
-    name: 'SOF Director',
+    name: 'SOF Director (Demo)',
     icon: <Building2 className="h-4 w-4" />,
     description: 'Share of Freehold Director - Ownership management'
   },
   {
     email: 'leaseholder@demo.com',
     role: 'leaseholder',
-    name: 'Leaseholder',
+    name: 'Leaseholder (Demo)',
     icon: <Home className="h-4 w-4" />,
     description: 'Leaseholder - Resident with lease'
   },
   {
     email: 'shareholder@demo.com',
     role: 'shareholder',
-    name: 'Shareholder',
+    name: 'Shareholder (Demo)',
     icon: <Users className="h-4 w-4" />,
     description: 'Shareholder - Owns share of freehold'
   },
   {
     email: 'management@demo.com',
     role: 'management-company',
-    name: 'Management Company',
+    name: 'Management Company (Demo)',
     icon: <Briefcase className="h-4 w-4" />,
     description: 'Professional management company'
   }
@@ -65,21 +74,32 @@ const DevUserSwitcher: React.FC = () => {
     setIsSwitching(true);
 
     try {
+      // Determine building info based on user
+      const isRealFrankie = devUser.email === 'frankie@manage.management';
+      const buildingInfo = isRealFrankie ? {
+        buildingId: 'your-real-building-id', // You'll need to replace this with actual Central Park building ID
+        buildingName: 'Central Park',
+        buildingAddress: 'Central Park, London',
+        unitNumber: 'Penthouse'
+      } : {
+        buildingId: 'b0a3f3f0-0b1a-4e1a-9f1a-0e1b2c3d4e5f',
+        buildingName: 'Riverside Gardens',
+        buildingAddress: '123 River Street, London SW1A 1AA',
+        unitNumber: devUser.role.includes('director') ? 'Director' : '101'
+      };
+
       // Update the current user's metadata to simulate being the target user
       console.log('Updating user metadata...');
       const { data, error } = await supabase.auth.updateUser({
         data: {
           role: devUser.role,
-          firstName: devUser.name.split(' ')[0],
-          lastName: devUser.name.split(' ')[1] || '',
-          buildingId: 'b0a3f3f0-0b1a-4e1a-9f1a-0e1b2c3d4e5f',
-          buildingName: 'Riverside Gardens',
-          buildingAddress: '123 River Street, London SW1A 1AA',
-          unitNumber: devUser.role.includes('director') ? 'Director' : '101',
+          firstName: isRealFrankie ? 'Frankie' : devUser.name.split(' ')[0],
+          lastName: isRealFrankie ? 'Baeza' : (devUser.name.split(' ')[1] || ''),
+          ...buildingInfo,
           onboardingComplete: true,
-          devMode: true,
-          originalEmail: 'frankie@manage.management',
-          simulatedEmail: devUser.email
+          devMode: !isRealFrankie, // Real Frankie is not in dev mode
+          originalEmail: isRealFrankie ? null : 'frankie@manage.management',
+          simulatedEmail: isRealFrankie ? null : devUser.email
         }
       });
 
@@ -111,9 +131,9 @@ const DevUserSwitcher: React.FC = () => {
           role: 'super-admin',
           firstName: 'Frankie',
           lastName: 'Baeza',
-          buildingId: 'b0a3f3f0-0b1a-4e1a-9f1a-0e1b2c3d4e5f',
-          buildingName: 'Riverside Gardens',
-          buildingAddress: '123 River Street, London SW1A 1AA',
+          buildingId: 'your-real-building-id', // Central Park building ID
+          buildingName: 'Central Park',
+          buildingAddress: 'Central Park, London',
           unitNumber: 'Super Admin',
           onboardingComplete: true,
           devMode: false,
