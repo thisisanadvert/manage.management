@@ -77,7 +77,7 @@ const DevUserSwitcher: React.FC = () => {
       // Determine building info based on user
       const isRealFrankie = devUser.email === 'frankie@manage.management';
       const buildingInfo = isRealFrankie ? {
-        buildingId: 'your-real-building-id', // You'll need to replace this with actual Central Park building ID
+        buildingId: 'c1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6', // Central Park building ID
         buildingName: 'Central Park',
         buildingAddress: 'Central Park, London',
         unitNumber: 'Penthouse'
@@ -131,7 +131,7 @@ const DevUserSwitcher: React.FC = () => {
           role: 'super-admin',
           firstName: 'Frankie',
           lastName: 'Baeza',
-          buildingId: 'your-real-building-id', // Central Park building ID
+          buildingId: 'c1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6', // Central Park building ID
           buildingName: 'Central Park',
           buildingAddress: 'Central Park, London',
           unitNumber: 'Super Admin',
