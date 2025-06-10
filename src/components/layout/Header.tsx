@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { Bell, Search, Menu, Settings, User, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNotifications } from '../../contexts/NotificationContext';
 import Logo from '../ui/Logo';
+import NotificationDropdown from '../notifications/NotificationDropdown';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -13,6 +15,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const { user, signOut } = useAuth();
+  const { unreadCount } = useNotifications();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -124,27 +127,17 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
                 aria-label="Notifications"
               >
                 <Bell size={20} />
-                <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-accent-500 rounded-full"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </button>
 
-              {/* Notification dropdown */}
-              {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200 animate-slide-down">
-                  <div className="px-4 py-2 border-b border-gray-100">
-                    <h3 className="font-semibold text-gray-900">Notifications</h3>
-                  </div>
-                  <div className="max-h-96 overflow-y-auto">
-                    <div className="px-4 py-3 hover:bg-gray-50 border-l-4 border-primary-500">
-                      <p className="text-sm font-medium text-gray-900">New announcement posted</p>
-                      <p className="text-xs text-gray-500 mt-1">10 minutes ago</p>
-                    </div>
-                    <div className="px-4 py-3 hover:bg-gray-50">
-                      <p className="text-sm font-medium text-gray-900">Issue #23 status updated</p>
-                      <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <NotificationDropdown
+                isOpen={showNotifications}
+                onClose={() => setShowNotifications(false)}
+              />
             </div>
             
             {/* User profile */}
