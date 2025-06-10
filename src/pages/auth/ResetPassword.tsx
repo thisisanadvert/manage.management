@@ -9,7 +9,7 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | React.ReactNode | null>(null);
   const [success, setSuccess] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -17,9 +17,23 @@ const ResetPassword = () => {
   // Check if we have a hash in the URL (from the reset password email)
   useEffect(() => {
     const handlePasswordReset = async () => {
+      console.log('=== PASSWORD RESET DEBUG ===');
       console.log('Current URL:', window.location.href);
       console.log('Hash:', window.location.hash);
       console.log('Search:', window.location.search);
+
+      // First, check if we already have an active session
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (session && !sessionError) {
+          console.log('Found existing session, using it for password reset');
+          setAccessToken(session.access_token);
+          setError(null);
+          return;
+        }
+      } catch (err) {
+        console.log('No existing session found, checking URL parameters');
+      }
 
       // Try to extract tokens from both hash and query parameters
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -37,7 +51,7 @@ const ResetPassword = () => {
         searchLength: window.location.search.length
       });
 
-      if (accessToken && type === 'recovery') {
+      if (accessToken) {
         try {
           setAccessToken(accessToken);
 
@@ -49,22 +63,17 @@ const ResetPassword = () => {
 
           if (error) {
             console.error('Error setting session:', error);
-            setError(`Session error: ${error.message}`);
+            setError(`Session error: ${error.message}. Please try requesting a new password reset link.`);
           } else {
             console.log('Session set successfully:', data);
-            // Clear the error if session was set successfully
             setError(null);
           }
         } catch (err: any) {
           console.error('Exception in password reset:', err);
-          setError(`Reset error: ${err.message}`);
+          setError(`Reset error: ${err.message}. Please try requesting a new password reset link.`);
         }
       } else {
-        const missingParams = [];
-        if (!accessToken) missingParams.push('access_token');
-        if (!type || type !== 'recovery') missingParams.push('type=recovery');
-
-        console.log('Missing required parameters:', missingParams);
+        console.log('No access token found in URL');
         console.log('Full URL breakdown:', {
           href: window.location.href,
           hash: window.location.hash,
@@ -72,7 +81,20 @@ const ResetPassword = () => {
           pathname: window.location.pathname
         });
 
-        setError(`Invalid or expired password reset link. Missing: ${missingParams.join(', ')}. Please request a new password reset link.`);
+        setError(
+          <div>
+            <p className="mb-2">Invalid or expired password reset link.</p>
+            <p className="text-xs text-gray-600 mb-3">
+              The link may have expired or been used already. Password reset links are only valid for 1 hour.
+            </p>
+            <Link
+              to="/forgot-password"
+              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            >
+              Request New Reset Link
+            </Link>
+          </div>
+        );
       }
     };
 
@@ -168,9 +190,11 @@ const ResetPassword = () => {
           ) : (
             <form className="space-y-6" onSubmit={handleSubmit}>
               {error && (
-                <div className="bg-error-50 text-error-500 p-3 rounded-md text-sm flex items-start">
-                  <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
-                  <span>{error}</span>
+                <div className="bg-error-50 text-error-500 p-3 rounded-md text-sm">
+                  <div className="flex items-start">
+                    <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                    <div>{error}</div>
+                  </div>
                 </div>
               )}
               

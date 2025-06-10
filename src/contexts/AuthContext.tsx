@@ -163,7 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const resetPassword = async (email: string) => {
     try {
-      // Use the current origin for the redirect URL
+      // Use the current origin for the redirect URL with proper hash handling
       const redirectUrl = `${window.location.origin}/reset-password`;
       console.log('Sending password reset with redirect URL:', redirectUrl);
 
@@ -172,11 +172,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
+        console.error('Reset password error:', error);
         return { error };
       }
 
+      console.log('Password reset email sent successfully');
       return {};
     } catch (error: any) {
+      console.error('Reset password exception:', error);
       return { error };
     }
   };
