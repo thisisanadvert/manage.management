@@ -91,11 +91,11 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
       icon: Calendar, 
       roles: ['rtm-director', 'sof-director', 'leaseholder', 'shareholder', 'management-company']
     },
-    { 
-      name: 'RTM Formation', 
-      href: `${baseRoute}/rtm`, 
-      icon: Scale, 
-      roles: ['rtm-director']
+    {
+      name: 'RTM Formation',
+      href: `${baseRoute}/rtm`,
+      icon: Scale,
+      roles: ['rtm-director', 'sof-director']
     },
     { 
       name: 'Share Certificates', 

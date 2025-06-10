@@ -1,16 +1,17 @@
 import React from 'react';
-import { 
-  Building2, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Clock, 
-  Wallet, 
-  Users, 
+import {
+  Building2,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Wallet,
+  Users,
   TrendingUp,
   ArrowRight,
   Calendar,
   FileText,
-  Bell
+  Bell,
+  Scale
 } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
@@ -299,6 +300,17 @@ export const QuickActions: React.FC<QuickActionsProps> = ({ userRole }) => {
       });
     }
 
+    // Add RTM tools for RTM and SOF directors
+    if (userRole === 'rtm-director' || userRole === 'sof-director') {
+      baseActions.push({
+        title: 'RTM Formation',
+        description: 'Access RTM formation tools',
+        icon: Scale,
+        color: 'success',
+        onClick: () => navigate(`/${basePath}/rtm`),
+      });
+    }
+
     return baseActions;
   };
 
@@ -316,11 +328,13 @@ export const QuickActions: React.FC<QuickActionsProps> = ({ userRole }) => {
           >
             <div className={`p-2 rounded-lg w-fit mb-2 ${
               action.color === 'primary' ? 'bg-blue-100' :
-              action.color === 'warning' ? 'bg-yellow-100' : 'bg-gray-100'
+              action.color === 'warning' ? 'bg-yellow-100' :
+              action.color === 'success' ? 'bg-green-100' : 'bg-gray-100'
             }`}>
               <action.icon className={`h-5 w-5 ${
                 action.color === 'primary' ? 'text-blue-600' :
-                action.color === 'warning' ? 'text-yellow-600' : 'text-gray-600'
+                action.color === 'warning' ? 'text-yellow-600' :
+                action.color === 'success' ? 'text-green-600' : 'text-gray-600'
               }`} />
             </div>
             <h3 className="font-medium text-gray-900 text-sm">{action.title}</h3>

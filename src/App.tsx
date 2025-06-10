@@ -190,6 +190,7 @@ function App() {
         <Route path="announcements" element={<Announcements />} />
         <Route path="voting" element={<Voting />} />
         <Route path="agms" element={<AGMs />} />
+        <Route path="rtm" element={<RTMManagement />} />
         <Route path="shares" element={<ShareCertificates />} />
         <Route path="suppliers" element={<SupplierNetwork />} />
       </Route>
