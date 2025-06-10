@@ -23,6 +23,7 @@ import ResetPassword from './pages/auth/ResetPassword';
 import SetupPassword from './pages/auth/SetupPassword';
 import DebugReset from './pages/auth/DebugReset';
 import VerifyReset from './pages/auth/VerifyReset';
+import SupabaseConfig from './pages/auth/SupabaseConfig';
 import Landing from './pages/Landing';
 import Pricing from './pages/Pricing';
 import BuildingSetup from './pages/BuildingSetup';
@@ -106,6 +107,7 @@ function App() {
       <Route path="/setup-password" element={<SetupPassword />} />
       <Route path="/debug-reset" element={<DebugReset />} />
       <Route path="/verify-reset" element={<VerifyReset />} />
+      <Route path="/supabase-config" element={<SupabaseConfig />} />
       <Route path="/verify-reset" element={<VerifyReset />} />
 
       {/* Legal routes */}

@@ -145,9 +145,21 @@ const ForgotPassword = () => {
           ) : (
             <form className="space-y-6" onSubmit={handleSubmit}>
               {error && (
-                <div className="bg-error-50 text-error-500 p-3 rounded-md text-sm flex items-start">
-                  <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
-                  <span>{error}</span>
+                <div className="bg-error-50 text-error-500 p-3 rounded-md text-sm">
+                  <div className="flex items-start">
+                    <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="mb-2">{error}</div>
+                      {error.includes('redirect') || error.includes('URL') ? (
+                        <Link
+                          to="/supabase-config"
+                          className="inline-flex items-center text-xs text-error-600 hover:text-error-700 underline"
+                        >
+                          View Configuration Guide →
+                        </Link>
+                      ) : null}
+                    </div>
+                  </div>
                 </div>
               )}
               

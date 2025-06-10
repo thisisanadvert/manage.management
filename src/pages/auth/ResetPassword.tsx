@@ -85,14 +85,23 @@ const ResetPassword = () => {
           <div>
             <p className="mb-2">Invalid or expired password reset link.</p>
             <p className="text-xs text-gray-600 mb-3">
-              The link may have expired or been used already. Password reset links are only valid for 1 hour.
+              The link may have expired, been used already, or the redirect URL isn't configured properly in Supabase.
+              Password reset links are only valid for 1 hour.
             </p>
-            <Link
-              to="/forgot-password"
-              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
-              Request New Reset Link
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Link
+                to="/forgot-password"
+                className="inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                Request New Reset Link
+              </Link>
+              <Link
+                to="/supabase-config"
+                className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                Configuration Guide
+              </Link>
+            </div>
           </div>
         );
       }
