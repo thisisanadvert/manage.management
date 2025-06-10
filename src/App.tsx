@@ -12,6 +12,8 @@ import AGMs from './pages/AGMs';
 import RTMManagement from './pages/RTMManagement';
 import ShareCertificates from './pages/ShareCertificates';
 import SupplierNetwork from './pages/SupplierNetwork';
+import BuildingDetails from './pages/BuildingDetails';
+import Reports from './pages/Reports';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Login from './pages/auth/Login';
@@ -257,6 +259,11 @@ function App() {
         <Route path="voting" element={<Voting />} />
         <Route path="agms" element={<AGMs />} />
         <Route path="suppliers" element={<SupplierNetwork />} />
+        <Route path="building/:buildingId" element={<BuildingDetails />} />
+        <Route path="building/:buildingId/issues" element={<IssuesManagement />} />
+        <Route path="building/:buildingId/finances" element={<Finances />} />
+        <Route path="building/:buildingId/agms" element={<AGMs />} />
+        <Route path="reports" element={<Reports />} />
       </Route>
 
       {/* 404 page for unknown routes */}
