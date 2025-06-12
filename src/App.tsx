@@ -24,8 +24,10 @@ import SetupPassword from './pages/auth/SetupPassword';
 import DebugReset from './pages/auth/DebugReset';
 import VerifyReset from './pages/auth/VerifyReset';
 import SupabaseConfig from './pages/auth/SupabaseConfig';
+import EmailDiagnostic from './pages/auth/EmailDiagnostic';
 import Landing from './pages/Landing';
 import Pricing from './pages/Pricing';
+import AuthRedirectHandler from './components/auth/AuthRedirectHandler';
 import BuildingSetup from './pages/BuildingSetup';
 import NotFound from './pages/NotFound';
 import PrivacyPolicy from './pages/legal/PrivacyPolicy';
@@ -96,7 +98,12 @@ function App() {
   return (
     <Routes>
       {/* Public routes */}
-      <Route path="/" element={!user ? <Landing /> : <Navigate to={`/${user.role === 'super-admin' ? 'rtm' : user.role?.split('-')[0]}`} replace />} />
+      <Route path="/" element={!user ? (
+        <>
+          <AuthRedirectHandler />
+          <Landing />
+        </>
+      ) : <Navigate to={`/${user.role === 'super-admin' ? 'rtm' : user.role?.split('-')[0]}`} replace />} />
       <Route path="/pricing" element={!user ? <Pricing /> : <Navigate to={`/${user.role === 'super-admin' ? 'rtm' : user.role?.split('-')[0]}`} replace />} />
       
       {/* Auth routes */}
@@ -268,8 +275,13 @@ function App() {
         <Route path="reports" element={<Reports />} />
       </Route>
 
-      {/* 404 page for unknown routes */}
-      <Route path="*" element={<NotFound />} />
+      {/* Catch-all route for auth redirects */}
+      <Route path="*" element={
+        <>
+          <AuthRedirectHandler />
+          <NotFound />
+        </>
+      } />
     </Routes>
   );
 }

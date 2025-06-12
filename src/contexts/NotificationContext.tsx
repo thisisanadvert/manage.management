@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { isDemoUser, cleanupDemoDataFromStorage } from '../utils/userUtils';
 
 export type NotificationType = 
   | 'issues' 
@@ -102,6 +103,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Load preferences from localStorage on mount
   useEffect(() => {
     if (user?.id) {
+      // Clean up any demo data for real users
+      if (!isDemoUser(user)) {
+        cleanupDemoDataFromStorage(user.id);
+      }
+
       const savedPreferences = localStorage.getItem(`notification_preferences_${user.id}`);
       if (savedPreferences) {
         try {
@@ -197,50 +203,56 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  // Add some demo notifications for development
+  // Add demo notifications only for demo users
   useEffect(() => {
     if (user?.id && notifications.length === 0) {
-      const demoNotifications: Omit<Notification, 'id' | 'createdAt' | 'read'>[] = [
-        {
-          type: 'issues',
-          title: 'New Issue Reported',
-          message: 'Lift maintenance required - Unit 4B',
-          priority: 'high',
-          actionUrl: '/issues'
-        },
-        {
-          type: 'announcements',
-          title: 'Building Announcement',
-          message: 'AGM scheduled for next month',
-          priority: 'medium',
-          actionUrl: '/announcements'
-        },
-        {
-          type: 'voting',
-          title: 'New Poll Available',
-          message: 'Vote on new cleaning service provider',
-          priority: 'medium',
-          actionUrl: '/voting'
-        },
-        {
-          type: 'finances',
-          title: 'Service Charge Due',
-          message: 'Q4 service charge payment due in 7 days',
-          priority: 'high',
-          actionUrl: '/finances'
-        },
-        {
-          type: 'documents',
-          title: 'New Document',
-          message: 'Insurance certificate uploaded',
-          priority: 'low',
-          actionUrl: '/documents'
-        }
-      ];
+      // Only add demo notifications for demo users
+      const isDemo = isDemoUser(user);
 
-      demoNotifications.forEach(notification => {
-        setTimeout(() => addNotification(notification), Math.random() * 1000);
-      });
+      if (isDemo) {
+        const demoNotifications: Omit<Notification, 'id' | 'createdAt' | 'read'>[] = [
+          {
+            type: 'issues',
+            title: 'New Issue Reported',
+            message: 'Lift maintenance required - Unit 4B',
+            priority: 'high',
+            actionUrl: '/issues'
+          },
+          {
+            type: 'announcements',
+            title: 'Building Announcement',
+            message: 'AGM scheduled for next month',
+            priority: 'medium',
+            actionUrl: '/announcements'
+          },
+          {
+            type: 'voting',
+            title: 'New Poll Available',
+            message: 'Vote on new cleaning service provider',
+            priority: 'medium',
+            actionUrl: '/voting'
+          },
+          {
+            type: 'finances',
+            title: 'Service Charge Due',
+            message: 'Q4 service charge payment due in 7 days',
+            priority: 'high',
+            actionUrl: '/finances'
+          },
+          {
+            type: 'documents',
+            title: 'New Document',
+            message: 'Insurance certificate uploaded',
+            priority: 'low',
+            actionUrl: '/documents'
+          }
+        ];
+
+        demoNotifications.forEach(notification => {
+          setTimeout(() => addNotification(notification), Math.random() * 1000);
+        });
+      }
+      // For real users, start with a clean slate - no notifications
     }
   }, [user?.id]);
 

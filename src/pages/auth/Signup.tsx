@@ -168,6 +168,14 @@ const Signup = () => {
         });
 
         if (authError) {
+          // Handle specific rate limiting error
+          if (authError.message?.includes('For security purposes, you can only request this after')) {
+            throw new Error('Please wait 60 seconds before requesting another confirmation email. Check your email inbox and spam folder for the confirmation link.');
+          }
+          // Handle email already registered
+          if (authError.message?.includes('User already registered')) {
+            throw new Error('This email is already registered. Please try logging in instead, or contact your building administrator if you need help.');
+          }
           throw authError;
         }
 
@@ -214,6 +222,14 @@ const Signup = () => {
         });
 
         if (authError) {
+          // Handle specific rate limiting error
+          if (authError.message?.includes('For security purposes, you can only request this after')) {
+            throw new Error('Please wait 60 seconds before requesting another confirmation email. Check your email inbox and spam folder for the confirmation link.');
+          }
+          // Handle email already registered
+          if (authError.message?.includes('User already registered')) {
+            throw new Error('This email is already registered. Please try logging in instead, or use the "Forgot Password" link if you need to reset your password.');
+          }
           throw authError;
         }
 

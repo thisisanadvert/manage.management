@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Plus,
   Search,
@@ -18,20 +18,31 @@ import {
   Heart,
   Reply,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Users
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
+import { isDemoUser } from '../utils/userUtils';
 
 const Announcements = () => {
+  const { user } = useAuth();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<number | null>(null);
   const [newComment, setNewComment] = useState('');
+  const [announcements, setAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const announcements = [
+  // Check if user is demo user or has demo data
+  const isDemo = isDemoUser(user);
+
+  // Demo announcements for demo users only
+  const demoAnnouncements = [
     {
       id: 1,
       title: 'Emergency Maintenance: Lift Repair',
@@ -88,6 +99,51 @@ const Announcements = () => {
       priority: 'medium'
     }
   ];
+
+  // Load announcements based on user type
+  useEffect(() => {
+    const loadAnnouncements = async () => {
+      setLoading(true);
+
+      if (isDemo) {
+        // Demo users get demo announcements
+        setAnnouncements(demoAnnouncements);
+      } else {
+        // Real users: load from database or show empty state
+        try {
+          const buildingId = user?.user_metadata?.buildingId;
+
+          if (buildingId) {
+            // Load real announcements from database
+            const { data, error } = await supabase
+              .from('announcements')
+              .select('*')
+              .eq('building_id', buildingId)
+              .order('created_at', { ascending: false });
+
+            if (error) {
+              console.error('Error loading announcements:', error);
+              setAnnouncements([]);
+            } else {
+              setAnnouncements(data || []);
+            }
+          } else {
+            // No building setup yet - empty state
+            setAnnouncements([]);
+          }
+        } catch (error) {
+          console.error('Error loading announcements:', error);
+          setAnnouncements([]);
+        }
+      }
+
+      setLoading(false);
+    };
+
+    if (user?.id) {
+      loadAnnouncements();
+    }
+  }, [user?.id, isDemo]);
 
   // Mock comments data
   const commentsData = {
@@ -389,71 +445,107 @@ const Announcements = () => {
       </div>
 
       <div className="space-y-4">
-        {announcements.map((announcement) => {
-          const isExpanded = selectedAnnouncement === announcement.id;
-          return (
-            <Card key={announcement.id} hoverable className="animate-slide-up">
-              <div className="flex items-start gap-4">
-                <div className={`p-2 rounded-lg ${
-                  announcement.isPinned ? 'bg-primary-100' : 'bg-gray-100'
-                }`}>
-                  {announcement.isPinned ? (
-                    <Pin className="h-5 w-5 text-primary-600" />
-                  ) : (
-                    <BellRing className="h-5 w-5 text-gray-600" />
-                  )}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          </div>
+        ) : announcements.length === 0 ? (
+          <Card className="text-center py-12">
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <BellRing className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Announcements Yet</h3>
+              <p className="text-gray-600 mb-6 max-w-md">
+                {!user?.user_metadata?.buildingId
+                  ? "Complete your building setup to start receiving announcements from your building community."
+                  : "Your building community hasn't posted any announcements yet. Be the first to share important updates!"
+                }
+              </p>
+              {user?.user_metadata?.buildingId && (
+                <Button
+                  leftIcon={<Plus size={16} />}
+                  variant="primary"
+                  onClick={() => setShowCreateModal(true)}
+                >
+                  Create First Announcement
+                </Button>
+              )}
+              {!user?.user_metadata?.buildingId && (
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <Building2 size={16} />
+                  <span>Complete building setup to get started</span>
                 </div>
-
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge
-                      variant={getPriorityColor(announcement.priority)}
-                      size="sm"
-                    >
-                      {announcement.category}
-                    </Badge>
-                    {announcement.isPinned && (
-                      <Badge variant="primary" size="sm">Pinned</Badge>
+              )}
+            </div>
+          </Card>
+        ) : (
+          announcements.map((announcement) => {
+            const isExpanded = selectedAnnouncement === announcement.id;
+            return (
+              <Card key={announcement.id} hoverable className="animate-slide-up">
+                <div className="flex items-start gap-4">
+                  <div className={`p-2 rounded-lg ${
+                    announcement.isPinned ? 'bg-primary-100' : 'bg-gray-100'
+                  }`}>
+                    {announcement.isPinned ? (
+                      <Pin className="h-5 w-5 text-primary-600" />
+                    ) : (
+                      <BellRing className="h-5 w-5 text-gray-600" />
                     )}
                   </div>
 
-                  <h3 className="text-lg font-medium">{announcement.title}</h3>
-                  <p className="mt-1 text-gray-600">{announcement.content}</p>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge
+                        variant={getPriorityColor(announcement.priority)}
+                        size="sm"
+                      >
+                        {announcement.category}
+                      </Badge>
+                      {announcement.isPinned && (
+                        <Badge variant="primary" size="sm">Pinned</Badge>
+                      )}
+                    </div>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <User size={14} />
-                      <span>{announcement.postedBy}</span>
+                    <h3 className="text-lg font-medium">{announcement.title}</h3>
+                    <p className="mt-1 text-gray-600">{announcement.content}</p>
+
+                    <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <User size={14} />
+                        <span>{announcement.postedBy}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock size={14} />
+                        <span>{announcement.postedAt}</span>
+                      </div>
+                      <button
+                        onClick={() => handleAnnouncementClick(announcement.id)}
+                        className="flex items-center gap-1 hover:text-primary-600 transition-colors"
+                      >
+                        <MessageSquare size={14} />
+                        <span>{announcement.comments} comments</span>
+                      </button>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Clock size={14} />
-                      <span>{announcement.postedAt}</span>
-                    </div>
-                    <button
-                      onClick={() => handleAnnouncementClick(announcement.id)}
-                      className="flex items-center gap-1 hover:text-primary-600 transition-colors"
-                    >
-                      <MessageSquare size={14} />
-                      <span>{announcement.comments} comments</span>
-                    </button>
+
+                    {/* Comments Section */}
+                    {isExpanded && <CommentsSection announcementId={announcement.id} />}
                   </div>
 
-                  {/* Comments Section */}
-                  {isExpanded && <CommentsSection announcementId={announcement.id} />}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    onClick={() => handleAnnouncementClick(announcement.id)}
+                  >
+                    {isExpanded ? 'Hide Comments' : 'View Comments'}
+                  </Button>
                 </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  leftIcon={isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                  onClick={() => handleAnnouncementClick(announcement.id)}
-                >
-                  {isExpanded ? 'Hide Comments' : 'View Comments'}
-                </Button>
-              </div>
-            </Card>
-          );
-        })}
+              </Card>
+            );
+          })
+        )}
       </div>
 
       {showCreateModal && <CreateAnnouncementModal />}
