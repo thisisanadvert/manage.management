@@ -154,9 +154,9 @@ const Landing = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/pricing')}
+                onClick={() => navigate('/qualify')}
               >
-                Pricing
+                Do I Qualify?
               </Button>
               <Button
                 variant="ghost"
@@ -209,11 +209,15 @@ const Landing = () => {
               Whether you're a first-time homeowner or experienced property manager, our platform makes building management straightforward and stress-free.
             </p>
             <div className="mt-4 flex justify-center">
-              <Tooltip content="Don't worry if these terms are new to you! RTM means 'Right to Manage' - it's when residents take control of managing their building. Share of Freehold means you own a share of the building itself, not just your flat.">
-                <p className="text-sm text-gray-500 flex items-center space-x-1">
+              <Tooltip content="Don't worry if these terms are new to you! RTM means 'Right to Manage' - it's when residents take control of managing their building. Share of Freehold means you own a share of the building itself, not just your home. Click to learn more about qualifying!">
+                <button
+                  onClick={() => navigate('/qualify')}
+                  className="text-sm text-gray-500 flex items-center space-x-1 hover:text-primary-600 transition-colors cursor-pointer"
+                  aria-label="Learn more about RTM and Share of Freehold - click to check if you qualify"
+                >
                   <span>Perfect for RTM directors, Share of Freehold directors, and homeowners</span>
-                  <HelpCircle size={14} className="text-gray-400" />
-                </p>
+                  <HelpCircle size={14} className="text-gray-400 hover:text-primary-600 transition-colors" />
+                </button>
               </Tooltip>
             </div>
             <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4 px-4">
@@ -230,11 +234,11 @@ const Landing = () => {
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => navigate('/pricing')}
+                onClick={() => navigate('/qualify')}
                 className="w-full sm:w-auto"
-                aria-label="View our simple, transparent pricing"
+                aria-label="Check if your building qualifies for RTM"
               >
-                💷 See Pricing
+                🏠 Do I Qualify?
               </Button>
               <div className="flex justify-center">
                 <Tooltip content="Try typing 'magic', 'coffee', or 'bournemouth' to discover hidden features! Or try the famous Konami code: ↑↑↓↓←→←→BA">
