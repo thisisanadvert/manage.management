@@ -65,12 +65,18 @@ const EasterEggSystem: React.FC<EasterEggSystemProps> = ({ onLogoClick }) => {
   const [logoClickCount, setLogoClickCount] = useState(0);
   const [activeEgg, setActiveEgg] = useState<EasterEgg | null>(null);
   const [foundEggs, setFoundEggs] = useState<Set<string>>(new Set());
+  const [easterEggsEnabled, setEasterEggsEnabled] = useState(false);
 
-  // Load found eggs from localStorage
+  // Load found eggs and activation status from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('found-easter-eggs');
     if (saved) {
       setFoundEggs(new Set(JSON.parse(saved)));
+    }
+
+    const easterEggsActivated = localStorage.getItem('easter-eggs-enabled');
+    if (easterEggsActivated === 'true') {
+      setEasterEggsEnabled(true);
     }
   }, []);
 
@@ -82,16 +88,37 @@ const EasterEggSystem: React.FC<EasterEggSystemProps> = ({ onLogoClick }) => {
     localStorage.setItem('found-easter-eggs', JSON.stringify([...newFoundEggs]));
   }, [foundEggs]);
 
-  // Show easter egg
+  // Enable easter eggs
+  const enableEasterEggs = useCallback(() => {
+    setEasterEggsEnabled(true);
+    localStorage.setItem('easter-eggs-enabled', 'true');
+
+    // Show activation message
+    setActiveEgg({
+      id: 'activation',
+      trigger: 'mischiefmanaged',
+      message: '🪄 Mischief Managed! Easter eggs are now active! ✨',
+      icon: <Sparkles className="w-6 h-6" />,
+      color: 'from-purple-400 to-pink-500'
+    });
+
+    setTimeout(() => {
+      setActiveEgg(null);
+    }, 4000);
+  }, []);
+
+  // Show easter egg (only if enabled)
   const showEasterEgg = useCallback((egg: EasterEgg) => {
+    if (!easterEggsEnabled) return;
+
     setActiveEgg(egg);
     saveFoundEgg(egg.id);
-    
+
     // Auto-hide after 4 seconds
     setTimeout(() => {
       setActiveEgg(null);
     }, 4000);
-  }, [saveFoundEgg]);
+  }, [saveFoundEgg, easterEggsEnabled]);
 
   // Handle keyboard input
   useEffect(() => {
@@ -114,14 +141,22 @@ const EasterEggSystem: React.FC<EasterEggSystemProps> = ({ onLogoClick }) => {
       if (event.key.length === 1) {
         setTypedText(prev => {
           const newText = (prev + event.key.toLowerCase()).slice(-20);
-          
-          // Check for word-based easter eggs
-          easterEggs.forEach(egg => {
-            if (egg.trigger !== 'konami' && egg.trigger !== 'triple-click-logo' && newText.includes(egg.trigger)) {
-              showEasterEgg(egg);
-            }
-          });
-          
+
+          // Check for activation phrase first
+          if (newText.includes('mischiefmanaged') && !easterEggsEnabled) {
+            enableEasterEggs();
+            return '';
+          }
+
+          // Check for word-based easter eggs (only if enabled)
+          if (easterEggsEnabled) {
+            easterEggs.forEach(egg => {
+              if (egg.trigger !== 'konami' && egg.trigger !== 'triple-click-logo' && newText.includes(egg.trigger)) {
+                showEasterEgg(egg);
+              }
+            });
+          }
+
           return newText;
         });
       }
@@ -133,9 +168,17 @@ const EasterEggSystem: React.FC<EasterEggSystemProps> = ({ onLogoClick }) => {
 
   // Handle logo clicks
   const handleLogoClick = useCallback(() => {
+    if (!easterEggsEnabled) {
+      // Call the original onLogoClick if provided
+      if (onLogoClick) {
+        onLogoClick();
+      }
+      return;
+    }
+
     setLogoClickCount(prev => {
       const newCount = prev + 1;
-      
+
       if (newCount === 3) {
         const tripleClickEgg = easterEggs.find(egg => egg.id === 'triple-click');
         if (tripleClickEgg) {
@@ -143,19 +186,19 @@ const EasterEggSystem: React.FC<EasterEggSystemProps> = ({ onLogoClick }) => {
         }
         return 0; // Reset counter
       }
-      
+
       // Reset counter after 2 seconds if not triple-clicked
       setTimeout(() => {
         setLogoClickCount(0);
       }, 2000);
-      
+
       return newCount;
     });
-    
+
     if (onLogoClick) {
       onLogoClick();
     }
-  }, [onLogoClick, showEasterEgg]);
+  }, [onLogoClick, showEasterEgg, easterEggsEnabled]);
 
   // Expose logo click handler
   useEffect(() => {
@@ -178,8 +221,8 @@ const EasterEggSystem: React.FC<EasterEggSystemProps> = ({ onLogoClick }) => {
         </div>
       )}
 
-      {/* Easter Egg Counter (only show if any found) */}
-      {foundEggs.size > 0 && (
+      {/* Easter Egg Counter (only show if easter eggs are enabled and any found) */}
+      {easterEggsEnabled && foundEggs.size > 0 && (
         <div className="fixed bottom-4 left-4 z-40">
           <div className="bg-white rounded-full shadow-lg p-2 flex items-center space-x-2 text-sm">
             <Gift className="w-4 h-4 text-primary-600" />

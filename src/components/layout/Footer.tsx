@@ -108,6 +108,9 @@ const Footer = () => {
               <span>Made in Bournemouth with</span>
               <Heart size={14} className="text-error-500 fill-error-500" />
               <span>for homeowners across the UK</span>
+              <span className="ml-4 text-xs text-gray-400 opacity-50 hover:opacity-100 transition-opacity cursor-default" title="🪄 Curious developers might find hidden magic...">
+                •
+              </span>
             </div>
           </div>
         </div>
