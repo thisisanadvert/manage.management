@@ -240,13 +240,7 @@ const Landing = () => {
               >
                 🏠 Do I Qualify?
               </Button>
-              <div className="flex justify-center">
-                <Tooltip content="Try typing 'magic', 'coffee', or 'bournemouth' to discover hidden features! Or try the famous Konami code: ↑↑↓↓←→←→BA">
-                  <Badge variant="secondary" className="text-xs cursor-help">
-                    ✨ Hidden features await!
-                  </Badge>
-                </Tooltip>
-              </div>
+
               {import.meta.env.DEV && (
                 <Button
                   variant="ghost"
