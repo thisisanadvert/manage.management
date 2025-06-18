@@ -35,49 +35,71 @@ const AccessibilityToolbar: React.FC = () => {
     // Font size
     root.style.fontSize = `${settings.fontSize}%`;
 
-    // High contrast - COMPLETE WEBSITE TRANSFORMATION
+    // High contrast - AGGRESSIVE INLINE STYLE APPROACH
     if (settings.highContrast) {
-      console.log('🎨 Enabling FULL high contrast mode');
+      console.log('🎨 Enabling FULL high contrast mode with inline styles');
 
-      // Apply to all possible elements
+      // Apply class to root elements
       root.classList.add('high-contrast');
       document.body.classList.add('high-contrast');
 
-      // Force immediate visual change
-      document.body.style.backgroundColor = 'white !important';
-      document.body.style.color = 'black !important';
+      // AGGRESSIVE: Apply inline styles to EVERY element
+      const applyHighContrastStyles = () => {
+        const allElements = document.querySelectorAll('*');
+        allElements.forEach(element => {
+          if (element instanceof HTMLElement) {
+            // Skip the accessibility panel itself
+            if (element.closest('.accessibility-panel')) return;
 
-      // Apply to all existing elements
-      const allElements = document.querySelectorAll('*');
-      allElements.forEach(element => {
-        if (element instanceof HTMLElement) {
-          element.classList.add('high-contrast');
-        }
-      });
+            element.style.backgroundColor = 'white';
+            element.style.color = 'black';
+            element.style.borderColor = 'black';
+            element.style.backgroundImage = 'none';
+            element.style.boxShadow = 'none';
 
-      // Override CSS custom properties globally
-      root.style.setProperty('--tw-bg-opacity', '1');
-      root.style.setProperty('--tw-text-opacity', '1');
+            // Special handling for primary buttons
+            if (element.classList.contains('bg-primary-600') ||
+                element.classList.contains('bg-primary-700') ||
+                element.classList.contains('bg-primary-500')) {
+              element.style.backgroundColor = 'black';
+              element.style.color = 'white';
+            }
+          }
+        });
+      };
+
+      // Apply immediately and on DOM changes
+      applyHighContrastStyles();
+
+      // Watch for new elements
+      const observer = new MutationObserver(applyHighContrastStyles);
+      observer.observe(document.body, { childList: true, subtree: true });
+      (window as any).highContrastObserver = observer;
 
     } else {
       console.log('🎨 Disabling high contrast mode');
 
-      // Remove from all elements
+      // Remove classes
       root.classList.remove('high-contrast');
       document.body.classList.remove('high-contrast');
 
+      // Stop observing
+      if ((window as any).highContrastObserver) {
+        (window as any).highContrastObserver.disconnect();
+        delete (window as any).highContrastObserver;
+      }
+
+      // Remove all inline styles
       const allElements = document.querySelectorAll('*');
       allElements.forEach(element => {
         if (element instanceof HTMLElement) {
-          element.classList.remove('high-contrast');
+          element.style.removeProperty('background-color');
+          element.style.removeProperty('color');
+          element.style.removeProperty('border-color');
+          element.style.removeProperty('background-image');
+          element.style.removeProperty('box-shadow');
         }
       });
-
-      // Reset body styles
-      document.body.style.removeProperty('background-color');
-      document.body.style.removeProperty('color');
-      root.style.removeProperty('--tw-bg-opacity');
-      root.style.removeProperty('--tw-text-opacity');
     }
 
     // Save to localStorage
@@ -121,7 +143,7 @@ const AccessibilityToolbar: React.FC = () => {
 
       {/* Accessibility Panel */}
       {isOpen && (
-        <div className={`fixed top-20 right-4 z-40 rounded-lg shadow-xl border p-4 w-80 max-w-[calc(100vw-2rem)] ${
+        <div className={`accessibility-panel fixed top-20 right-4 z-40 rounded-lg shadow-xl border p-4 w-80 max-w-[calc(100vw-2rem)] ${
           settings.highContrast
             ? 'bg-white border-black text-black'
             : 'bg-white border-gray-200 text-gray-900'
