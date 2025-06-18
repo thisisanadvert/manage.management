@@ -37,21 +37,35 @@ const AccessibilityToolbar: React.FC = () => {
 
     // High contrast - apply comprehensive high contrast styles
     if (settings.highContrast) {
+      console.log('🎨 Enabling high contrast mode');
       root.classList.add('high-contrast');
+      document.body.classList.add('high-contrast');
+
       // Apply inline styles for immediate effect
       root.style.setProperty('--bg-primary', '#000000');
       root.style.setProperty('--text-primary', '#ffffff');
       root.style.setProperty('--bg-secondary', '#ffffff');
       root.style.setProperty('--text-secondary', '#000000');
       root.style.setProperty('--border-color', '#ffffff');
+
+      // Force body background
+      document.body.style.backgroundColor = 'white';
+      document.body.style.color = 'black';
     } else {
+      console.log('🎨 Disabling high contrast mode');
       root.classList.remove('high-contrast');
+      document.body.classList.remove('high-contrast');
+
       // Reset to default values
       root.style.removeProperty('--bg-primary');
       root.style.removeProperty('--text-primary');
       root.style.removeProperty('--bg-secondary');
       root.style.removeProperty('--text-secondary');
       root.style.removeProperty('--border-color');
+
+      // Reset body styles
+      document.body.style.removeProperty('background-color');
+      document.body.style.removeProperty('color');
     }
 
     // Save to localStorage
@@ -141,16 +155,21 @@ const AccessibilityToolbar: React.FC = () => {
             </div>
 
             {/* High Contrast */}
-            <div>
+            <div className={`p-2 rounded-md ${settings.highContrast ? 'bg-black text-white' : 'bg-gray-50'}`}>
               <label className="flex items-center space-x-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={settings.highContrast}
-                  onChange={(e) => updateSetting('highContrast', e.target.checked)}
+                  onChange={(e) => {
+                    console.log('🎨 High contrast toggle clicked:', e.target.checked);
+                    updateSetting('highContrast', e.target.checked);
+                  }}
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
-                <Eye size={16} />
-                <span className="text-sm font-medium text-gray-700">High Contrast</span>
+                <Eye size={16} className={settings.highContrast ? 'text-white' : 'text-gray-600'} />
+                <span className={`text-sm font-medium ${settings.highContrast ? 'text-white' : 'text-gray-700'}`}>
+                  High Contrast {settings.highContrast ? '(Active)' : ''}
+                </span>
               </label>
             </div>
 

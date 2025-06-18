@@ -25,25 +25,55 @@
   --gray-900: #000000;
 }
 
-.high-contrast * {
+/* High contrast base styles - more specific selectors */
+.high-contrast,
+.high-contrast body,
+.high-contrast main,
+.high-contrast div,
+.high-contrast section,
+.high-contrast article,
+.high-contrast aside,
+.high-contrast header,
+.high-contrast footer,
+.high-contrast nav {
   background-color: white !important;
   color: black !important;
+}
+
+.high-contrast * {
   border-color: black !important;
 }
 
 /* High contrast gradients become solid */
 .high-contrast .bg-gradient-to-r,
 .high-contrast .bg-gradient-to-b,
-.high-contrast .bg-gradient-to-br {
+.high-contrast .bg-gradient-to-br,
+.high-contrast [class*="bg-gradient"] {
   background: white !important;
   background-image: none !important;
 }
 
-.high-contrast .text-transparent {
+.high-contrast .text-transparent,
+.high-contrast [class*="text-transparent"] {
   color: black !important;
   background: white !important;
   -webkit-background-clip: unset !important;
   background-clip: unset !important;
+}
+
+/* Override all background colors */
+.high-contrast [class*="bg-gray"],
+.high-contrast [class*="bg-white"],
+.high-contrast [class*="bg-slate"],
+.high-contrast .bg-white {
+  background-color: white !important;
+}
+
+/* Override all text colors */
+.high-contrast [class*="text-gray"],
+.high-contrast [class*="text-slate"],
+.high-contrast .text-black {
+  color: black !important;
 }
 
 .high-contrast .bg-primary-600,
