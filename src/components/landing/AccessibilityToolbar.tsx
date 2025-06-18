@@ -1,32 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Accessibility, 
-  Type, 
-  Eye, 
-  Zap, 
-  X, 
-  Plus, 
-  Minus,
-  Sun,
-  Moon,
-  Volume2,
-  VolumeX
+import {
+  Accessibility,
+  Type,
+  Eye,
+  X,
+  Plus,
+  Minus
 } from 'lucide-react';
 
 interface AccessibilitySettings {
   fontSize: number;
   highContrast: boolean;
-  reducedMotion: boolean;
-  soundEnabled: boolean;
 }
 
 const AccessibilityToolbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [settings, setSettings] = useState<AccessibilitySettings>({
     fontSize: 100,
-    highContrast: false,
-    reducedMotion: false,
-    soundEnabled: true
+    highContrast: false
   });
 
   // Load settings from localStorage on mount
@@ -40,24 +31,29 @@ const AccessibilityToolbar: React.FC = () => {
   // Apply settings to document
   useEffect(() => {
     const root = document.documentElement;
-    
+
     // Font size
     root.style.fontSize = `${settings.fontSize}%`;
-    
-    // High contrast
+
+    // High contrast - apply comprehensive high contrast styles
     if (settings.highContrast) {
       root.classList.add('high-contrast');
+      // Apply inline styles for immediate effect
+      root.style.setProperty('--bg-primary', '#000000');
+      root.style.setProperty('--text-primary', '#ffffff');
+      root.style.setProperty('--bg-secondary', '#ffffff');
+      root.style.setProperty('--text-secondary', '#000000');
+      root.style.setProperty('--border-color', '#ffffff');
     } else {
       root.classList.remove('high-contrast');
+      // Reset to default values
+      root.style.removeProperty('--bg-primary');
+      root.style.removeProperty('--text-primary');
+      root.style.removeProperty('--bg-secondary');
+      root.style.removeProperty('--text-secondary');
+      root.style.removeProperty('--border-color');
     }
-    
-    // Reduced motion
-    if (settings.reducedMotion) {
-      root.classList.add('reduce-motion');
-    } else {
-      root.classList.remove('reduce-motion');
-    }
-    
+
     // Save to localStorage
     localStorage.setItem('accessibility-settings', JSON.stringify(settings));
   }, [settings]);
@@ -81,9 +77,7 @@ const AccessibilityToolbar: React.FC = () => {
   const resetSettings = () => {
     setSettings({
       fontSize: 100,
-      highContrast: false,
-      reducedMotion: false,
-      soundEnabled: true
+      highContrast: false
     });
   };
 
@@ -157,34 +151,6 @@ const AccessibilityToolbar: React.FC = () => {
                 />
                 <Eye size={16} />
                 <span className="text-sm font-medium text-gray-700">High Contrast</span>
-              </label>
-            </div>
-
-            {/* Reduced Motion */}
-            <div>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.reducedMotion}
-                  onChange={(e) => updateSetting('reducedMotion', e.target.checked)}
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                />
-                <Zap size={16} />
-                <span className="text-sm font-medium text-gray-700">Reduce Motion</span>
-              </label>
-            </div>
-
-            {/* Sound Toggle */}
-            <div>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.soundEnabled}
-                  onChange={(e) => updateSetting('soundEnabled', e.target.checked)}
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                />
-                {settings.soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
-                <span className="text-sm font-medium text-gray-700">Sound Effects</span>
               </label>
             </div>
 

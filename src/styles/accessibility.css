@@ -31,6 +31,21 @@
   border-color: black !important;
 }
 
+/* High contrast gradients become solid */
+.high-contrast .bg-gradient-to-r,
+.high-contrast .bg-gradient-to-b,
+.high-contrast .bg-gradient-to-br {
+  background: white !important;
+  background-image: none !important;
+}
+
+.high-contrast .text-transparent {
+  color: black !important;
+  background: white !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+}
+
 .high-contrast .bg-primary-600,
 .high-contrast .bg-primary-700,
 .high-contrast .bg-primary-500 {
