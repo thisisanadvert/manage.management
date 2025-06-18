@@ -1,32 +1,52 @@
 /* Accessibility Styles */
 
-/* High Contrast Mode */
+/* High Contrast Mode - Complete Website Transformation */
 .high-contrast {
-  --primary-50: #000000;
-  --primary-100: #000000;
-  --primary-200: #000000;
-  --primary-300: #000000;
-  --primary-400: #000000;
-  --primary-500: #000000;
-  --primary-600: #000000;
-  --primary-700: #ffffff;
-  --primary-800: #ffffff;
-  --primary-900: #ffffff;
-  
-  --gray-50: #ffffff;
-  --gray-100: #ffffff;
-  --gray-200: #ffffff;
-  --gray-300: #cccccc;
-  --gray-400: #999999;
-  --gray-500: #666666;
-  --gray-600: #333333;
-  --gray-700: #000000;
-  --gray-800: #000000;
-  --gray-900: #000000;
+  /* Override ALL CSS custom properties */
+  --primary-50: #ffffff !important;
+  --primary-100: #ffffff !important;
+  --primary-200: #ffffff !important;
+  --primary-300: #ffffff !important;
+  --primary-400: #ffffff !important;
+  --primary-500: #000000 !important;
+  --primary-600: #000000 !important;
+  --primary-700: #000000 !important;
+  --primary-800: #000000 !important;
+  --primary-900: #000000 !important;
+
+  --gray-50: #ffffff !important;
+  --gray-100: #ffffff !important;
+  --gray-200: #ffffff !important;
+  --gray-300: #ffffff !important;
+  --gray-400: #000000 !important;
+  --gray-500: #000000 !important;
+  --gray-600: #000000 !important;
+  --gray-700: #000000 !important;
+  --gray-800: #000000 !important;
+  --gray-900: #000000 !important;
+
+  --accent-500: #000000 !important;
+  --secondary-500: #000000 !important;
+  --error-500: #000000 !important;
+  --warning-500: #000000 !important;
+  --success-500: #000000 !important;
 }
 
-/* High contrast base styles - more specific selectors */
+/* COMPLETE HIGH CONTRAST TRANSFORMATION */
+
+/* Base elements - force white background, black text */
 .high-contrast,
+.high-contrast *,
+.high-contrast *::before,
+.high-contrast *::after {
+  background-color: white !important;
+  background-image: none !important;
+  color: black !important;
+  border-color: black !important;
+  box-shadow: none !important;
+}
+
+/* Specific element targeting */
 .high-contrast body,
 .high-contrast main,
 .high-contrast div,
@@ -35,24 +55,69 @@
 .high-contrast aside,
 .high-contrast header,
 .high-contrast footer,
-.high-contrast nav {
+.high-contrast nav,
+.high-contrast p,
+.high-contrast span,
+.high-contrast h1,
+.high-contrast h2,
+.high-contrast h3,
+.high-contrast h4,
+.high-contrast h5,
+.high-contrast h6 {
   background-color: white !important;
   color: black !important;
 }
 
-.high-contrast * {
-  border-color: black !important;
-}
-
-/* High contrast gradients become solid */
+/* Remove ALL gradients */
+.high-contrast [class*="bg-gradient"],
 .high-contrast .bg-gradient-to-r,
+.high-contrast .bg-gradient-to-l,
+.high-contrast .bg-gradient-to-t,
 .high-contrast .bg-gradient-to-b,
+.high-contrast .bg-gradient-to-tr,
+.high-contrast .bg-gradient-to-tl,
 .high-contrast .bg-gradient-to-br,
-.high-contrast [class*="bg-gradient"] {
+.high-contrast .bg-gradient-to-bl {
   background: white !important;
   background-image: none !important;
 }
 
+/* Override ALL Tailwind background colors */
+.high-contrast [class*="bg-"],
+.high-contrast .bg-white,
+.high-contrast .bg-gray-50,
+.high-contrast .bg-gray-100,
+.high-contrast .bg-gray-200,
+.high-contrast .bg-primary-50,
+.high-contrast .bg-primary-100,
+.high-contrast .bg-blue-100,
+.high-contrast .bg-green-100,
+.high-contrast .bg-yellow-100,
+.high-contrast .bg-red-100,
+.high-contrast .bg-purple-100,
+.high-contrast .bg-pink-100 {
+  background-color: white !important;
+}
+
+/* Override ALL Tailwind text colors */
+.high-contrast [class*="text-"],
+.high-contrast .text-gray-500,
+.high-contrast .text-gray-600,
+.high-contrast .text-gray-700,
+.high-contrast .text-gray-800,
+.high-contrast .text-gray-900,
+.high-contrast .text-primary-600,
+.high-contrast .text-primary-800,
+.high-contrast .text-blue-600,
+.high-contrast .text-green-600,
+.high-contrast .text-yellow-600,
+.high-contrast .text-red-600,
+.high-contrast .text-purple-600,
+.high-contrast .text-pink-600 {
+  color: black !important;
+}
+
+/* Fix transparent text */
 .high-contrast .text-transparent,
 .high-contrast [class*="text-transparent"] {
   color: black !important;
@@ -61,19 +126,64 @@
   background-clip: unset !important;
 }
 
-/* Override all background colors */
-.high-contrast [class*="bg-gray"],
-.high-contrast [class*="bg-white"],
-.high-contrast [class*="bg-slate"],
-.high-contrast .bg-white {
+/* Buttons need special treatment */
+.high-contrast button,
+.high-contrast [role="button"],
+.high-contrast .btn {
   background-color: white !important;
+  color: black !important;
+  border: 2px solid black !important;
 }
 
-/* Override all text colors */
-.high-contrast [class*="text-gray"],
-.high-contrast [class*="text-slate"],
-.high-contrast .text-black {
+/* Primary buttons should be inverted */
+.high-contrast .bg-primary-600,
+.high-contrast .bg-primary-700,
+.high-contrast .bg-primary-500,
+.high-contrast [class*="bg-primary"] {
+  background-color: black !important;
+  color: white !important;
+  border: 2px solid black !important;
+}
+
+/* Links */
+.high-contrast a,
+.high-contrast [role="link"] {
   color: black !important;
+  text-decoration: underline !important;
+}
+
+/* Form elements */
+.high-contrast input,
+.high-contrast textarea,
+.high-contrast select {
+  background-color: white !important;
+  color: black !important;
+  border: 2px solid black !important;
+}
+
+/* Cards and containers */
+.high-contrast .card,
+.high-contrast [class*="shadow"],
+.high-contrast .rounded,
+.high-contrast [class*="rounded"] {
+  background-color: white !important;
+  border: 2px solid black !important;
+  box-shadow: none !important;
+}
+
+/* Icons should be black */
+.high-contrast svg,
+.high-contrast [class*="lucide"] {
+  color: black !important;
+  fill: black !important;
+  stroke: black !important;
+}
+
+/* Special cases for white text on dark backgrounds */
+.high-contrast .text-white,
+.high-contrast [class*="text-white"] {
+  color: white !important;
+  background-color: black !important;
 }
 
 .high-contrast .bg-primary-600,

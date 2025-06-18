@@ -35,37 +35,49 @@ const AccessibilityToolbar: React.FC = () => {
     // Font size
     root.style.fontSize = `${settings.fontSize}%`;
 
-    // High contrast - apply comprehensive high contrast styles
+    // High contrast - COMPLETE WEBSITE TRANSFORMATION
     if (settings.highContrast) {
-      console.log('🎨 Enabling high contrast mode');
+      console.log('🎨 Enabling FULL high contrast mode');
+
+      // Apply to all possible elements
       root.classList.add('high-contrast');
       document.body.classList.add('high-contrast');
 
-      // Apply inline styles for immediate effect
-      root.style.setProperty('--bg-primary', '#000000');
-      root.style.setProperty('--text-primary', '#ffffff');
-      root.style.setProperty('--bg-secondary', '#ffffff');
-      root.style.setProperty('--text-secondary', '#000000');
-      root.style.setProperty('--border-color', '#ffffff');
+      // Force immediate visual change
+      document.body.style.backgroundColor = 'white !important';
+      document.body.style.color = 'black !important';
 
-      // Force body background
-      document.body.style.backgroundColor = 'white';
-      document.body.style.color = 'black';
+      // Apply to all existing elements
+      const allElements = document.querySelectorAll('*');
+      allElements.forEach(element => {
+        if (element instanceof HTMLElement) {
+          element.classList.add('high-contrast');
+        }
+      });
+
+      // Override CSS custom properties globally
+      root.style.setProperty('--tw-bg-opacity', '1');
+      root.style.setProperty('--tw-text-opacity', '1');
+
     } else {
       console.log('🎨 Disabling high contrast mode');
+
+      // Remove from all elements
       root.classList.remove('high-contrast');
       document.body.classList.remove('high-contrast');
 
-      // Reset to default values
-      root.style.removeProperty('--bg-primary');
-      root.style.removeProperty('--text-primary');
-      root.style.removeProperty('--bg-secondary');
-      root.style.removeProperty('--text-secondary');
-      root.style.removeProperty('--border-color');
+      const allElements = document.querySelectorAll('*');
+      allElements.forEach(element => {
+        if (element instanceof HTMLElement) {
+          element.classList.remove('high-contrast');
+        }
+      });
 
       // Reset body styles
       document.body.style.removeProperty('background-color');
       document.body.style.removeProperty('color');
+      root.style.removeProperty('--tw-bg-opacity');
+      root.style.removeProperty('--tw-text-opacity');
     }
 
     // Save to localStorage
@@ -109,7 +121,11 @@ const AccessibilityToolbar: React.FC = () => {
 
       {/* Accessibility Panel */}
       {isOpen && (
-        <div className="fixed top-20 right-4 z-40 bg-white rounded-lg shadow-xl border border-gray-200 p-4 w-80 max-w-[calc(100vw-2rem)]">
+        <div className={`fixed top-20 right-4 z-40 rounded-lg shadow-xl border p-4 w-80 max-w-[calc(100vw-2rem)] ${
+          settings.highContrast
+            ? 'bg-white border-black text-black'
+            : 'bg-white border-gray-200 text-gray-900'
+        }`}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center">
               <Accessibility className="mr-2" size={20} />
