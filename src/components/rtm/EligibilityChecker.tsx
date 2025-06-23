@@ -21,7 +21,11 @@ interface EligibilityResult {
   nextSteps: string[];
 }
 
-const EligibilityChecker: React.FC = () => {
+interface EligibilityCheckerProps {
+  onNavigateToSurvey?: () => void;
+}
+
+const EligibilityChecker: React.FC<EligibilityCheckerProps> = ({ onNavigateToSurvey }) => {
   const [formData, setFormData] = useState<EligibilityData>({
     totalFlats: 0,
     residentialFlats: 0,
@@ -234,7 +238,11 @@ const EligibilityChecker: React.FC = () => {
 
           {result.eligible && (
             <div className="pt-4 border-t border-gray-200">
-              <Button variant="primary" className="w-full">
+              <Button
+                variant="primary"
+                className="w-full"
+                onClick={onNavigateToSurvey}
+              >
                 Continue to Leaseholder Survey
               </Button>
             </div>

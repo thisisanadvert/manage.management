@@ -87,7 +87,7 @@ const RTMManagement = () => {
   const renderActiveView = () => {
     switch (activeView) {
       case 'eligibility':
-        return <EligibilityChecker />;
+        return <EligibilityChecker onNavigateToSurvey={() => setActiveView('survey')} />;
       case 'survey':
         return <LeaseholderSurvey />;
       case 'formation':

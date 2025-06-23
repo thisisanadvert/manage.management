@@ -18,19 +18,19 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
   const [success, setSuccess] = useState(false);
   
   const initialFormData = {
-    serviceChargeAccountBalance: 0,
-    reserveFundBalance: 0,
+    serviceChargeAccountBalance: '',
+    reserveFundBalance: '',
     serviceChargeFrequency: 'Quarterly',
-    totalAnnualBudget: 0,
-    annualMaintenanceBudget: 0,
-    annualInsuranceBudget: 0,
-    annualUtilitiesBudget: 0,
-    annualCleaningBudget: 0,
-    annualManagementFee: 0,
-    annualReserveContribution: 0,
+    totalAnnualBudget: '',
+    annualMaintenanceBudget: '',
+    annualInsuranceBudget: '',
+    annualUtilitiesBudget: '',
+    annualCleaningBudget: '',
+    annualManagementFee: '',
+    annualReserveContribution: '',
     hasMajorWorks: false,
     majorWorksDescription: '',
-    majorWorksCost: 0,
+    majorWorksCost: '',
     currency: 'GBP',
     setupCompleted: false
   };
@@ -96,9 +96,13 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else if (type === 'number') {
-      // Handle number inputs more carefully
-      const numValue = value === '' ? 0 : parseFloat(value);
-      setFormData(prev => ({ ...prev, [name]: isNaN(numValue) ? 0 : numValue }));
+      // Handle number inputs - keep as string if empty, convert to number otherwise
+      if (value === '') {
+        setFormData(prev => ({ ...prev, [name]: '' }));
+      } else {
+        const numValue = parseFloat(value);
+        setFormData(prev => ({ ...prev, [name]: isNaN(numValue) ? '' : numValue }));
+      }
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -118,8 +122,8 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
       });
 
       // Ensure values are numbers and handle potential string/NaN issues
-      const serviceChargeBalance = Number(formData.serviceChargeAccountBalance);
-      const reserveBalance = Number(formData.reserveFundBalance);
+      const serviceChargeBalance = formData.serviceChargeAccountBalance === '' ? 0 : Number(formData.serviceChargeAccountBalance);
+      const reserveBalance = formData.reserveFundBalance === '' ? 0 : Number(formData.reserveFundBalance);
 
       if (isNaN(serviceChargeBalance) || serviceChargeBalance < 0) {
         setError('Service charge account balance must be zero or positive');
@@ -136,12 +140,12 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
     } else if (step === 2) {
       // Calculate total budget from components
       const calculatedTotal =
-        Number(formData.annualMaintenanceBudget) +
-        Number(formData.annualInsuranceBudget) +
-        Number(formData.annualUtilitiesBudget) +
-        Number(formData.annualCleaningBudget) +
-        Number(formData.annualManagementFee) +
-        Number(formData.annualReserveContribution);
+        (formData.annualMaintenanceBudget === '' ? 0 : Number(formData.annualMaintenanceBudget)) +
+        (formData.annualInsuranceBudget === '' ? 0 : Number(formData.annualInsuranceBudget)) +
+        (formData.annualUtilitiesBudget === '' ? 0 : Number(formData.annualUtilitiesBudget)) +
+        (formData.annualCleaningBudget === '' ? 0 : Number(formData.annualCleaningBudget)) +
+        (formData.annualManagementFee === '' ? 0 : Number(formData.annualManagementFee)) +
+        (formData.annualReserveContribution === '' ? 0 : Number(formData.annualReserveContribution));
 
       if (calculatedTotal <= 0) {
         setError('At least one budget category must have a value greater than zero');
@@ -195,18 +199,18 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
         .from('financial_setup')
         .upsert({
           building_id: user?.metadata?.buildingId,
-          service_charge_account_balance: formData.serviceChargeAccountBalance,
-          reserve_fund_balance: formData.reserveFundBalance,
+          service_charge_account_balance: formData.serviceChargeAccountBalance === '' ? 0 : Number(formData.serviceChargeAccountBalance),
+          reserve_fund_balance: formData.reserveFundBalance === '' ? 0 : Number(formData.reserveFundBalance),
           service_charge_frequency: formData.serviceChargeFrequency,
-          annual_maintenance_budget: formData.annualMaintenanceBudget,
-          annual_insurance_budget: formData.annualInsuranceBudget,
-          annual_utilities_budget: formData.annualUtilitiesBudget,
-          annual_cleaning_budget: formData.annualCleaningBudget,
-          annual_management_fee: formData.annualManagementFee,
-          annual_reserve_contribution: formData.annualReserveContribution,
+          annual_maintenance_budget: formData.annualMaintenanceBudget === '' ? 0 : Number(formData.annualMaintenanceBudget),
+          annual_insurance_budget: formData.annualInsuranceBudget === '' ? 0 : Number(formData.annualInsuranceBudget),
+          annual_utilities_budget: formData.annualUtilitiesBudget === '' ? 0 : Number(formData.annualUtilitiesBudget),
+          annual_cleaning_budget: formData.annualCleaningBudget === '' ? 0 : Number(formData.annualCleaningBudget),
+          annual_management_fee: formData.annualManagementFee === '' ? 0 : Number(formData.annualManagementFee),
+          annual_reserve_contribution: formData.annualReserveContribution === '' ? 0 : Number(formData.annualReserveContribution),
           has_major_works: formData.hasMajorWorks,
           major_works_description: formData.majorWorksDescription,
-          major_works_cost: formData.majorWorksCost,
+          major_works_cost: formData.majorWorksCost === '' ? 0 : Number(formData.majorWorksCost),
           currency: formData.currency,
           setup_completed: true,
           created_by: user?.id
@@ -347,9 +351,10 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
                               value={formData.serviceChargeAccountBalance}
                               onChange={handleChange}
                               className="block w-full rounded-md border border-gray-300 pl-10 pr-3 py-2 focus:border-primary-500 focus:ring-primary-500"
-                              step="1"
+                              step="0.01"
                               min="0"
                               placeholder="0"
+                              inputMode="decimal"
                             />
                           </div>
                           <p className="mt-1 text-xs text-gray-500">
@@ -372,9 +377,10 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
                               value={formData.reserveFundBalance}
                               onChange={handleChange}
                               className="block w-full rounded-md border border-gray-300 pl-10 pr-3 py-2 focus:border-primary-500 focus:ring-primary-500"
-                              step="1"
+                              step="0.01"
                               min="0"
                               placeholder="0"
+                              inputMode="decimal"
                             />
                           </div>
                           <p className="mt-1 text-xs text-gray-500">
@@ -449,9 +455,10 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
                               value={formData.annualMaintenanceBudget}
                               onChange={handleChange}
                               className="block w-full rounded-md border border-gray-300 pl-10 pr-3 py-2 focus:border-primary-500 focus:ring-primary-500"
-                              step="1"
+                              step="0.01"
                               min="0"
                               placeholder="0"
+                              inputMode="decimal"
                             />
                           </div>
                           <p className="mt-1 text-xs text-gray-500">
@@ -474,9 +481,10 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
                               value={formData.annualInsuranceBudget}
                               onChange={handleChange}
                               className="block w-full rounded-md border border-gray-300 pl-10 pr-3 py-2 focus:border-primary-500 focus:ring-primary-500"
-                              step="1"
+                              step="0.01"
                               min="0"
                               placeholder="0"
+                              inputMode="decimal"
                             />
                           </div>
                           <p className="mt-1 text-xs text-gray-500">
@@ -499,9 +507,10 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
                               value={formData.annualUtilitiesBudget}
                               onChange={handleChange}
                               className="block w-full rounded-md border border-gray-300 pl-10 pr-3 py-2 focus:border-primary-500 focus:ring-primary-500"
-                              step="1"
+                              step="0.01"
                               min="0"
                               placeholder="0"
+                              inputMode="decimal"
                             />
                           </div>
                           <p className="mt-1 text-xs text-gray-500">
