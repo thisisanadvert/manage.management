@@ -164,8 +164,8 @@ const RTMQualify = () => {
             ))}
           </div>
           <blockquote className="text-lg text-gray-700 italic">
-            "The RTM qualification tool helped us understand exactly what we needed to do. 
-            We successfully formed our RTM company and took control of our building management!"
+            "The RTM qualification tool helped us understand exactly what we needed to do.
+            We're now on the path to forming our RTM company and taking control of our building management!"
           </blockquote>
           <div className="text-sm text-gray-600">
             <strong>Basilio B.</strong> - RTM Director, London
