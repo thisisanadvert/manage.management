@@ -196,7 +196,7 @@ const Landing = () => {
           <div className="text-center">
             <div className="mb-4">
               <Badge variant="primary" className="animate-pulse">
-                🏠 New to property management? We've got you covered!
+                🏠 Take real ownership of your home by taking over management of your building
               </Badge>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
