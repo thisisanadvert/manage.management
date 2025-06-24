@@ -31,6 +31,7 @@ import Badge from '../components/ui/Badge';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import FinancialSetupModal from '../components/modals/FinancialSetupModal';
+import { getUserBuildingId } from '../utils/buildingUtils';
 
 const Finances = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -42,22 +43,68 @@ const Finances = () => {
   const { user, signOut } = useAuth();
   const isDirector = user?.role === 'rtm-director' || user?.role === 'sof-director';
 
+  // Check building association
+  const checkBuildingAssociation = async () => {
+    if (!user?.id) return;
+
+    try {
+      console.log('Checking building association for user:', user.id);
+
+      const { data: buildingUsers, error } = await supabase
+        .from('building_users')
+        .select('building_id, role')
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error checking building association:', error);
+      } else {
+        console.log('Building associations found:', buildingUsers);
+      }
+    } catch (error) {
+      console.error('Error in building association check:', error);
+    }
+  };
+
   useEffect(() => {
+    if (user?.id) {
+      checkBuildingAssociation();
+    }
+
     if (user?.metadata?.buildingId) {
       fetchFinancialSetup();
     }
-  }, [user?.metadata?.buildingId]);
+  }, [user?.metadata?.buildingId, user?.id]);
 
   const fetchFinancialSetup = async () => {
     setIsLoading(true);
     try {
+      console.log('Fetching financial setup...');
+      console.log('User role:', user?.role);
+      console.log('User metadata:', user?.metadata);
+
+      // Get the user's building ID, ensuring it's valid
+      const buildingId = await getUserBuildingId(user);
+
+      if (!buildingId) {
+        console.log('No building found for user');
+        setFinancialSetup(null);
+        return;
+      }
+
+      console.log('Fetching financial setup for building:', buildingId);
+
       const { data, error } = await supabase
         .from('financial_setup')
         .select('*')
-        .eq('building_id', user?.metadata?.buildingId);
+        .eq('building_id', buildingId);
 
-      if (error) throw error;
-      
+      if (error) {
+        console.error('Supabase error details:', error);
+        throw error;
+      }
+
+      console.log('Financial setup data:', data);
+
       if (data && data.length > 0) {
         setFinancialSetup(data[0]);
       } else {
@@ -65,6 +112,15 @@ const Finances = () => {
       }
     } catch (error: any) {
       console.error('Error fetching financial setup:', error.message || error);
+
+      // If it's a permission error, try to provide more helpful feedback
+      if (error.message && error.message.includes('row-level security')) {
+        console.error('RLS Policy Error - User may not have proper building association');
+        console.error('Building ID from metadata:', user?.metadata?.buildingId);
+        console.error('User ID:', user?.id);
+        console.error('User role:', user?.role);
+      }
+
       setFinancialSetup(null);
     } finally {
       setIsLoading(false);

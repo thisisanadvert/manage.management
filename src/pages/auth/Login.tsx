@@ -11,7 +11,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
   const [isNewUser, setIsNewUser] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,14 +22,45 @@ const Login = () => {
     }
   }, [searchParams]);
 
+  // Handle redirect after successful login
+  useEffect(() => {
+    if (user) {
+      console.log('Login component detected user, redirecting...');
+      const getRoleBasePath = (role?: string): string => {
+        switch (role) {
+          case 'rtm-director':
+            return '/rtm';
+          case 'sof-director':
+            return '/sof';
+          case 'leaseholder':
+            return '/leaseholder';
+          case 'shareholder':
+            return '/shareholder';
+          case 'management-company':
+            return '/management';
+          case 'super-admin':
+            return '/rtm';
+          default:
+            return '/building-setup';
+        }
+      };
+
+      const redirectPath = getRoleBasePath(user.role);
+      console.log('Login component redirecting to:', redirectPath);
+      navigate(redirectPath, { replace: true });
+    }
+  }, [user, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
+      console.log('Login form submitted for:', email);
       const { error } = await signIn(email, password);
       if (error) {
+        console.error('Login form error:', error);
         // Provide helpful error messages
         if (error.message.includes('Invalid login credentials')) {
           setError('Invalid email or password. Please check your credentials and try again.');
@@ -38,8 +69,11 @@ const Login = () => {
         } else {
           setError(error.message);
         }
+      } else {
+        console.log('Login form - no error returned, login should be successful');
       }
     } catch (err: any) {
+      console.error('Login form catch error:', err);
       setError(err.message || 'Failed to sign in');
     } finally {
       setLoading(false);

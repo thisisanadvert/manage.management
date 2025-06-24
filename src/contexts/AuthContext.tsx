@@ -59,7 +59,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state change event:', event, 'Session:', !!session);
       setSession(session);
       if (session?.user) {
         // Create a user object with metadata from the session
@@ -68,22 +69,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role: session.user.user_metadata?.role,
           metadata: session.user.user_metadata
         };
+        console.log('Auth state change - User with role:', userWithRole.role, 'Metadata:', userWithRole.metadata);
         
         // If we don't have a buildingId in metadata, try to fetch it
         if (!userWithRole.metadata?.buildingId) {
           // Fetch the building ID from building_users table
+          // Handle potential infinite recursion gracefully
           supabase
             .from('building_users')
             .select('building_id')
             .eq('user_id', session.user.id)
             .limit(1)
+            .maybeSingle()
             .then(({ data, error }) => {
               if (error) {
                 console.error('Error fetching building ID:', error);
-              } else if (data && data.length > 0) {
+                // If it's a recursion error, just continue without the building ID
+                if (!error.message?.includes('infinite recursion')) {
+                  console.error('Non-recursion error:', error);
+                }
+              } else if (data) {
                 // Update user metadata with the building ID
-                const buildingId = data[0].building_id;
-                
+                const buildingId = data.building_id;
+
                 // Update local user state
                 userWithRole.metadata = {
                   ...userWithRole.metadata,
@@ -116,12 +124,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log('Attempting login for:', email);
+      console.log('Current URL before login:', window.location.href);
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error('Login error:', error);
         return { error };
       }
 
@@ -141,8 +153,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // New users need to complete building setup
           navigate('/building-setup');
         } else {
-          const basePath = data.user.user_metadata?.role?.split('-')[0];
-          navigate(`/${basePath}`);
+          // Handle navigation based on user role with proper fallbacks
+          const userRole = data.user.user_metadata?.role;
+          console.log('User role after login:', userRole, 'Full metadata:', data.user.user_metadata);
+
+          if (!userRole) {
+            console.warn('No role found for user, redirecting to building setup');
+            navigate('/building-setup');
+            return {};
+          }
+
+          let basePath: string;
+          switch (userRole) {
+            case 'rtm-director':
+              basePath = '/rtm';
+              break;
+            case 'sof-director':
+              basePath = '/sof';
+              break;
+            case 'leaseholder':
+              basePath = '/leaseholder';
+              break;
+            case 'shareholder':
+              basePath = '/shareholder';
+              break;
+            case 'management-company':
+              basePath = '/management';
+              break;
+            case 'super-admin':
+              basePath = '/rtm'; // Default for super admin
+              break;
+            default:
+              console.warn('Unknown role:', userRole, 'redirecting to building setup');
+              navigate('/building-setup');
+              return {};
+          }
+
+          console.log('About to navigate to:', basePath);
+          console.log('Current location before navigate:', window.location.pathname);
+
+          // Use a small delay to ensure auth state is fully updated
+          setTimeout(() => {
+            console.log('Executing navigation to:', basePath);
+            navigate(basePath, { replace: true });
+          }, 100);
         }
       }
 

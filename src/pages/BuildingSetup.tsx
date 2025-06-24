@@ -35,71 +35,90 @@ const BuildingSetup = () => {
 
   useEffect(() => {
     const fetchBuildingData = async () => {
-      // Try to get building ID from user metadata
+      if (!user?.id) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Try to get building ID from user metadata first
       let buildingId = user?.metadata?.buildingId;
-      
+
       if (!buildingId) {
         // If not in metadata, try to get it from building_users table
         try {
           const { data: buildingUserData, error: buildingUserError } = await supabase
             .from('building_users')
             .select('building_id')
-            .eq('user_id', user?.id)
-            .single();
-            
+            .eq('user_id', user.id)
+            .limit(1)
+            .maybeSingle();
+
           if (buildingUserError) {
             console.error('Error fetching building user data:', buildingUserError);
+            // If it's a recursion error, just continue without the building ID
+            if (!buildingUserError.message?.includes('infinite recursion')) {
+              setError('Error loading building data: ' + buildingUserError.message);
+            }
             setIsLoading(false);
             return;
           }
-          
+
           if (buildingUserData) {
             buildingId = buildingUserData.building_id;
-            
+
             // Update user metadata with the building ID
-            await supabase.auth.updateUser({
-              data: { buildingId: buildingId }
-            });
-          } else {
-            setIsLoading(false);
-            return;
+            try {
+              await supabase.auth.updateUser({
+                data: { buildingId: buildingId }
+              });
+            } catch (updateError) {
+              console.error('Error updating user metadata:', updateError);
+            }
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error fetching building user data:', error);
+          if (!error.message?.includes('infinite recursion')) {
+            setError('Error loading building data: ' + error.message);
+          }
           setIsLoading(false);
           return;
         }
       }
 
-      try {
-        const { data, error } = await supabase
-          .from('buildings')
-          .select('*')
-          .eq('id', buildingId)
-          .single();
+      // If we have a building ID, fetch the building data
+      if (buildingId) {
+        try {
+          const { data, error } = await supabase
+            .from('buildings')
+            .select('*')
+            .eq('id', buildingId)
+            .single();
 
-        if (error) throw error;
-
-        if (data) {
-          setBuildingData({
-            name: data.name || '',
-            address: data.address || user?.metadata?.buildingAddress || '',
-            totalUnits: data.total_units || 1,
-            buildingAge: data.building_age || null,
-            buildingType: data.building_type || null,
-            serviceChargeFrequency: data.service_charge_frequency || 'Quarterly',
-            managementStructure: data.management_structure || (user?.role?.includes('rtm') ? 'rtm' : 'share-of-freehold')
-          });
+          if (error) {
+            console.error('Error fetching building data:', error);
+            setError('Error loading building data: ' + error.message);
+          } else if (data) {
+            setBuildingData({
+              name: data.name || '',
+              address: data.address || user?.metadata?.buildingAddress || '',
+              totalUnits: data.total_units || 1,
+              buildingAge: data.building_age || 0,
+              buildingType: data.building_type || '',
+              serviceChargeFrequency: data.service_charge_frequency || 'Quarterly',
+              managementStructure: data.management_structure || (user?.role?.includes('rtm') ? 'rtm' : 'share-of-freehold')
+            });
+          }
+        } catch (error: any) {
+          console.error('Error fetching building data:', error);
+          setError('Error loading building data: ' + error.message);
         }
-      } catch (error: any) {
-        console.error('Error fetching building data:', error.message);
-      } finally {
-        setIsLoading(false);
       }
+
+      setIsLoading(false);
     };
 
     fetchBuildingData();
-  }, [user?.metadata?.buildingId]);
+  }, [user?.id, user?.metadata?.buildingId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -120,25 +139,44 @@ const BuildingSetup = () => {
       
       if (!buildingId && user?.id) {
         // Try to find the building ID from the building_users table
-        const { data: buildingUserData, error: buildingUserError } = await supabase
-          .from('building_users')
-          .select('building_id')
-          .eq('user_id', user?.id)
-          .single();
-          
-        if (buildingUserError && buildingUserError.code !== 'PGRST116') {
-          throw new Error('Error finding your building: ' + buildingUserError.message);
+        // Use a more specific query to avoid triggering recursive policies
+        try {
+          const { data: buildingUserData, error: buildingUserError } = await supabase
+            .from('building_users')
+            .select('building_id')
+            .eq('user_id', user?.id)
+            .limit(1)
+            .maybeSingle();
+
+          if (buildingUserError) {
+            console.error('Error querying building_users:', buildingUserError);
+            // If we get a recursion error, skip this step and create a new building
+            if (buildingUserError.message?.includes('infinite recursion')) {
+              console.log('Detected infinite recursion, will create new building instead');
+            } else {
+              throw new Error('Error finding your building: ' + buildingUserError.message);
+            }
+          } else if (buildingUserData) {
+            buildingId = buildingUserData.building_id;
+
+            // Update user metadata with the building ID
+            await supabase.auth.updateUser({
+              data: { buildingId: buildingId }
+            });
+          }
+        } catch (error: any) {
+          console.error('Error in building lookup:', error);
+          // If we get any error (including recursion), continue to create a new building
+          if (error.message?.includes('infinite recursion')) {
+            console.log('Caught infinite recursion error, will create new building');
+          } else {
+            throw error;
+          }
         }
-        
-        if (buildingUserData) {
-          buildingId = buildingUserData.building_id;
-          
-          // Update user metadata with the building ID
-          await supabase.auth.updateUser({
-            data: { buildingId: buildingId }
-          });
-        } else {
-          // If no building found, create a new one
+      }
+
+      // If no building found or error occurred, create a new one
+      if (!buildingId) {
           const { data: newBuilding, error: newBuildingError } = await supabase
             .from('buildings')
             .insert([
@@ -153,34 +191,46 @@ const BuildingSetup = () => {
               }
             ])
             .select();
-            
+
           if (newBuildingError) throw newBuildingError;
-          
+
           if (newBuilding && newBuilding.length > 0) {
             buildingId = newBuilding[0].id;
-            
-            // Create building_users entry
-            const { error: buildingUserError } = await supabase
-              .from('building_users')
-              .insert([
-                {
-                  building_id: buildingId,
-                  user_id: user.id,
-                  role: user.role
-                }
-              ]);
-              
-            if (buildingUserError) throw buildingUserError;
-            
+
+            // Try to create building_users entry, but handle potential recursion errors
+            try {
+              const { error: buildingUserError } = await supabase
+                .from('building_users')
+                .insert([
+                  {
+                    building_id: buildingId,
+                    user_id: user.id,
+                    role: user.role
+                  }
+                ]);
+
+              if (buildingUserError && !buildingUserError.message?.includes('infinite recursion')) {
+                throw buildingUserError;
+              }
+            } catch (error: any) {
+              console.error('Error creating building_users entry:', error);
+              // If it's a recursion error, we'll continue without the building_users entry
+              // The user can still use the building, and we'll fix the association later
+              if (!error.message?.includes('infinite recursion')) {
+                throw error;
+              }
+            }
+
             // Update user metadata with the building ID
             await supabase.auth.updateUser({
               data: { buildingId: buildingId }
             });
           }
         }
-      }
       
-      if (!buildingId) throw new Error('Could not find or create a building. Please contact support.');
+      if (!buildingId) {
+        throw new Error('Could not find or create a building. This may be due to a temporary database issue. Please try refreshing the page or contact support if the problem persists.');
+      }
 
       const { data, error } = await supabase
         .from('buildings')

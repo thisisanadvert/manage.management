@@ -3,6 +3,7 @@ import { X, Wallet, PiggyBank, Calendar, AlertTriangle, CheckCircle2, ArrowRight
 import Button from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import { ensureBuildingAssociation } from '../../utils/buildingUtils';
 
 interface FinancialSetupModalProps {
   isOpen: boolean;
@@ -195,10 +196,20 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
     setIsSubmitting(true);
 
     try {
+      // Ensure we have a valid building association
+      const buildingAssociation = await ensureBuildingAssociation(user);
+
+      if (!buildingAssociation) {
+        throw new Error('Unable to establish building association. Please contact support.');
+      }
+
+      const { buildingId, isNewBuilding } = buildingAssociation;
+      console.log('Financial setup for building:', buildingId, isNewBuilding ? '(newly created)' : '(existing)');
+
       const { data, error } = await supabase
         .from('financial_setup')
         .upsert({
-          building_id: user?.metadata?.buildingId,
+          building_id: buildingId,
           service_charge_account_balance: formData.serviceChargeAccountBalance === '' ? 0 : Number(formData.serviceChargeAccountBalance),
           reserve_fund_balance: formData.reserveFundBalance === '' ? 0 : Number(formData.reserveFundBalance),
           service_charge_frequency: formData.serviceChargeFrequency,

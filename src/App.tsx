@@ -44,6 +44,27 @@ import CommunicationHub from './pages/features/CommunicationHub';
 import PageLoader from './components/ui/PageLoader';
 import { useAuth } from './contexts/AuthContext';
 
+// Helper function to get the correct base path for a user role
+function getRoleBasePath(role?: string): string {
+  switch (role) {
+    case 'rtm-director':
+      return '/rtm';
+    case 'sof-director':
+      return '/sof';
+    case 'leaseholder':
+      return '/leaseholder';
+    case 'shareholder':
+      return '/shareholder';
+    case 'management-company':
+      return '/management';
+    case 'super-admin':
+      return '/rtm';
+    default:
+      console.warn('Unknown or missing role:', role, 'redirecting to building setup');
+      return '/building-setup';
+  }
+}
+
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const location = useLocation();
@@ -60,15 +81,18 @@ function RoleBasedRoute({ children, allowedRoles }: { children: React.ReactNode;
   const location = useLocation();
 
   if (!user?.role || !allowedRoles.includes(user.role)) {
+    console.log('RoleBasedRoute - Access denied. User role:', user?.role, 'Allowed roles:', allowedRoles);
+
     let redirectPath = '/login';
     if (user?.role) {
-      // Handle super-admin role specially
-      if (user.role === 'super-admin') {
-        redirectPath = '/rtm'; // Default to RTM dashboard for super admin
-      } else {
-        redirectPath = `/${user.role.split('-')[0]}`;
-      }
+      // Handle role-based redirects with proper mapping
+      redirectPath = getRoleBasePath(user.role);
+    } else {
+      console.warn('No role found for user in RoleBasedRoute');
+      redirectPath = '/building-setup';
     }
+
+    console.log('RoleBasedRoute redirecting to:', redirectPath);
     return <Navigate to={redirectPath} state={{ from: location }} replace />;
   }
 
@@ -86,13 +110,37 @@ function App() {
 
   // Prevent landing page access for logged-in users
   if (user && (location.pathname === '/' || location.pathname === '/pricing')) {
-    let basePath = 'rtm'; // Default fallback
-    if (user.role === 'super-admin') {
-      basePath = 'rtm'; // Super admin goes to RTM dashboard
-    } else if (user.role) {
-      basePath = user.role.split('-')[0];
+    let basePath: string;
+
+    console.log('App.tsx redirect - User role:', user.role, 'Full user:', user);
+
+    switch (user.role) {
+      case 'rtm-director':
+        basePath = '/rtm';
+        break;
+      case 'sof-director':
+        basePath = '/sof';
+        break;
+      case 'leaseholder':
+        basePath = '/leaseholder';
+        break;
+      case 'shareholder':
+        basePath = '/shareholder';
+        break;
+      case 'management-company':
+        basePath = '/management';
+        break;
+      case 'super-admin':
+        basePath = '/rtm';
+        break;
+      default:
+        console.warn('Unknown or missing role in App.tsx:', user.role, 'redirecting to building setup');
+        basePath = '/building-setup';
+        break;
     }
-    return <Navigate to={`/${basePath}`} replace />;
+
+    console.log('App.tsx redirecting to:', basePath);
+    return <Navigate to={basePath} replace />;
   }
 
   return (
@@ -103,12 +151,12 @@ function App() {
           <AuthRedirectHandler />
           <Landing />
         </>
-      ) : <Navigate to={`/${user.role === 'super-admin' ? 'rtm' : user.role?.split('-')[0]}`} replace />} />
-      <Route path="/pricing" element={!user ? <Pricing /> : <Navigate to={`/${user.role === 'super-admin' ? 'rtm' : user.role?.split('-')[0]}`} replace />} />
-      
+      ) : <Navigate to={getRoleBasePath(user.role)} replace />} />
+      <Route path="/pricing" element={!user ? <Pricing /> : <Navigate to={getRoleBasePath(user.role)} replace />} />
+
       {/* Auth routes */}
       <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={!user ? <Signup /> : <Navigate to={`/${user.role === 'super-admin' ? 'rtm' : user.role?.split('-')[0]}`} replace />} />
+      <Route path="/signup" element={!user ? <Signup /> : <Navigate to={getRoleBasePath(user.role)} replace />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/setup-password" element={<SetupPassword />} />
@@ -277,10 +325,16 @@ function App() {
 
       {/* Catch-all route for auth redirects */}
       <Route path="*" element={
-        <>
-          <AuthRedirectHandler />
-          <NotFound />
-        </>
+        user ? (
+          // If user is logged in but on unknown route, redirect to their dashboard
+          <Navigate to={getRoleBasePath(user.role)} replace />
+        ) : (
+          // If not logged in, show 404 with auth redirect handler
+          <>
+            <AuthRedirectHandler />
+            <NotFound />
+          </>
+        )
       } />
     </Routes>
   );

@@ -33,22 +33,47 @@ CREATE POLICY "Users can view financial setup for their buildings"
   ON financial_setup
   FOR SELECT
   USING (
+    -- Allow super user access
+    EXISTS (
+      SELECT 1 FROM auth.users
+      WHERE auth.users.id = auth.uid()
+      AND auth.users.email = 'frankie@manage.management'
+    )
+    OR
+    -- Allow users associated with the building
     EXISTS (
       SELECT 1 FROM building_users
       WHERE building_users.building_id = financial_setup.building_id
       AND building_users.user_id = auth.uid()
     )
+    OR
+    -- Allow users whose metadata contains the building ID
+    building_id::text = (auth.jwt() -> 'user_metadata' ->> 'buildingId')
   );
 
 CREATE POLICY "Directors can manage financial setup"
   ON financial_setup
   FOR ALL
   USING (
+    -- Allow super user access
+    EXISTS (
+      SELECT 1 FROM auth.users
+      WHERE auth.users.id = auth.uid()
+      AND auth.users.email = 'frankie@manage.management'
+    )
+    OR
+    -- Allow directors associated with the building
     EXISTS (
       SELECT 1 FROM building_users
       WHERE building_users.building_id = financial_setup.building_id
       AND building_users.user_id = auth.uid()
       AND building_users.role IN ('rtm-director', 'sof-director')
+    )
+    OR
+    -- Allow directors whose metadata contains the building ID
+    (
+      building_id::text = (auth.jwt() -> 'user_metadata' ->> 'buildingId')
+      AND (auth.jwt() -> 'user_metadata' ->> 'role') IN ('rtm-director', 'sof-director')
     )
   );
 

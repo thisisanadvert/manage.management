@@ -152,19 +152,35 @@ const OnboardingWizard: React.FC = () => {
         
         if (!buildingId) {
           // Try to find the building ID from the building_users table
-          const { data: buildingUserData, error: buildingUserError } = await supabase
-            .from('building_users')
-            .select('building_id')
-            .eq('user_id', user.id)
-            .single();
-            
-          if (!buildingUserError && buildingUserData) {
-            buildingId = buildingUserData.building_id;
-            
-            // Update user metadata with the building ID
-            await supabase.auth.updateUser({
-              data: { buildingId: buildingId }
-            });
+          // Handle potential infinite recursion gracefully
+          try {
+            const { data: buildingUserData, error: buildingUserError } = await supabase
+              .from('building_users')
+              .select('building_id')
+              .eq('user_id', user.id)
+              .limit(1)
+              .maybeSingle();
+
+            if (buildingUserError) {
+              console.error('Error querying building_users in onboarding:', buildingUserError);
+              // If it's a recursion error, just continue without the building ID
+              if (!buildingUserError.message?.includes('infinite recursion')) {
+                throw buildingUserError;
+              }
+            } else if (buildingUserData) {
+              buildingId = buildingUserData.building_id;
+
+              // Update user metadata with the building ID
+              await supabase.auth.updateUser({
+                data: { buildingId: buildingId }
+              });
+            }
+          } catch (error: any) {
+            console.error('Error in building lookup during onboarding:', error);
+            // If it's a recursion error, continue without the building ID
+            if (!error.message?.includes('infinite recursion')) {
+              throw error;
+            }
           }
         }
         
