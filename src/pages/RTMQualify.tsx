@@ -168,7 +168,7 @@ const RTMQualify = () => {
             We successfully formed our RTM company and took control of our building management!"
           </blockquote>
           <div className="text-sm text-gray-600">
-            <strong>Sarah M.</strong> - RTM Director, London
+            <strong>Basilio B.</strong> - RTM Director, London
           </div>
         </div>
       </div>
