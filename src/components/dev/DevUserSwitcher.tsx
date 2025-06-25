@@ -30,11 +30,11 @@ const DEV_USERS: DevUser[] = [
     description: 'Right to Manage Director - Full building control'
   },
   {
-    email: 'sof@demo.com',
-    role: 'sof-director',
-    name: 'SOF Director (Demo)',
+    email: 'rmc@demo.com',
+    role: 'rmc-director',
+    name: 'RMC Director (Demo)',
     icon: <Building2 className="h-4 w-4" />,
-    description: 'Share of Freehold Director - Ownership management'
+    description: 'Resident Management Company Director - Ownership management'
   },
   {
     email: 'leaseholder@demo.com',

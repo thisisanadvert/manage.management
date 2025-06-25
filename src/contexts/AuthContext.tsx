@@ -3,11 +3,11 @@ import { User, Session } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
-type UserRole = 
-  | 'rtm-director' 
-  | 'sof-director' 
-  | 'leaseholder' 
-  | 'shareholder' 
+type UserRole =
+  | 'rtm-director'
+  | 'rmc-director'
+  | 'leaseholder'
+  | 'shareholder'
   | 'management-company';
 
 type BuildingType = 'rtm' | 'share-of-freehold' | 'landlord-managed';
@@ -168,8 +168,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             case 'rtm-director':
               basePath = '/rtm';
               break;
-            case 'sof-director':
-              basePath = '/sof';
+            case 'rmc-director':
+              basePath = '/rmc';
               break;
             case 'leaseholder':
               basePath = '/leaseholder';

@@ -31,9 +31,9 @@ const signupOptions = [
     fields: ['buildingName', 'buildingAddress', 'unitNumber', 'phone']
   },
   {
-    id: 'sof-director',
-    title: 'Share of Freehold Director',
-    description: 'Manage your Share of Freehold company and building',
+    id: 'rmc-director',
+    title: 'Resident Management Company (RMC) Director',
+    description: 'Manage your Resident Management Company and building',
     icon: Building,
     color: 'bg-blue-100 text-blue-600',
     available: true,

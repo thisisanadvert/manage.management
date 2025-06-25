@@ -43,79 +43,79 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
   const baseRoute = user?.role ? `/${user.role.split('-')[0]}` : '';
   
   const navigation = [
-    { 
-      name: 'Dashboard', 
-      href: baseRoute, 
-      icon: LayoutDashboard, 
-      roles: ['rtm-director', 'sof-director', 'leaseholder', 'shareholder', 'management-company']
+    {
+      name: 'Dashboard',
+      href: baseRoute,
+      icon: LayoutDashboard,
+      roles: ['rtm-director', 'rmc-director', 'leaseholder', 'shareholder', 'management-company']
     },
-    { 
-      name: 'Building Setup', 
-      href: `${baseRoute}/building-setup`, 
-      icon: Building2, 
-      roles: ['rtm-director', 'sof-director', 'leaseholder', 'shareholder', 'management-company']
+    {
+      name: 'Building Setup',
+      href: `${baseRoute}/building-setup`,
+      icon: Building2,
+      roles: ['rtm-director', 'rmc-director', 'leaseholder', 'shareholder', 'management-company']
     },
-    { 
-      name: 'Issues', 
-      href: `${baseRoute}/issues`, 
-      icon: AlertTriangle, 
-      roles: ['rtm-director', 'sof-director', 'leaseholder', 'shareholder', 'management-company']
+    {
+      name: 'Issues',
+      href: `${baseRoute}/issues`,
+      icon: AlertTriangle,
+      roles: ['rtm-director', 'rmc-director', 'leaseholder', 'shareholder', 'management-company']
     },
-    { 
-      name: 'Finances', 
-      href: `${baseRoute}/finances`, 
-      icon: Wallet, 
-      roles: ['rtm-director', 'sof-director', 'leaseholder', 'shareholder', 'management-company']
+    {
+      name: 'Finances',
+      href: `${baseRoute}/finances`,
+      icon: Wallet,
+      roles: ['rtm-director', 'rmc-director', 'leaseholder', 'shareholder', 'management-company']
     },
-    { 
-      name: 'Documents', 
-      href: `${baseRoute}/documents`, 
-      icon: FileText, 
-      roles: ['rtm-director', 'sof-director', 'leaseholder', 'shareholder', 'management-company']
+    {
+      name: 'Documents',
+      href: `${baseRoute}/documents`,
+      icon: FileText,
+      roles: ['rtm-director', 'rmc-director', 'leaseholder', 'shareholder', 'management-company']
     },
-    { 
-      name: 'Announcements', 
-      href: `${baseRoute}/announcements`, 
-      icon: BellRing, 
-      roles: ['rtm-director', 'sof-director', 'leaseholder', 'shareholder', 'management-company']
+    {
+      name: 'Announcements',
+      href: `${baseRoute}/announcements`,
+      icon: BellRing,
+      roles: ['rtm-director', 'rmc-director', 'leaseholder', 'shareholder', 'management-company']
     },
-    { 
-      name: 'Voting', 
-      href: `${baseRoute}/voting`, 
-      icon: Vote, 
-      roles: ['rtm-director', 'sof-director', 'leaseholder', 'shareholder', 'management-company']
+    {
+      name: 'Voting',
+      href: `${baseRoute}/voting`,
+      icon: Vote,
+      roles: ['rtm-director', 'rmc-director', 'leaseholder', 'shareholder', 'management-company']
     },
-    { 
-      name: 'AGMs', 
-      href: `${baseRoute}/agms`, 
-      icon: Calendar, 
-      roles: ['rtm-director', 'sof-director', 'leaseholder', 'shareholder', 'management-company']
+    {
+      name: 'AGMs',
+      href: `${baseRoute}/agms`,
+      icon: Calendar,
+      roles: ['rtm-director', 'rmc-director', 'leaseholder', 'shareholder', 'management-company']
     },
     {
       name: 'RTM Formation',
       href: `${baseRoute}/rtm`,
       icon: Scale,
-      roles: ['rtm-director', 'sof-director']
+      roles: ['rtm-director'] // Only RTM directors can access RTM formation tools
     },
-    { 
-      name: 'Share Certificates', 
-      href: `${baseRoute}/shares`, 
-      icon: Share2, 
-      roles: ['sof-director']
+    {
+      name: 'Share Certificates',
+      href: `${baseRoute}/shares`,
+      icon: Share2,
+      roles: ['rmc-director'] // Only RMC directors have share certificates
     },
-    { 
-      name: 'Supplier Network', 
-      href: `${baseRoute}/suppliers`, 
-      icon: UserCheck, 
-      beta: true, 
-      roles: ['rtm-director', 'sof-director'],
+    {
+      name: 'Supplier Network',
+      href: `${baseRoute}/suppliers`,
+      icon: UserCheck,
+      beta: true,
+      roles: ['rtm-director', 'rmc-director'],
       requiresFeature: 'supplierNetwork'
     },
-    { 
-      name: 'Settings', 
-      href: '/settings', 
-      icon: Settings, 
-      roles: ['rtm-director', 'sof-director', 'leaseholder', 'shareholder', 'management-company']
+    {
+      name: 'Settings',
+      href: '/settings',
+      icon: Settings,
+      roles: ['rtm-director', 'rmc-director', 'leaseholder', 'shareholder', 'management-company']
     },
   ];
 

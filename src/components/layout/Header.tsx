@@ -61,8 +61,8 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
     switch (user?.role) {
       case 'rtm-director':
         return 'RTM Director';
-      case 'sof-director':
-        return 'Share of Freehold Director';
+      case 'rmc-director':
+        return 'Resident Management Company (RMC) Director';
       case 'leaseholder':
         return 'Leaseholder';
       case 'shareholder':

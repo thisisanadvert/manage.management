@@ -136,7 +136,7 @@ export const getRoleDisplayName = (role: string | undefined): string => {
   
   const roleMap: Record<string, string> = {
     'rtm-director': 'RTM Director',
-    'sof-director': 'SOF Director',
+    'rmc-director': 'RMC Director',
     'leaseholder': 'Leaseholder',
     'shareholder': 'Shareholder',
     'management-company': 'Management Company',

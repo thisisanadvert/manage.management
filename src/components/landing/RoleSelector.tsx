@@ -39,8 +39,8 @@ const roles: Role[] = [
     ]
   },
   {
-    id: 'sof-director',
-    title: 'Share of Freehold Director',
+    id: 'rmc-director',
+    title: 'Resident Management Company (RMC) Director',
     description: 'Collaborative ownership management made simple',
     icon: <Scale className="h-6 w-6" />,
     features: [

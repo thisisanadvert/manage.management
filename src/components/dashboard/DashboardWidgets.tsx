@@ -300,14 +300,25 @@ export const QuickActions: React.FC<QuickActionsProps> = ({ userRole }) => {
       });
     }
 
-    // Add RTM tools for RTM and SOF directors
-    if (userRole === 'rtm-director' || userRole === 'sof-director') {
+    // Add RTM tools only for RTM directors (RMC directors already own the freehold)
+    if (userRole === 'rtm-director') {
       baseActions.push({
         title: 'RTM Formation',
         description: 'Access RTM formation tools',
         icon: Scale,
         color: 'success',
         onClick: () => navigate(`/${basePath}/rtm`),
+      });
+    }
+
+    // Add Share Certificates for RMC directors
+    if (userRole === 'rmc-director') {
+      baseActions.push({
+        title: 'Share Certificates',
+        description: 'Manage share certificates',
+        icon: Scale,
+        color: 'primary',
+        onClick: () => navigate(`/${basePath}/shares`),
       });
     }
 

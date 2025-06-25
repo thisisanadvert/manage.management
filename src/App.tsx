@@ -52,8 +52,8 @@ function getRoleBasePath(role?: string): string {
   switch (role) {
     case 'rtm-director':
       return '/rtm';
-    case 'sof-director':
-      return '/sof';
+    case 'rmc-director':
+      return '/rmc';
     case 'leaseholder':
       return '/leaseholder';
     case 'shareholder':
@@ -121,8 +121,8 @@ function App() {
       case 'rtm-director':
         basePath = '/rtm';
         break;
-      case 'sof-director':
-        basePath = '/sof';
+      case 'rmc-director':
+        basePath = '/rmc';
         break;
       case 'leaseholder':
         basePath = '/leaseholder';
@@ -252,12 +252,12 @@ function App() {
         <Route path="suppliers" element={<SupplierNetwork />} />
       </Route>
 
-      {/* SOF Director Routes */}
+      {/* RMC Director Routes */}
       <Route
-        path="/sof/*"
+        path="/rmc/*"
         element={
           <PrivateRoute>
-            <RoleBasedRoute allowedRoles={['sof-director', 'super-admin']}>
+            <RoleBasedRoute allowedRoles={['rmc-director', 'super-admin']}>
               <MainLayout />
             </RoleBasedRoute>
           </PrivateRoute>
@@ -271,10 +271,11 @@ function App() {
         <Route path="announcements" element={<Announcements />} />
         <Route path="voting" element={<Voting />} />
         <Route path="agms" element={<AGMs />} />
-        <Route path="rtm" element={<RTMManagement />} />
         <Route path="shares" element={<ShareCertificates />} />
         <Route path="suppliers" element={<SupplierNetwork />} />
       </Route>
+
+
 
       {/* Shareholder Routes */}
       <Route

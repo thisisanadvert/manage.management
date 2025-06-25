@@ -209,13 +209,13 @@ const Landing = () => {
               Whether you're a first-time homeowner or experienced property manager, our platform makes building management straightforward and stress-free.
             </p>
             <div className="mt-4 flex justify-center">
-              <Tooltip content="Don't worry if these terms are new to you! RTM means 'Right to Manage' - it's when residents take control of managing their building. Share of Freehold means you own a share of the building itself, not just your home. Click to learn more about qualifying!">
+              <Tooltip content="Don't worry if these terms are new to you! RTM means 'Right to Manage' - it's when residents take control of managing their building. RMC means 'Resident Management Company' - it's when residents own the freehold and manage the building themselves. Click to learn more about qualifying!">
                 <button
                   onClick={() => navigate('/qualify')}
                   className="text-sm text-gray-500 flex items-center space-x-1 hover:text-primary-600 transition-colors cursor-pointer"
-                  aria-label="Learn more about RTM and Share of Freehold - click to check if you qualify"
+                  aria-label="Learn more about RTM and RMC - click to check if you qualify"
                 >
-                  <span>Perfect for RTM directors, Share of Freehold directors, and homeowners</span>
+                  <span>Perfect for RTM directors, RMC directors, and homeowners</span>
                   <HelpCircle size={14} className="text-gray-400 hover:text-primary-600 transition-colors" />
                 </button>
               </Tooltip>
