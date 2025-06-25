@@ -9,11 +9,17 @@ import {
   MessageSquare,
   ChevronRight,
   ArrowRight,
-  Settings
+  Settings,
+  Scale,
+  BookOpen,
+  AlertTriangle,
+  Shield
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
+import LegalGuidanceTooltip from '../components/legal/LegalGuidanceTooltip';
+import ComplianceStatusIndicator from '../components/legal/ComplianceStatusIndicator';
 
 // Import RTM Formation Components
 import EligibilityChecker from '../components/rtm/EligibilityChecker';
@@ -109,9 +115,81 @@ const RTMManagement = () => {
 
   const renderOverview = () => (
     <div className="space-y-6">
+      {/* Legal Compliance Overview */}
+      <Card className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center space-x-3">
+            <Shield className="h-8 w-8 text-blue-600" />
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">RTM Legal Compliance Guide</h2>
+              <p className="text-gray-700 mb-4">
+                The Right to Manage process is governed by the Commonhold and Leasehold Reform Act 2002.
+                Follow our step-by-step guidance to ensure full legal compliance.
+              </p>
+            </div>
+            <LegalGuidanceTooltip
+              title="RTM Legal Requirements"
+              guidance={{
+                basic: "RTM allows qualifying tenants to take over management of their building. You must follow strict legal procedures under the Commonhold and Leasehold Reform Act 2002.",
+                intermediate: "Key requirements include: 50%+ qualifying tenant participation, proper RTM company formation, correct notice procedures, and compliance with consultation requirements.",
+                advanced: "Detailed compliance includes company law obligations, statutory notice periods, counter-notice procedures, acquisition date requirements, and ongoing management duties."
+              }}
+              framework="CLRA_2002"
+              mandatory={true}
+              externalResources={[
+                {
+                  title: "LEASE RTM Guide",
+                  url: "https://www.lease-advice.org/advice-guide/right-to-manage/",
+                  type: "lease",
+                  description: "Comprehensive RTM legal guidance"
+                },
+                {
+                  title: "Gov.uk RTM Information",
+                  url: "https://www.gov.uk/right-to-manage-your-building",
+                  type: "government",
+                  description: "Official government RTM guidance"
+                }
+              ]}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <ComplianceStatusIndicator
+            status="pending_review"
+            title="Eligibility Assessment"
+            description="Verify building qualifies for RTM"
+            size="sm"
+          />
+          <ComplianceStatusIndicator
+            status="unknown"
+            title="Tenant Participation"
+            description="Secure 50%+ qualifying tenant support"
+            size="sm"
+          />
+          <ComplianceStatusIndicator
+            status="unknown"
+            title="Legal Documentation"
+            description="Prepare compliant notices and forms"
+            size="sm"
+          />
+        </div>
+      </Card>
+
       {/* RTM Formation Tools Grid */}
       <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">RTM Formation Tools</h2>
+        <div className="flex items-center space-x-2 mb-4">
+          <h2 className="text-xl font-bold text-gray-900">RTM Formation Tools</h2>
+          <LegalGuidanceTooltip
+            title="RTM Formation Process"
+            guidance={{
+              basic: "Follow these tools in order to ensure a legally compliant RTM formation process.",
+              intermediate: "Each tool addresses specific legal requirements and helps you maintain compliance throughout the process.",
+              advanced: "Tools are designed to meet statutory requirements under CLRA 2002 and related regulations."
+            }}
+            framework="CLRA_2002"
+          />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {rtmTools.map((tool) => (
             <Card

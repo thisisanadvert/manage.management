@@ -104,6 +104,12 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
       roles: ['rmc-director', 'super-admin'] // RMC directors and super admin
     },
     {
+      name: 'Legal Templates',
+      href: `${baseRoute}/legal-templates`,
+      icon: FileText,
+      roles: ['rtm-director', 'rmc-director', 'management-company', 'super-admin']
+    },
+    {
       name: 'Supplier Network',
       href: `${baseRoute}/suppliers`,
       icon: UserCheck,

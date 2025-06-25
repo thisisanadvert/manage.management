@@ -223,68 +223,11 @@ export class LegalComplianceService {
   }
 
   /**
-   * Get all legal templates (would be loaded from database/config)
+   * Get all legal templates
    */
   private static getAllTemplates(): LegalTemplate[] {
-    // This would be loaded from a database or configuration file
-    return [
-      {
-        id: 'section-20-notice-intention',
-        title: 'Section 20 Notice of Intention',
-        description: 'Template for the first stage of Section 20 consultation',
-        category: 'section_20_consultation',
-        framework: 'LTA_1985',
-        applicableRoles: ['rtm-director', 'rmc-director', 'management-company'],
-        content: `NOTICE OF INTENTION TO CARRY OUT WORKS
-
-To: All Leaseholders of {{buildingName}}
-From: {{senderName}}
-Date: {{date}}
-
-We are required under Section 20 of the Landlord and Tenant Act 1985 to consult you about proposed works to {{buildingName}}.
-
-DESCRIPTION OF WORKS:
-{{worksDescription}}
-
-ESTIMATED COST: £{{estimatedCost}}
-
-You have 30 days from the date of this notice to make written observations...`,
-        variables: [
-          {
-            name: 'buildingName',
-            type: 'text',
-            required: true,
-            description: 'Name of the building'
-          },
-          {
-            name: 'senderName',
-            type: 'text',
-            required: true,
-            description: 'Name of the sender (landlord/management company)'
-          },
-          {
-            name: 'date',
-            type: 'date',
-            required: true,
-            description: 'Date of the notice'
-          },
-          {
-            name: 'worksDescription',
-            type: 'text',
-            required: true,
-            description: 'Description of the proposed works'
-          },
-          {
-            name: 'estimatedCost',
-            type: 'currency',
-            required: true,
-            description: 'Estimated total cost of works'
-          }
-        ],
-        lastUpdated: new Date(),
-        version: '1.0'
-      }
-      // More templates would be added here
-    ];
+    // Import templates from the legal templates data file
+    const { LEGAL_TEMPLATES } = require('../data/legalTemplates');
+    return LEGAL_TEMPLATES;
   }
 }
