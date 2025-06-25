@@ -18,7 +18,9 @@ import {
   Scale,
   Mail,
   X,
-  Settings
+  Settings,
+  Shield,
+  BookOpen
 } from 'lucide-react';
 import Button from '../ui/Button';
 
@@ -40,7 +42,11 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const baseRoute = user?.role ? `/${user.role.split('-')[0]}` : '';
+  const baseRoute = user?.role
+    ? user.role === 'super-admin'
+      ? '/rtm'  // Super-admin users default to RTM dashboard
+      : `/${user.role.split('-')[0]}`
+    : '';
   
   const navigation = [
     {
