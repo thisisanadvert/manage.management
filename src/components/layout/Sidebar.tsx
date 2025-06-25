@@ -110,6 +110,18 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
       roles: ['rtm-director', 'rmc-director', 'management-company', 'super-admin']
     },
     {
+      name: 'Director Support',
+      href: `${baseRoute}/director-support`,
+      icon: Users,
+      roles: ['rtm-director', 'rmc-director', 'super-admin']
+    },
+    {
+      name: 'Legal Resources',
+      href: `${baseRoute}/legal-resources`,
+      icon: BookOpen,
+      roles: ['rtm-director', 'rmc-director', 'management-company', 'homeowner', 'super-admin']
+    },
+    {
       name: 'Supplier Network',
       href: `${baseRoute}/suppliers`,
       icon: UserCheck,

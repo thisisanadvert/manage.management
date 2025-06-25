@@ -37,12 +37,14 @@ import FinancialSetupModal from '../components/modals/FinancialSetupModal';
 import { getUserBuildingId } from '../utils/buildingUtils';
 import LegalGuidanceTooltip from '../components/legal/LegalGuidanceTooltip';
 import ComplianceStatusIndicator from '../components/legal/ComplianceStatusIndicator';
+import Section20Workflow from '../components/finances/Section20Workflow';
 
 const Finances = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [showImportModal, setShowImportModal] = useState(false);
   const [showFinancialSetupModal, setShowFinancialSetupModal] = useState(false);
+  const [showSection20Workflow, setShowSection20Workflow] = useState(false);
   const [financialSetup, setFinancialSetup] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { user, signOut } = useAuth();
@@ -447,7 +449,7 @@ const Finances = () => {
         </div>
       )}
 
-      {activeTab === 'section-20' && (
+      {activeTab === 'section-20' && !showSection20Workflow && (
         <div className="space-y-6">
           {/* Section 20 Overview */}
           <Card className="p-6">
@@ -474,7 +476,11 @@ const Finances = () => {
                   ]}
                 />
               </div>
-              <Button variant="primary" leftIcon={<Plus className="h-4 w-4" />}>
+              <Button
+                variant="primary"
+                leftIcon={<Plus className="h-4 w-4" />}
+                onClick={() => setShowSection20Workflow(true)}
+              >
                 Start New Consultation
               </Button>
             </div>
@@ -535,6 +541,11 @@ const Finances = () => {
             </div>
           </Card>
         </div>
+      )}
+
+      {/* Section 20 Workflow */}
+      {activeTab === 'section-20' && showSection20Workflow && (
+        <Section20Workflow onClose={() => setShowSection20Workflow(false)} />
       )}
 
       {/* Default content for other tabs */}

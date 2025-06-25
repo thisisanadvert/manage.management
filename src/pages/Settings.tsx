@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Bell, Lock, Mail, Shield, Smartphone, ToggleLeft as Toggle, CheckCircle2, XCircle } from 'lucide-react';
+import { Bell, Lock, Mail, Shield, Smartphone, ToggleLeft as Toggle, CheckCircle2, XCircle, Database } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
+import GDPRCompliance from '../components/gdpr/GDPRCompliance';
 
 const Settings = () => {
+  const [activeTab, setActiveTab] = useState('account');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const PasswordModal = () => (
@@ -60,6 +62,12 @@ const Settings = () => {
     </div>
   );
 
+  const tabs = [
+    { id: 'account', label: 'Account & Security', icon: <Lock className="h-4 w-4" /> },
+    { id: 'notifications', label: 'Notifications', icon: <Bell className="h-4 w-4" /> },
+    { id: 'privacy', label: 'Privacy & Data', icon: <Database className="h-4 w-4" /> }
+  ];
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-16 lg:pb-0">
       <div>
@@ -67,8 +75,31 @@ const Settings = () => {
         <p className="text-gray-600 mt-1">Manage your account settings and preferences</p>
       </div>
 
-      {/* Security Settings */}
-      <Card>
+      {/* Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="flex space-x-8">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                activeTab === tab.id
+                  ? 'border-primary-500 text-primary-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              {tab.icon}
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'account' && (
+        <div className="space-y-6">
+          {/* Security Settings */}
+          <Card>
         <h2 className="text-lg font-semibold mb-4 flex items-center">
           <Shield className="mr-2 text-primary-600" size={20} />
           Security
@@ -192,6 +223,13 @@ const Settings = () => {
           </div>
         </div>
       </Card>
+        </div>
+      )}
+
+      {/* Privacy & Data Tab */}
+      {activeTab === 'privacy' && (
+        <GDPRCompliance />
+      )}
 
       {showPasswordModal && <PasswordModal />}
     </div>

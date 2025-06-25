@@ -27,12 +27,18 @@ import {
 } from '../../components/dashboard/DashboardWidgets';
 import LegalGuidanceTooltip from '../../components/legal/LegalGuidanceTooltip';
 import ComplianceStatusIndicator from '../../components/legal/ComplianceStatusIndicator';
+import ComplianceMonitoringService from '../../services/complianceMonitoringService';
 
 const RTMDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isOnboarded, setIsOnboarded] = useState(!!user?.metadata?.onboardingComplete);
   const dashboardData = useDashboardData();
+
+  // Get compliance monitoring data
+  const monitoringService = ComplianceMonitoringService.getInstance();
+  const complianceSummary = monitoringService.getComplianceSummary();
+  const criticalAlerts = monitoringService.getUnacknowledgedAlerts().filter(a => a.severity === 'critical');
 
   // If user hasn't completed onboarding, show the onboarding wizard
   if (!isOnboarded) {
@@ -252,19 +258,54 @@ const RTMDashboard = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
               <AlertTriangle className="h-5 w-5 text-orange-600" />
-              <h3 className="text-lg font-semibold text-gray-900">Upcoming Deadlines</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Compliance Monitoring</h3>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/dashboard/compliance')}
+            >
+              View All
+            </Button>
+          </div>
+
+          {/* Compliance Summary */}
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="text-center p-2 bg-blue-50 rounded">
+              <div className="text-lg font-bold text-blue-600">{complianceSummary.totalDeadlines}</div>
+              <div className="text-xs text-blue-700">Active</div>
+            </div>
+            <div className="text-center p-2 bg-orange-50 rounded">
+              <div className="text-lg font-bold text-orange-600">{complianceSummary.dueSoonDeadlines}</div>
+              <div className="text-xs text-orange-700">Due Soon</div>
+            </div>
+            <div className="text-center p-2 bg-red-50 rounded">
+              <div className="text-lg font-bold text-red-600">{complianceSummary.overdueDeadlines}</div>
+              <div className="text-xs text-red-700">Overdue</div>
             </div>
           </div>
-          <div className="space-y-3">
-            <div className="p-3 bg-orange-50 rounded-lg">
-              <div className="font-medium text-orange-900">AGM Notice</div>
-              <div className="text-sm text-orange-700">Due in 14 days</div>
+
+          {/* Critical Alerts */}
+          {criticalAlerts.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="font-medium text-red-800">Critical Alerts</h4>
+              {criticalAlerts.slice(0, 2).map((alert) => (
+                <div key={alert.id} className="p-3 bg-red-50 rounded-lg border border-red-200">
+                  <div className="font-medium text-red-900">{alert.title}</div>
+                  <div className="text-sm text-red-700">{alert.message}</div>
+                </div>
+              ))}
             </div>
-            <div className="p-3 bg-yellow-50 rounded-lg">
-              <div className="font-medium text-yellow-900">Insurance Review</div>
-              <div className="text-sm text-yellow-700">Due in 30 days</div>
+          )}
+
+          {criticalAlerts.length === 0 && (
+            <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+              <div className="flex items-center space-x-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <div className="font-medium text-green-800">All compliance requirements up to date</div>
+              </div>
             </div>
-          </div>
+          )}
         </Card>
       </div>
 

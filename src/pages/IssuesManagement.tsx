@@ -1,25 +1,26 @@
 import React from 'react';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  AlertTriangle, 
-  Clock, 
-  CheckCircle2, 
-  Calendar, 
-  MessageSquare, 
-  MapPin, 
-  PenTool as Tool, 
-  Building2, 
-  Wrench, 
-  Zap, 
-  Droplet, 
-  Shield, 
+import {
+  Plus,
+  Search,
+  Filter,
+  AlertTriangle,
+  Clock,
+  CheckCircle2,
+  Calendar,
+  MessageSquare,
+  MapPin,
+  PenTool as Tool,
+  Building2,
+  Wrench,
+  Zap,
+  Droplet,
+  Shield,
   Brush,
   Link,
   User,
   Vote,
-  History
+  History,
+  Flame
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -30,9 +31,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import BuildingSafetyCompliance from '../components/building-safety/BuildingSafetyCompliance';
 import { useFeatures } from '../hooks/useFeatures';
 
 const IssuesManagement = () => {
+  const [activeTab, setActiveTab] = useState('issues');
   const [isCreateIssueModalOpen, setIsCreateIssueModalOpen] = useState(false);
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState('all');
@@ -161,12 +164,17 @@ const IssuesManagement = () => {
     }
   };
 
+  const tabs = [
+    { id: 'issues', label: 'Issues Management', icon: <Tool className="h-4 w-4" /> },
+    { id: 'building-safety', label: 'Building Safety', icon: <Flame className="h-4 w-4" /> }
+  ];
+
   return (
     <div className="space-y-6 pb-16 lg:pb-0">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Issues Management</h1>
-          <p className="text-gray-600 mt-1">Track and manage building maintenance issues</p>
+          <h1 className="text-2xl font-bold text-gray-900">Issues & Safety Management</h1>
+          <p className="text-gray-600 mt-1">Track building maintenance issues and safety compliance</p>
         </div>
         <div className="flex gap-2">
           <Button 
@@ -178,8 +186,31 @@ const IssuesManagement = () => {
           </Button>
         </div>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+      {/* Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="flex space-x-8">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                activeTab === tab.id
+                  ? 'border-primary-500 text-primary-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              {tab.icon}
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'issues' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="bg-error-50">
           <div className="flex items-center">
             <div className="p-3 bg-error-100 rounded-lg">
@@ -386,19 +417,26 @@ const IssuesManagement = () => {
         ))}
       </div>
 
-      <CreateIssueModal
-        isOpen={isCreateIssueModalOpen}
-        onClose={() => setIsCreateIssueModalOpen(false)}
-        buildingId={user?.metadata?.buildingId || ''}
-        onIssueCreated={handleIssueCreated}
-      />
-      
-      {selectedIssueId && (
-        <IssueDetail 
-          issueId={selectedIssueId}
-          onClose={() => setSelectedIssueId(null)}
-          onStatusChange={fetchIssues}
-        />
+          <CreateIssueModal
+            isOpen={isCreateIssueModalOpen}
+            onClose={() => setIsCreateIssueModalOpen(false)}
+            buildingId={user?.metadata?.buildingId || ''}
+            onIssueCreated={handleIssueCreated}
+          />
+
+          {selectedIssueId && (
+            <IssueDetail
+              issueId={selectedIssueId}
+              onClose={() => setSelectedIssueId(null)}
+              onStatusChange={fetchIssues}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Building Safety Tab */}
+      {activeTab === 'building-safety' && (
+        <BuildingSafetyCompliance />
       )}
     </div>
   );

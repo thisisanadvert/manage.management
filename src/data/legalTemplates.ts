@@ -661,6 +661,170 @@ Date: {{date}}`,
     ],
     lastUpdated: new Date('2024-12-01'),
     version: '2.0'
+  },
+
+  {
+    id: 'gdpr-privacy-notice',
+    title: 'GDPR Privacy Notice',
+    description: 'Comprehensive privacy notice compliant with GDPR requirements',
+    category: 'privacy_notice',
+    framework: 'GDPR_2018',
+    applicableRoles: ['rtm-director', 'rmc-director', 'management-company'],
+    content: `PRIVACY NOTICE
+
+{{organisationName}}
+{{organisationAddress}}
+
+GENERAL DATA PROTECTION REGULATION (GDPR) - PRIVACY NOTICE
+
+This privacy notice explains how we collect, use, and protect your personal data in compliance with the General Data Protection Regulation (GDPR).
+
+DATA CONTROLLER:
+{{dataControllerName}}
+{{dataControllerAddress}}
+Email: {{dataControllerEmail}}
+Phone: {{dataControllerPhone}}
+
+WHAT PERSONAL DATA WE COLLECT:
+We collect and process the following categories of personal data:
+
+• Contact Information: Name, address, telephone numbers, email addresses
+• Lease Information: Lease terms, property details, service charge information
+• Financial Information: Payment history, bank details, service charge accounts
+• Communication Records: Correspondence, meeting minutes, voting records
+• Emergency Contact Information: Next of kin details for emergency situations
+
+LEGAL BASIS FOR PROCESSING:
+We process your personal data on the following legal bases:
+
+• Contract Performance: To fulfil our obligations under your lease agreement
+• Legal Obligation: To comply with statutory requirements for property management
+• Legitimate Interest: For building management, maintenance, and resident communication
+• Consent: Where you have specifically agreed to certain processing activities
+
+HOW WE USE YOUR PERSONAL DATA:
+• Managing your lease and service charge obligations
+• Communicating about building matters and maintenance
+• Organising meetings and consultations
+• Maintaining building safety and security
+• Complying with legal and regulatory requirements
+• Resolving disputes and handling complaints
+
+WHO WE SHARE YOUR DATA WITH:
+We may share your personal data with:
+
+• Professional advisors (solicitors, accountants, surveyors)
+• Contractors and service providers for building maintenance
+• Regulatory bodies and authorities where required by law
+• Emergency services in case of emergencies
+• Insurance companies for claims processing
+
+DATA RETENTION:
+We retain your personal data for the following periods:
+
+• Lease information: 7 years after lease termination
+• Financial records: 6 years after final payment
+• Communication records: Duration of residency plus 2 years
+• Emergency contact information: Duration of residency
+
+YOUR RIGHTS UNDER GDPR:
+You have the following rights regarding your personal data:
+
+• Right of Access: Request copies of your personal data
+• Right to Rectification: Request correction of inaccurate data
+• Right to Erasure: Request deletion of your data in certain circumstances
+• Right to Restrict Processing: Request limitation of processing
+• Right to Data Portability: Request transfer of your data
+• Right to Object: Object to processing based on legitimate interest
+• Right to Withdraw Consent: Where processing is based on consent
+
+To exercise any of these rights, please contact us using the details above.
+
+DATA SECURITY:
+We implement appropriate technical and organisational measures to protect your personal data against unauthorised access, alteration, disclosure, or destruction.
+
+COMPLAINTS:
+If you have concerns about how we handle your personal data, you can complain to the Information Commissioner's Office (ICO):
+Website: www.ico.org.uk
+Phone: 0303 123 1113
+
+CHANGES TO THIS NOTICE:
+We may update this privacy notice from time to time. We will notify you of any significant changes.
+
+CONTACT US:
+If you have any questions about this privacy notice or our data processing practices, please contact:
+
+{{contactName}}
+{{contactEmail}}
+{{contactPhone}}
+
+Last updated: {{lastUpdated}}
+
+{{organisationName}}`,
+    variables: [
+      {
+        name: 'organisationName',
+        type: 'text',
+        required: true,
+        description: 'Name of the organisation (RTM company, management company, etc.)'
+      },
+      {
+        name: 'organisationAddress',
+        type: 'address',
+        required: true,
+        description: 'Registered address of the organisation'
+      },
+      {
+        name: 'dataControllerName',
+        type: 'text',
+        required: true,
+        description: 'Name of the data controller'
+      },
+      {
+        name: 'dataControllerAddress',
+        type: 'address',
+        required: true,
+        description: 'Address of the data controller'
+      },
+      {
+        name: 'dataControllerEmail',
+        type: 'text',
+        required: true,
+        description: 'Email address of the data controller'
+      },
+      {
+        name: 'dataControllerPhone',
+        type: 'text',
+        required: true,
+        description: 'Phone number of the data controller'
+      },
+      {
+        name: 'contactName',
+        type: 'text',
+        required: true,
+        description: 'Name of contact person for data protection queries'
+      },
+      {
+        name: 'contactEmail',
+        type: 'text',
+        required: true,
+        description: 'Email for data protection queries'
+      },
+      {
+        name: 'contactPhone',
+        type: 'text',
+        required: true,
+        description: 'Phone number for data protection queries'
+      },
+      {
+        name: 'lastUpdated',
+        type: 'date',
+        required: true,
+        description: 'Date when privacy notice was last updated'
+      }
+    ],
+    lastUpdated: new Date('2024-12-01'),
+    version: '1.0'
   }
 ];
 

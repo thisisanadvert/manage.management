@@ -27,6 +27,7 @@ import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import LegalGuidanceTooltip from '../components/legal/LegalGuidanceTooltip';
 
 const Documents = () => {
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -50,11 +51,71 @@ const Documents = () => {
   const { user } = useAuth();
 
   const categories = [
-    { id: 'legal', name: 'Legal Documents', icon: Scale, color: 'text-blue-600' },
-    { id: 'financial', name: 'Financial', icon: Wallet, color: 'text-green-600' },
-    { id: 'insurance', name: 'Insurance', icon: Shield, color: 'text-purple-600' },
-    { id: 'maintenance', name: 'Maintenance', icon: AlertTriangle, color: 'text-orange-600' },
-    { id: 'admin', name: 'Admin', icon: FileText, color: 'text-gray-600' },
+    {
+      id: 'legal',
+      name: 'Legal Documents',
+      icon: Scale,
+      color: 'text-blue-600',
+      description: 'Leases, notices, legal correspondence, and statutory documents',
+      guidance: {
+        basic: "Legal documents must be properly stored and accessible for compliance purposes. Include leases, Section 20 notices, RTM documentation, and legal correspondence.",
+        intermediate: "Maintain proper document retention periods: leases (7 years after termination), notices (6 years), and correspondence (duration of matter plus 2 years).",
+        advanced: "Ensure GDPR compliance for personal data in legal documents, maintain audit trails, and consider legal privilege for privileged communications."
+      },
+      framework: 'LTA_1985' as const
+    },
+    {
+      id: 'financial',
+      name: 'Financial',
+      icon: Wallet,
+      color: 'text-green-600',
+      description: 'Budgets, accounts, service charge statements, and financial reports',
+      guidance: {
+        basic: "Financial documents must be kept for statutory periods and made available to leaseholders upon request under LTA 1985.",
+        intermediate: "Maintain service charge accounts, annual statements, receipts, and supporting documentation for 6 years minimum.",
+        advanced: "Ensure compliance with accounting standards, audit requirements, and statutory consultation documentation for major expenditure."
+      },
+      framework: 'LTA_1985' as const
+    },
+    {
+      id: 'insurance',
+      name: 'Insurance',
+      icon: Shield,
+      color: 'text-purple-600',
+      description: 'Insurance policies, certificates, claims, and renewal documents',
+      guidance: {
+        basic: "Building insurance is mandatory for leasehold properties. Keep current policies and certificates accessible to leaseholders.",
+        intermediate: "Maintain insurance schedules, renewal notices, claims history, and ensure adequate cover for reinstatement value.",
+        advanced: "Consider professional indemnity, directors' liability, and ensure compliance with lease requirements for insurance obligations."
+      },
+      framework: 'LTA_1985' as const
+    },
+    {
+      id: 'maintenance',
+      name: 'Maintenance',
+      icon: AlertTriangle,
+      color: 'text-orange-600',
+      description: 'Maintenance contracts, inspection reports, and repair documentation',
+      guidance: {
+        basic: "Keep maintenance records for health and safety compliance and to demonstrate proper building management.",
+        intermediate: "Maintain contractor agreements, inspection reports, safety certificates, and repair documentation for warranty and liability purposes.",
+        advanced: "Ensure compliance with Building Safety Act 2022 for high-rise buildings, including golden thread documentation and safety case reports."
+      },
+      framework: 'BSA_2022' as const
+    },
+    {
+      id: 'admin',
+      name: 'Admin',
+      icon: FileText,
+      color: 'text-gray-600',
+      description: 'Meeting minutes, correspondence, and general administrative documents',
+      guidance: {
+        basic: "Administrative documents support good governance and provide audit trails for decision-making processes.",
+        intermediate: "Maintain board meeting minutes, AGM records, correspondence logs, and decision documentation for transparency.",
+        advanced: "Ensure compliance with company law requirements for record-keeping, including statutory registers and filing obligations."
+      },
+      framework: 'CLRA_2002' as const
+    },
   ];
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -524,18 +585,25 @@ const Documents = () => {
           const Icon = category.icon;
           const isSelected = selectedCategory === category.id;
           return (
-            <button
-              key={category.id}
-              onClick={() => setSelectedCategory(category.id)}
-              className={`flex items-center px-4 py-2 rounded-lg border transition-all whitespace-nowrap ${
-                isSelected 
-                  ? 'border-primary-500 bg-primary-50 text-primary-700' 
-                  : 'border-gray-200 hover:border-gray-300 text-gray-600'
-              }`}
-            >
-              <Icon size={16} className="mr-2" />
-              {category.name}
-            </button>
+            <div key={category.id} className="flex items-center space-x-1">
+              <button
+                onClick={() => setSelectedCategory(category.id)}
+                className={`flex items-center px-4 py-2 rounded-lg border transition-all whitespace-nowrap ${
+                  isSelected
+                    ? 'border-primary-500 bg-primary-50 text-primary-700'
+                    : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                }`}
+              >
+                <Icon size={16} className="mr-2" />
+                {category.name}
+              </button>
+              <LegalGuidanceTooltip
+                title={`${category.name} Legal Requirements`}
+                guidance={category.guidance}
+                framework={category.framework}
+                mandatory={category.id === 'legal' || category.id === 'financial'}
+              />
+            </div>
           );
         })}
       </div>

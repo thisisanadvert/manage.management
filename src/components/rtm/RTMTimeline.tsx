@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { CheckCircle2, Circle, Clock, AlertTriangle, Calendar, FileText, Users, Building2 } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, AlertTriangle, Calendar, FileText, Users, Building2, Scale, BookOpen } from 'lucide-react';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
+import LegalGuidanceTooltip from '../legal/LegalGuidanceTooltip';
 
 interface TimelineStep {
   id: string;
@@ -152,14 +153,48 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
   };
 
   return (
-    <Card>
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-xl font-semibold text-gray-900">RTM Process Timeline</h3>
-          <p className="text-gray-600 mt-1">
-            Track your progress through the Right to Manage formation process
-          </p>
+    <div className="space-y-6">
+      {/* Legal Compliance Header */}
+      <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center space-x-3">
+            <Scale className="h-6 w-6 text-indigo-600" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">RTM Process Legal Timeline</h3>
+              <p className="text-sm text-gray-700 mt-1">
+                Follow the statutory process under CLRA 2002 with mandatory timelines and notice periods
+              </p>
+            </div>
+            <LegalGuidanceTooltip
+              title="RTM Process Legal Requirements"
+              guidance={{
+                basic: "The RTM process follows strict statutory timelines under CLRA 2002. Key stages include eligibility assessment, company formation, claim notice service, and acquisition of management rights.",
+                intermediate: "Critical timelines: claim notice must specify acquisition date (minimum 3 months), counter-notice period (1 month), and various notice requirements throughout the process with specific statutory periods.",
+                advanced: "Detailed process compliance: CLRA 2002 sections 78-95 govern the claim process, including notice requirements, counter-notice procedures, tribunal applications, and acquisition date calculations with specific timing obligations."
+              }}
+              framework="CLRA_2002"
+              mandatory={true}
+              externalResources={[
+                {
+                  title: "LEASE RTM Process Guide",
+                  url: "https://www.lease-advice.org/advice-guide/right-to-manage/rtm-process/",
+                  type: "lease",
+                  description: "Step-by-step RTM process guidance"
+                }
+              ]}
+            />
+          </div>
         </div>
+      </Card>
+
+      <Card>
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900">RTM Process Timeline</h3>
+            <p className="text-gray-600 mt-1">
+              Track your progress through the Right to Manage formation process
+            </p>
+          </div>
 
         <div className="space-y-4">
           {timelineSteps.map((step, index) => (
@@ -310,6 +345,7 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
         </div>
       </div>
     </Card>
+    </div>
   );
 };
 

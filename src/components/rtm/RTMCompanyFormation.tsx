@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Building2, Users, FileText, Download, ExternalLink, CheckCircle2, AlertTriangle, Info } from 'lucide-react';
+import { Building2, Users, FileText, Download, ExternalLink, CheckCircle2, AlertTriangle, Info, Scale, BookOpen } from 'lucide-react';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
+import LegalGuidanceTooltip from '../legal/LegalGuidanceTooltip';
 
 interface Director {
   id: string;
@@ -232,6 +233,45 @@ Date: ${currentDate}
 
   return (
     <div className="space-y-6">
+      {/* Legal Compliance Header */}
+      <Card className="bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center space-x-3">
+            <Scale className="h-6 w-6 text-purple-600" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">RTM Company Formation Legal Requirements</h3>
+              <p className="text-sm text-gray-700 mt-1">
+                Ensure compliance with Companies Act 2006 and CLRA 2002 for RTM company incorporation
+              </p>
+            </div>
+            <LegalGuidanceTooltip
+              title="RTM Company Formation Requirements"
+              guidance={{
+                basic: "RTM companies must be incorporated as companies limited by guarantee under the Companies Act 2006, with specific requirements under CLRA 2002 including qualifying tenant directors and RTM-specific articles.",
+                intermediate: "Key requirements: company limited by guarantee, name ending 'RTM Company Limited', at least one qualifying tenant director, adoption of model RTM articles, registered office address, and compliance with company law obligations.",
+                advanced: "Detailed compliance includes: memorandum and articles compliant with CLRA 2002 Schedule 6, director qualification requirements, company secretary appointment, statutory registers, filing obligations with Companies House, and ongoing compliance duties."
+              }}
+              framework="CLRA_2002"
+              mandatory={true}
+              externalResources={[
+                {
+                  title: "LEASE RTM Company Guide",
+                  url: "https://www.lease-advice.org/advice-guide/right-to-manage/rtm-company/",
+                  type: "lease",
+                  description: "RTM company formation guidance"
+                },
+                {
+                  title: "Companies House Guidance",
+                  url: "https://www.gov.uk/government/organisations/companies-house",
+                  type: "government",
+                  description: "Company incorporation requirements"
+                }
+              ]}
+            />
+          </div>
+        </div>
+      </Card>
+
       {/* Company Formation Overview */}
       <Card>
         <div className="space-y-4">
@@ -240,12 +280,15 @@ Date: ${currentDate}
             <div className="flex items-start space-x-3">
               <Info className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
-                <h4 className="font-medium text-blue-900">Legal Requirements</h4>
+                <h4 className="font-medium text-blue-900">Legal Requirements (CLRA 2002 & Companies Act 2006)</h4>
                 <ul className="text-sm text-blue-800 mt-2 space-y-1">
-                  <li>• Company must be limited by guarantee</li>
+                  <li>• Company must be limited by guarantee (not by shares)</li>
                   <li>• At least one director must be a qualifying tenant</li>
                   <li>• Company name must end with "RTM Company Limited"</li>
-                  <li>• Must adopt specific RTM articles of association</li>
+                  <li>• Must adopt RTM-specific articles of association</li>
+                  <li>• Registered office address required</li>
+                  <li>• Company secretary appointment recommended</li>
+                  <li>• Compliance with ongoing company law obligations</li>
                 </ul>
               </div>
             </div>

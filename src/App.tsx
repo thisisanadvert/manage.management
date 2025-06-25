@@ -13,6 +13,10 @@ import RTMManagement from './pages/RTMManagement';
 import ShareCertificates from './pages/ShareCertificates';
 import SupplierNetwork from './pages/SupplierNetwork';
 import LegalTemplates from './pages/LegalTemplates';
+import DirectorSupport from './pages/DirectorSupport';
+import ComplianceMonitoringDashboard from './components/compliance/ComplianceMonitoringDashboard';
+import LegalResourcesDashboard from './components/legal/LegalResourcesDashboard';
+import LegalAccuracyDashboard from './components/legal/LegalAccuracyDashboard';
 import BuildingDetails from './pages/BuildingDetails';
 import Reports from './pages/Reports';
 import Profile from './pages/Profile';
@@ -252,6 +256,10 @@ function App() {
         <Route path="rtm" element={<RTMManagement />} />
         <Route path="suppliers" element={<SupplierNetwork />} />
         <Route path="legal-templates" element={<LegalTemplates />} />
+        <Route path="director-support" element={<DirectorSupport />} />
+        <Route path="compliance" element={<ComplianceMonitoringDashboard />} />
+        <Route path="legal-resources" element={<LegalResourcesDashboard />} />
+        <Route path="legal-accuracy" element={<LegalAccuracyDashboard />} />
       </Route>
 
       {/* RMC Director Routes */}
@@ -276,6 +284,10 @@ function App() {
         <Route path="shares" element={<ShareCertificates />} />
         <Route path="suppliers" element={<SupplierNetwork />} />
         <Route path="legal-templates" element={<LegalTemplates />} />
+        <Route path="director-support" element={<DirectorSupport />} />
+        <Route path="compliance" element={<ComplianceMonitoringDashboard />} />
+        <Route path="legal-resources" element={<LegalResourcesDashboard />} />
+        <Route path="legal-accuracy" element={<LegalAccuracyDashboard />} />
       </Route>
 
 

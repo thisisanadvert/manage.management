@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { CheckCircle2, XCircle, AlertTriangle, Info, Home, Users, Calendar, Percent } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, Info, Home, Users, Calendar, Percent, Scale, BookOpen } from 'lucide-react';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
+import LegalGuidanceTooltip from '../legal/LegalGuidanceTooltip';
 
 interface EligibilityData {
   totalFlats: number;
@@ -253,14 +254,54 @@ const EligibilityChecker: React.FC<EligibilityCheckerProps> = ({ onNavigateToSur
   }
 
   return (
-    <Card>
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-xl font-semibold text-gray-900">RTM Eligibility Checker</h3>
-          <p className="text-gray-600 mt-1">
-            Check if your building qualifies for Right to Manage under UK law
-          </p>
+    <div className="space-y-6">
+      {/* Legal Compliance Header */}
+      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center space-x-3">
+            <Scale className="h-6 w-6 text-blue-600" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Legal Eligibility Assessment</h3>
+              <p className="text-sm text-gray-700 mt-1">
+                Verify compliance with Commonhold and Leasehold Reform Act 2002 requirements
+              </p>
+            </div>
+            <LegalGuidanceTooltip
+              title="RTM Eligibility Requirements"
+              guidance={{
+                basic: "Under the Commonhold and Leasehold Reform Act 2002, buildings must meet specific criteria to qualify for RTM including minimum flat numbers, residential percentage, and qualifying tenant participation.",
+                intermediate: "Key requirements: at least 2 flats, 75%+ residential use, no more than 25% commercial space, qualifying tenants must hold long leases (over 21 years), and at least 50% of qualifying tenants must participate.",
+                advanced: "Detailed eligibility includes: premises must be self-contained, no resident landlord exemption, proper lease structure, company formation requirements, and compliance with RTM company regulations under CLRA 2002 sections 72-113."
+              }}
+              framework="CLRA_2002"
+              mandatory={true}
+              externalResources={[
+                {
+                  title: "LEASE RTM Eligibility Guide",
+                  url: "https://www.lease-advice.org/advice-guide/right-to-manage/eligibility/",
+                  type: "lease",
+                  description: "Comprehensive eligibility requirements"
+                },
+                {
+                  title: "Gov.uk RTM Criteria",
+                  url: "https://www.gov.uk/right-to-manage-your-building/eligibility",
+                  type: "government",
+                  description: "Official eligibility criteria"
+                }
+              ]}
+            />
+          </div>
         </div>
+      </Card>
+
+      <Card>
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900">RTM Eligibility Checker</h3>
+            <p className="text-gray-600 mt-1">
+              Check if your building qualifies for Right to Manage under UK law
+            </p>
+          </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -406,6 +447,7 @@ const EligibilityChecker: React.FC<EligibilityCheckerProps> = ({ onNavigateToSur
         </form>
       </div>
     </Card>
+    </div>
   );
 };
 

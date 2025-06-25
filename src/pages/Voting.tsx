@@ -11,7 +11,9 @@ import {
   BarChart4,
   ChevronRight,
   Users,
-  MessageSquare
+  MessageSquare,
+  Scale,
+  Shield
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -19,6 +21,7 @@ import Badge from '../components/ui/Badge';
 import CreatePollModal from '../components/modals/CreatePollModal';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import LegalGuidanceTooltip from '../components/legal/LegalGuidanceTooltip';
 
 const Voting = () => {
   const { user } = useAuth();
@@ -191,9 +194,29 @@ const Voting = () => {
   return (
     <div className="space-y-6 pb-16 lg:pb-0">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Voting & Decision Making</h1>
-          <p className="text-gray-600 mt-1">Manage building-wide decisions through transparent voting</p>
+        <div className="flex items-center space-x-2">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Voting & Decision Making</h1>
+            <p className="text-gray-600 mt-1">Manage building-wide decisions through transparent voting</p>
+          </div>
+          <LegalGuidanceTooltip
+            title="Voting and Consultation Legal Requirements"
+            guidance={{
+              basic: "Certain decisions require formal consultation with leaseholders, including major works over £250 per leaseholder and long-term agreements.",
+              intermediate: "Section 20 consultations must follow statutory procedures with proper notice periods. AGM voting requires specific quorum and majority requirements.",
+              advanced: "Ensure compliance with consultation regulations, proxy voting rules, and decision recording requirements under LTA 1985 and company law."
+            }}
+            framework="LTA_1985"
+            mandatory={true}
+            externalResources={[
+              {
+                title: "LEASE Consultation Guide",
+                url: "https://www.lease-advice.org/advice-guide/section-20-consultation/",
+                type: "lease",
+                description: "Statutory consultation requirements"
+              }
+            ]}
+          />
         </div>
         <Button
           leftIcon={<Plus size={16} />}
@@ -254,7 +277,69 @@ const Voting = () => {
           </div>
         </Card>
       </div>
-      
+
+      {/* Statutory Consultations Section */}
+      <Card className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center space-x-3">
+            <Scale className="h-6 w-6 text-blue-600" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Statutory Consultations</h3>
+              <p className="text-sm text-gray-700 mt-1">
+                Legal consultations required under Section 20 LTA 1985 and other statutory requirements
+              </p>
+            </div>
+          </div>
+          <Button variant="primary" size="sm">
+            Start Section 20 Consultation
+          </Button>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 bg-white rounded-lg border border-blue-200">
+            <div className="flex items-center space-x-2 mb-2">
+              <Shield className="h-4 w-4 text-blue-600" />
+              <h4 className="font-medium text-gray-900">Section 20 Consultations</h4>
+            </div>
+            <p className="text-sm text-gray-600 mb-3">
+              Required for major works over £250 per leaseholder
+            </p>
+            <div className="flex items-center space-x-2">
+              <Badge variant="info">0 Active</Badge>
+              <Badge variant="success">2 Completed</Badge>
+            </div>
+          </div>
+
+          <div className="p-4 bg-white rounded-lg border border-blue-200">
+            <div className="flex items-center space-x-2 mb-2">
+              <Users className="h-4 w-4 text-blue-600" />
+              <h4 className="font-medium text-gray-900">AGM Resolutions</h4>
+            </div>
+            <p className="text-sm text-gray-600 mb-3">
+              Annual General Meeting voting and resolutions
+            </p>
+            <div className="flex items-center space-x-2">
+              <Badge variant="warning">1 Upcoming</Badge>
+              <Badge variant="success">5 Passed</Badge>
+            </div>
+          </div>
+
+          <div className="p-4 bg-white rounded-lg border border-blue-200">
+            <div className="flex items-center space-x-2 mb-2">
+              <MessageSquare className="h-4 w-4 text-blue-600" />
+              <h4 className="font-medium text-gray-900">Policy Changes</h4>
+            </div>
+            <p className="text-sm text-gray-600 mb-3">
+              Building policy and rule changes requiring consultation
+            </p>
+            <div className="flex items-center space-x-2">
+              <Badge variant="info">0 Active</Badge>
+              <Badge variant="success">3 Approved</Badge>
+            </div>
+          </div>
+        </div>
+      </Card>
+
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">

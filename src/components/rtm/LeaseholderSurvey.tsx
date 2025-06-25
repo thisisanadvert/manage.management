@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Users, Mail, Phone, Home, CheckCircle2, Send, Download, Eye } from 'lucide-react';
+import { Users, Mail, Phone, Home, CheckCircle2, Send, Download, Eye, Scale, BookOpen } from 'lucide-react';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
+import LegalGuidanceTooltip from '../legal/LegalGuidanceTooltip';
 
 interface LeaseholderInfo {
   id: string;
@@ -135,6 +136,60 @@ This is an informal survey. No legal obligations arise from your response.
 
   return (
     <div className="space-y-6">
+      {/* Legal Compliance Header */}
+      <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center space-x-3">
+            <Scale className="h-6 w-6 text-green-600" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Qualifying Tenant Participation Requirements</h3>
+              <p className="text-sm text-gray-700 mt-1">
+                Ensure compliance with CLRA 2002 minimum participation thresholds for RTM claims
+              </p>
+            </div>
+            <LegalGuidanceTooltip
+              title="RTM Participation Requirements"
+              guidance={{
+                basic: "Under CLRA 2002, at least 50% of qualifying tenants must participate in the RTM claim. Qualifying tenants are those holding long leases (over 21 years) of flats in the building.",
+                intermediate: "Key requirements: qualifying tenants must hold leases granted for more than 21 years, must be current leaseholders, and at least half must be RTM company members when the claim notice is served.",
+                advanced: "Detailed compliance: qualifying tenant definition under CLRA 2002 s75, participation calculation methods, timing requirements for membership, and evidence requirements for RTM claim validity."
+              }}
+              framework="CLRA_2002"
+              mandatory={true}
+              externalResources={[
+                {
+                  title: "LEASE Qualifying Tenants Guide",
+                  url: "https://www.lease-advice.org/advice-guide/right-to-manage/qualifying-tenants/",
+                  type: "lease",
+                  description: "Understanding qualifying tenant requirements"
+                }
+              ]}
+            />
+          </div>
+        </div>
+        <div className="mt-4 p-3 bg-white rounded-lg border border-green-200">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700">Current Participation Rate:</span>
+            <span className={`text-lg font-bold ${participationRate >= 50 ? 'text-green-600' : 'text-red-600'}`}>
+              {participationRate.toFixed(1)}%
+            </span>
+          </div>
+          <div className="mt-2">
+            <div className="text-xs text-gray-600 mb-1">
+              {participationRate >= 50 ? '✓ Meets legal minimum (50%)' : '✗ Below legal minimum (50%)'}
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  participationRate >= 50 ? 'bg-green-500' : 'bg-red-500'
+                }`}
+                style={{ width: `${Math.min(participationRate, 100)}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </Card>
+
       {/* Survey Statistics */}
       <Card>
         <div className="space-y-4">
