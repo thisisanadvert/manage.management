@@ -258,10 +258,34 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
     </div>
   );
 
-  const filteredNavigation = navigation.filter(item => 
-    item.roles.includes(user?.role || '') && 
-    (!item.requiresFeature || isFeatureEnabled(item.requiresFeature))
-  );
+  const filteredNavigation = navigation.filter(item => {
+    const hasRole = item.roles.includes(user?.role || '');
+    const hasFeature = !item.requiresFeature || isFeatureEnabled(item.requiresFeature);
+
+    // Debug logging for User Impersonation specifically
+    if (item.name === 'User Impersonation') {
+      console.log('🔍 User Impersonation Filter Check:', {
+        itemName: item.name,
+        userRole: user?.role,
+        requiredRoles: item.roles,
+        hasRole,
+        hasFeature,
+        willShow: hasRole && hasFeature
+      });
+    }
+
+    return hasRole && hasFeature;
+  });
+
+  // Debug: Log all visible navigation items
+  console.log('📋 Sidebar Navigation Items:', {
+    userRole: user?.role,
+    userEmail: user?.email,
+    totalItems: navigation.length,
+    visibleItems: filteredNavigation.length,
+    visibleItemNames: filteredNavigation.map(item => item.name),
+    hasUserImpersonation: filteredNavigation.some(item => item.name === 'User Impersonation')
+  });
 
   return (
     <div className="h-full flex flex-col bg-white border-r border-gray-200 overflow-y-auto">
