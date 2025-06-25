@@ -69,6 +69,8 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
         return 'Share of Freeholder';
       case 'management-company':
         return 'Management Company';
+      case 'super-admin':
+        return 'Super Admin';
       default:
         return 'User';
     }

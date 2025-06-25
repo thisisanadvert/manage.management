@@ -8,7 +8,8 @@ type UserRole =
   | 'rmc-director'
   | 'leaseholder'
   | 'shareholder'
-  | 'management-company';
+  | 'management-company'
+  | 'super-admin';
 
 type BuildingType = 'rtm' | 'share-of-freehold' | 'landlord-managed';
 
