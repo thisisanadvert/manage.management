@@ -35,6 +35,9 @@ import TermsOfService from './pages/legal/TermsOfService';
 import Help from './pages/Help';
 import RTMResources from './pages/RTMResources';
 import About from './pages/About';
+import Blog from './pages/Blog';
+import Contact from './pages/Contact';
+import LeaseholderRights from './pages/LeaseholderRights';
 import RTMQualify from './pages/RTMQualify';
 import IssueManagement from './pages/features/IssueManagement';
 import FinancialTracking from './pages/features/FinancialTracking';
@@ -173,6 +176,9 @@ function App() {
       <Route path="/help" element={<Help />} />
       <Route path="/rtm-resources" element={<RTMResources />} />
       <Route path="/about" element={<About />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/leaseholder-rights" element={<LeaseholderRights />} />
 
       {/* RTM Qualification Lead Magnet */}
       <Route path="/qualify" element={<RTMQualify />} />
@@ -183,6 +189,22 @@ function App() {
       <Route path="/features/document-management" element={<DocumentManagement />} />
       <Route path="/features/voting-system" element={<VotingSystem />} />
       <Route path="/features/communication-hub" element={<CommunicationHub />} />
+
+      {/* User account pages - accessible when logged in */}
+      <Route path="/profile" element={
+        <PrivateRoute>
+          <MainLayout>
+            <Profile />
+          </MainLayout>
+        </PrivateRoute>
+      } />
+      <Route path="/settings" element={
+        <PrivateRoute>
+          <MainLayout>
+            <Settings />
+          </MainLayout>
+        </PrivateRoute>
+      } />
       
       {/* Profile and Settings routes */}
       <Route

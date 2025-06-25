@@ -102,17 +102,18 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
             </a>
           </div>
           
-          {/* Search bar - hidden on mobile */}
+          {/* Search bar - Coming soon */}
           <div className="hidden md:flex items-center w-1/3 relative">
             <div className="w-full relative">
               <input
                 type="text"
-                placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-colors"
+                placeholder="Search coming soon..."
+                disabled
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 bg-gray-50 text-gray-400 cursor-not-allowed"
               />
-              <Search 
-                size={18} 
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" 
+              <Search
+                size={18}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
               />
             </div>
           </div>

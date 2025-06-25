@@ -336,8 +336,9 @@ const Landing = () => {
                       variant="ghost"
                       className="mt-4"
                       rightIcon={<ArrowRight size={16} />}
+                      onClick={() => navigate('/help')}
                     >
-                      Read More
+                      Learn More
                     </Button>
                   </div>
                 </Card>
