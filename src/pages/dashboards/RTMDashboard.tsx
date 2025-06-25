@@ -8,7 +8,9 @@ import {
   Vote,
   Calendar,
   Plus,
-  ArrowRight
+  ArrowRight,
+  Shield,
+  BookOpen
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
@@ -23,6 +25,8 @@ import {
   RecentActivityWidget,
   QuickActions
 } from '../../components/dashboard/DashboardWidgets';
+import LegalGuidanceTooltip from '../../components/legal/LegalGuidanceTooltip';
+import ComplianceStatusIndicator from '../../components/legal/ComplianceStatusIndicator';
 
 const RTMDashboard = () => {
   const { user } = useAuth();
@@ -179,6 +183,91 @@ const RTMDashboard = () => {
         </div>
       </Card>
       
+      {/* Legal Compliance Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <Shield className="h-5 w-5 text-primary-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Legal Compliance</h3>
+              <LegalGuidanceTooltip
+                title="RTM Legal Compliance"
+                guidance={{
+                  basic: "As an RTM director, you have legal obligations under the Commonhold and Leasehold Reform Act 2002. This includes proper consultation procedures, financial management, and meeting statutory requirements.",
+                  intermediate: "Key obligations include Section 20 consultations for major works, proper accounting procedures, AGM requirements, and maintaining statutory registers.",
+                  advanced: "Detailed compliance includes adherence to RTM company articles, proper notice procedures, consultation requirements under LTA 1985, and potential liability under company law."
+                }}
+                framework="CLRA_2002"
+                mandatory={true}
+                externalResources={[
+                  {
+                    title: "LEASE RTM Guidance",
+                    url: "https://www.lease-advice.org/advice-guide/right-to-manage/",
+                    type: "lease",
+                    description: "Comprehensive guide to RTM legal requirements"
+                  }
+                ]}
+              />
+            </div>
+          </div>
+          <ComplianceStatusIndicator
+            status="compliant"
+            title="Overall Status"
+            description="All key requirements are being met"
+            lastReviewed={new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)}
+            size="md"
+          />
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <BookOpen className="h-5 w-5 text-blue-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Legal Resources</h3>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <a
+              href="https://www.lease-advice.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+            >
+              <div className="font-medium text-blue-900">LEASE</div>
+              <div className="text-sm text-blue-700">Leasehold Advisory Service</div>
+            </a>
+            <a
+              href="https://www.gov.uk/right-to-manage-your-building"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+            >
+              <div className="font-medium text-green-900">Gov.uk RTM Guide</div>
+              <div className="text-sm text-green-700">Official government guidance</div>
+            </a>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Upcoming Deadlines</h3>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div className="p-3 bg-orange-50 rounded-lg">
+              <div className="font-medium text-orange-900">AGM Notice</div>
+              <div className="text-sm text-orange-700">Due in 14 days</div>
+            </div>
+            <div className="p-3 bg-yellow-50 rounded-lg">
+              <div className="font-medium text-yellow-900">Insurance Review</div>
+              <div className="text-sm text-yellow-700">Due in 30 days</div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
       {/* Main Dashboard Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Recent Activity */}

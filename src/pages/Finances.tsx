@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  BarChart4, 
-  DollarSign, 
-  Download, 
-  Filter, 
+import {
+  BarChart4,
+  DollarSign,
+  Download,
+  Filter,
   Search,
   ArrowUpRight,
   ArrowDownRight,
@@ -23,7 +23,10 @@ import {
   Building2,
   Settings,
   History,
-  ChevronRight
+  ChevronRight,
+  Scale,
+  Users,
+  BookOpen
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -32,6 +35,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import FinancialSetupModal from '../components/modals/FinancialSetupModal';
 import { getUserBuildingId } from '../utils/buildingUtils';
+import LegalGuidanceTooltip from '../components/legal/LegalGuidanceTooltip';
+import ComplianceStatusIndicator from '../components/legal/ComplianceStatusIndicator';
 
 const Finances = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -41,7 +46,7 @@ const Finances = () => {
   const [financialSetup, setFinancialSetup] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { user, signOut } = useAuth();
-  const isDirector = user?.role === 'rtm-director' || user?.role === 'sof-director';
+  const isDirector = user?.role === 'rtm-director' || user?.role === 'rmc-director';
 
   // Check building association
   const checkBuildingAssociation = async () => {
@@ -140,6 +145,7 @@ const Finances = () => {
     { id: 'transactions', label: 'Transactions' },
     { id: 'budgets', label: 'Budgets & Planning' },
     { id: 'service-charges', label: 'Service Charges' },
+    { id: 'section-20', label: 'Section 20 Consultations' },
     { id: 'reports', label: 'Reports & Analysis' }
   ];
 
@@ -388,8 +394,152 @@ const Finances = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Tab Content */}
+      {activeTab === 'overview' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Legal Compliance Section */}
+          <Card className="lg:col-span-2">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <Scale className="h-5 w-5 text-primary-600" />
+                <h3 className="text-lg font-semibold text-gray-900">Financial Compliance</h3>
+                <LegalGuidanceTooltip
+                  title="Financial Legal Obligations"
+                  guidance={{
+                    basic: "You must follow strict rules for service charges, including Section 20 consultations for major works over £250 per leaseholder.",
+                    intermediate: "Key requirements include proper accounting, annual statements, consultation procedures, and transparent charging practices under LTA 1985.",
+                    advanced: "Detailed compliance includes service charge demand procedures, trust accounting, consultation timelines, and potential liability for non-compliance."
+                  }}
+                  framework="LTA_1985"
+                  mandatory={true}
+                  externalResources={[
+                    {
+                      title: "LEASE Service Charges Guide",
+                      url: "https://www.lease-advice.org/advice-guide/service-charges/",
+                      type: "lease",
+                      description: "Comprehensive guide to service charge legal requirements"
+                    }
+                  ]}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <ComplianceStatusIndicator
+                status="compliant"
+                title="Service Charge Demands"
+                description="All demands properly issued"
+                size="sm"
+              />
+              <ComplianceStatusIndicator
+                status="at_risk"
+                title="Section 20 Consultations"
+                description="Review upcoming major works"
+                size="sm"
+              />
+              <ComplianceStatusIndicator
+                status="compliant"
+                title="Annual Statements"
+                description="Up to date and compliant"
+                size="sm"
+              />
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === 'section-20' && (
+        <div className="space-y-6">
+          {/* Section 20 Overview */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-2">
+                <Users className="h-6 w-6 text-primary-600" />
+                <h2 className="text-xl font-semibold text-gray-900">Section 20 Consultations</h2>
+                <LegalGuidanceTooltip
+                  title="Section 20 Consultation Requirements"
+                  guidance={{
+                    basic: "You must consult leaseholders before carrying out major works costing more than £250 per leaseholder or entering into long-term agreements.",
+                    intermediate: "Follow the two-stage process: Notice of Intention (30 days), then Notice of Proposal with estimates (30 days). Failure to consult properly limits recoverable costs to £250 per leaseholder.",
+                    advanced: "Comply with Service Charges (Consultation Requirements) (England) Regulations 2003. Consider dispensation applications to First-tier Tribunal if consultation not possible."
+                  }}
+                  framework="LTA_1985"
+                  mandatory={true}
+                  externalResources={[
+                    {
+                      title: "Section 20 Consultation Guide",
+                      url: "https://www.lease-advice.org/advice-guide/section-20-consultation/",
+                      type: "lease",
+                      description: "Step-by-step guide to Section 20 consultations"
+                    }
+                  ]}
+                />
+              </div>
+              <Button variant="primary" leftIcon={<Plus className="h-4 w-4" />}>
+                Start New Consultation
+              </Button>
+            </div>
+
+            {/* Active Consultations */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-900">Active Consultations</h3>
+              <div className="space-y-3">
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-gray-900">Roof Repairs - Major Works</h4>
+                      <p className="text-sm text-gray-600">Estimated cost: £15,000 (£375 per leaseholder)</p>
+                      <div className="flex items-center space-x-4 mt-2">
+                        <Badge variant="warning">Notice of Intention Sent</Badge>
+                        <span className="text-sm text-gray-500">Responses due: 15 days</span>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      View Details
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="p-4 hover:bg-gray-50 cursor-pointer">
+                <div className="flex items-center space-x-3">
+                  <FileText className="h-8 w-8 text-blue-600" />
+                  <div>
+                    <h4 className="font-medium text-gray-900">Generate Notice</h4>
+                    <p className="text-sm text-gray-600">Create Section 20 notices</p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-4 hover:bg-gray-50 cursor-pointer">
+                <div className="flex items-center space-x-3">
+                  <BookOpen className="h-8 w-8 text-green-600" />
+                  <div>
+                    <h4 className="font-medium text-gray-900">Legal Templates</h4>
+                    <p className="text-sm text-gray-600">Access consultation templates</p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-4 hover:bg-gray-50 cursor-pointer">
+                <div className="flex items-center space-x-3">
+                  <Calendar className="h-8 w-8 text-purple-600" />
+                  <div>
+                    <h4 className="font-medium text-gray-900">Track Deadlines</h4>
+                    <p className="text-sm text-gray-600">Monitor consultation timelines</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Default content for other tabs */}
+      {activeTab !== 'overview' && activeTab !== 'section-20' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Transactions */}
         <Card>
           <div className="flex items-center justify-between mb-4">
