@@ -347,10 +347,17 @@ const Profile = () => {
               <h4 className="font-medium text-error-700">Sign Out</h4>
               <p className="text-sm text-gray-500">Sign out of your account</p>
             </div>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="text-error-600 hover:bg-error-50"
-              onClick={signOut}
+              onClick={async () => {
+                try {
+                  console.log('Profile page logout button clicked');
+                  await signOut();
+                } catch (error) {
+                  console.error('Profile logout error:', error);
+                }
+              }}
             >
               Sign Out
             </Button>

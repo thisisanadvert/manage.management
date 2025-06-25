@@ -43,10 +43,14 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
 
   const handleLogout = async () => {
     try {
+      console.log('Header logout button clicked');
+      setShowDropdown(false); // Close dropdown immediately
       await signOut();
-      navigate('/login');
+      // Navigation is handled in the signOut function
     } catch (error) {
       console.error('Error signing out:', error);
+      // Even if there's an error, try to navigate to login
+      navigate('/login', { replace: true });
     }
   };
 
@@ -177,7 +181,8 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
                   <div className="border-t border-gray-100 my-1"></div>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full transition-colors"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full transition-colors text-left"
+                    type="button"
                   >
                     <LogOut size={16} className="mr-2" />
                     Log out
