@@ -261,7 +261,20 @@ function App() {
         <Route path="compliance" element={<ComplianceMonitoringDashboard />} />
         <Route path="legal-resources" element={<LegalResourcesDashboard />} />
         <Route path="legal-accuracy" element={<LegalAccuracyDashboard />} />
-        <Route path="user-impersonation" element={<UserImpersonationDashboard />} />
+        <Route path="user-impersonation" element={
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">User Impersonation - Test</h1>
+              <p className="mt-1 text-sm text-gray-500">
+                Testing if the route works at all.
+              </p>
+            </div>
+            <div className="bg-white shadow rounded-lg p-6">
+              <p className="text-green-600">✅ Route is working! The issue was with the component.</p>
+              <p className="text-sm text-gray-600 mt-2">This confirms the routing is correct.</p>
+            </div>
+          </div>
+        } />
       </Route>
 
       {/* RMC Director Routes */}
