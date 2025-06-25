@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Building, Users, Scale, Home, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Building, Users, Scale, Home, ChevronLeft, ChevronRight, Briefcase, Crown } from 'lucide-react';
 import Card from '../ui/Card';
 
 interface Role {
   id: string;
   title: string;
+  subtitle?: string;
   description: string;
   icon: React.ReactNode;
   features: {
@@ -16,10 +17,10 @@ interface Role {
 
 const roles: Role[] = [
   {
-    id: 'rtm-director',
-    title: 'RTM Director',
-    description: 'Managing your Right to Manage company with confidence',
-    icon: <Building className="h-6 w-6" />,
+    id: 'director',
+    title: 'RTM/RMC Director',
+    description: 'Take control of your building management with confidence',
+    icon: <Crown className="h-6 w-6" />,
     features: [
       {
         title: 'Board Management',
@@ -32,39 +33,17 @@ const roles: Role[] = [
         icon: <Scale className="h-5 w-5" />
       },
       {
-        title: 'Compliance Tracking',
+        title: 'Compliance & Legal',
         description: 'Stay on top of legal requirements, certifications, and deadlines',
         icon: <Building className="h-5 w-5" />
       }
     ]
   },
   {
-    id: 'rmc-director',
-    title: 'Resident Management Company (RMC) Director',
-    description: 'Collaborative ownership management made simple',
-    icon: <Scale className="h-6 w-6" />,
-    features: [
-      {
-        title: 'Shareholder Communication',
-        description: 'Keep all shareholders informed with announcements and voting systems',
-        icon: <Users className="h-5 w-5" />
-      },
-      {
-        title: 'Property Maintenance',
-        description: 'Coordinate repairs, improvements, and ongoing maintenance efficiently',
-        icon: <Building className="h-5 w-5" />
-      },
-      {
-        title: 'Cost Sharing',
-        description: 'Transparent expense tracking and fair cost allocation among shareholders',
-        icon: <Scale className="h-5 w-5" />
-      }
-    ]
-  },
-  {
     id: 'homeowner',
     title: 'Homeowner',
-    description: 'Stay connected and informed about your building',
+    subtitle: 'Leaseholders and Share of Freeholders',
+    description: 'Stay connected and participate in your building community',
     icon: <Home className="h-6 w-6" />,
     features: [
       {
@@ -73,13 +52,36 @@ const roles: Role[] = [
         icon: <Building className="h-5 w-5" />
       },
       {
-        title: 'Community Updates',
-        description: 'Receive important announcements and participate in building decisions',
+        title: 'Community Participation',
+        description: 'Receive announcements, vote on decisions, and stay informed',
         icon: <Users className="h-5 w-5" />
       },
       {
         title: 'Service Charge Transparency',
         description: 'View detailed breakdowns of charges and building expenses',
+        icon: <Scale className="h-5 w-5" />
+      }
+    ]
+  },
+  {
+    id: 'management-company',
+    title: 'Block Freeholders/Management Companies',
+    description: 'Professional building management with transparency and efficiency',
+    icon: <Briefcase className="h-6 w-6" />,
+    features: [
+      {
+        title: 'Multi-Property Management',
+        description: 'Manage multiple buildings and portfolios from one central platform',
+        icon: <Building className="h-5 w-5" />
+      },
+      {
+        title: 'Resident Communication',
+        description: 'Keep residents informed with automated updates and announcements',
+        icon: <Users className="h-5 w-5" />
+      },
+      {
+        title: 'Financial Reporting',
+        description: 'Generate detailed reports and maintain transparent financial records',
         icon: <Scale className="h-5 w-5" />
       }
     ]
@@ -126,7 +128,16 @@ const RoleSelector: React.FC = () => {
                 }`}
               >
                 {role.icon}
-                <span className="font-medium">{role.title}</span>
+                <div className="text-left">
+                  <span className="font-medium block">{role.title}</span>
+                  {role.subtitle && (
+                    <span className={`text-xs block ${
+                      selectedRole === index ? 'text-white/80' : 'text-gray-500'
+                    }`}>
+                      {role.subtitle}
+                    </span>
+                  )}
+                </div>
               </button>
             ))}
           </div>
@@ -155,6 +166,11 @@ const RoleSelector: React.FC = () => {
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 px-4">
               {currentRole.title}
             </h3>
+            {currentRole.subtitle && (
+              <p className="text-sm sm:text-base text-gray-500 mb-2 px-4">
+                {currentRole.subtitle}
+              </p>
+            )}
             <p className="text-base sm:text-lg text-gray-600 px-4">
               {currentRole.description}
             </p>
