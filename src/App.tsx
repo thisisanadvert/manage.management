@@ -18,6 +18,59 @@ import ComplianceMonitoringDashboard from './components/compliance/ComplianceMon
 import LegalResourcesDashboard from './components/legal/LegalResourcesDashboard';
 import LegalAccuracyDashboard from './components/legal/LegalAccuracyDashboard';
 import UserImpersonationDashboard from './components/admin/UserImpersonationDashboard';
+import { useAuth } from './contexts/AuthContext';
+
+// Test component for debugging
+const TestImpersonationComponent = () => {
+  const { user, canImpersonate } = useAuth();
+
+  console.log('🧪 TestImpersonationComponent rendered:', {
+    user: user?.email,
+    role: user?.role,
+    canImpersonate,
+    timestamp: new Date().toISOString()
+  });
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">🧪 User Impersonation - Debug Test</h1>
+        <p className="mt-1 text-sm text-gray-500">
+          Testing if the route works at all.
+        </p>
+      </div>
+
+      <div className="bg-white shadow rounded-lg p-6">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Debug Information</h2>
+        <div className="space-y-2 text-sm">
+          <p><strong>User Email:</strong> {user?.email || 'Not logged in'}</p>
+          <p><strong>User Role:</strong> {user?.role || 'No role'}</p>
+          <p><strong>Can Impersonate:</strong> {canImpersonate ? 'Yes' : 'No'}</p>
+          <p><strong>Page Status:</strong> Component loaded successfully</p>
+          <p><strong>Current URL:</strong> {window.location.href}</p>
+          <p><strong>Timestamp:</strong> {new Date().toLocaleString()}</p>
+        </div>
+
+        {canImpersonate ? (
+          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-md">
+            <p className="text-green-800">✅ You have impersonation permissions!</p>
+            <p className="text-sm text-green-600 mt-1">The full dashboard will be loaded here.</p>
+          </div>
+        ) : (
+          <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-red-800">❌ No impersonation permissions</p>
+            <p className="text-sm text-red-600 mt-1">You need super-admin role to access this feature.</p>
+          </div>
+        )}
+
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+          <p className="text-blue-800">📝 Check the browser console for detailed logs</p>
+          <p className="text-sm text-blue-600 mt-1">Look for logs starting with 🔐, 🧪, ✅, or ❌</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 import BuildingDetails from './pages/BuildingDetails';
 import Reports from './pages/Reports';
 import Profile from './pages/Profile';
@@ -89,8 +142,17 @@ function RoleBasedRoute({ children, allowedRoles }: { children: React.ReactNode;
   const { user } = useAuth();
   const location = useLocation();
 
+  console.log('🔐 RoleBasedRoute Check:', {
+    currentPath: location.pathname,
+    userRole: user?.role,
+    userEmail: user?.email,
+    allowedRoles,
+    hasRole: !!user?.role,
+    isAllowed: user?.role && allowedRoles.includes(user.role)
+  });
+
   if (!user?.role || !allowedRoles.includes(user.role)) {
-    console.log('RoleBasedRoute - Access denied. User role:', user?.role, 'Allowed roles:', allowedRoles);
+    console.log('❌ RoleBasedRoute - Access denied. User role:', user?.role, 'Allowed roles:', allowedRoles);
 
     let redirectPath = '/login';
     if (user?.role) {
@@ -101,10 +163,11 @@ function RoleBasedRoute({ children, allowedRoles }: { children: React.ReactNode;
       redirectPath = '/building-setup';
     }
 
-    console.log('RoleBasedRoute redirecting to:', redirectPath);
+    console.log('🔄 RoleBasedRoute redirecting to:', redirectPath);
     return <Navigate to={redirectPath} state={{ from: location }} replace />;
   }
 
+  console.log('✅ RoleBasedRoute - Access granted!');
   return <>{children}</>;
 }
 
@@ -262,18 +325,7 @@ function App() {
         <Route path="legal-resources" element={<LegalResourcesDashboard />} />
         <Route path="legal-accuracy" element={<LegalAccuracyDashboard />} />
         <Route path="user-impersonation" element={
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">User Impersonation - Test</h1>
-              <p className="mt-1 text-sm text-gray-500">
-                Testing if the route works at all.
-              </p>
-            </div>
-            <div className="bg-white shadow rounded-lg p-6">
-              <p className="text-green-600">✅ Route is working! The issue was with the component.</p>
-              <p className="text-sm text-gray-600 mt-2">This confirms the routing is correct.</p>
-            </div>
-          </div>
+          <TestImpersonationComponent />
         } />
       </Route>
 
