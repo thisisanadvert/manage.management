@@ -46,7 +46,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   }, [isVisible, position]);
 
   const getPositionClasses = () => {
-    const baseClasses = 'absolute z-50 px-4 py-3 text-sm text-white bg-gray-900 rounded-lg shadow-lg max-w-sm';
+    const baseClasses = 'absolute z-50 px-4 py-3 text-sm text-white bg-gray-900 rounded-lg shadow-lg max-w-md';
     
     switch (actualPosition) {
       case 'top':
