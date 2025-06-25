@@ -122,6 +122,12 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
       roles: ['rtm-director', 'rmc-director', 'management-company', 'homeowner', 'super-admin']
     },
     {
+      name: 'User Impersonation',
+      href: `${baseRoute}/user-impersonation`,
+      icon: Shield,
+      roles: ['super-admin']
+    },
+    {
       name: 'Supplier Network',
       href: `${baseRoute}/suppliers`,
       icon: UserCheck,

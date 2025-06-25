@@ -17,6 +17,7 @@ import DirectorSupport from './pages/DirectorSupport';
 import ComplianceMonitoringDashboard from './components/compliance/ComplianceMonitoringDashboard';
 import LegalResourcesDashboard from './components/legal/LegalResourcesDashboard';
 import LegalAccuracyDashboard from './components/legal/LegalAccuracyDashboard';
+import UserImpersonationDashboard from './components/admin/UserImpersonationDashboard';
 import BuildingDetails from './pages/BuildingDetails';
 import Reports from './pages/Reports';
 import Profile from './pages/Profile';
@@ -260,6 +261,7 @@ function App() {
         <Route path="compliance" element={<ComplianceMonitoringDashboard />} />
         <Route path="legal-resources" element={<LegalResourcesDashboard />} />
         <Route path="legal-accuracy" element={<LegalAccuracyDashboard />} />
+        <Route path="user-impersonation" element={<UserImpersonationDashboard />} />
       </Route>
 
       {/* RMC Director Routes */}

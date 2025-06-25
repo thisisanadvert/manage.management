@@ -6,6 +6,8 @@ import Footer from './Footer';
 import MobileNav from './MobileNav';
 import DevUserSwitcher from '../dev/DevUserSwitcher';
 import DevPanel from '../dev/DevPanel';
+import ImpersonationBanner from '../admin/ImpersonationBanner';
+import ImpersonationStyleProvider from '../admin/ImpersonationStyleProvider';
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -27,8 +29,10 @@ const MainLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header toggleSidebar={toggleSidebar} />
+    <ImpersonationStyleProvider>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <ImpersonationBanner />
+        <Header toggleSidebar={toggleSidebar} />
       
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar for desktop */}
@@ -70,10 +74,11 @@ const MainLayout = () => {
       
       <Footer />
 
-      {/* Developer Tools - Only visible to super user */}
-      <DevPanel />
-      <DevUserSwitcher />
-    </div>
+        {/* Developer Tools - Only visible to super user */}
+        <DevPanel />
+        <DevUserSwitcher />
+      </div>
+    </ImpersonationStyleProvider>
   );
 };
 

@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { ImpersonationState, ImpersonationReason } from '../types/impersonation';
+import ImpersonationAuditService from '../services/impersonationAuditService';
 
 type UserRole =
   | 'rtm-director'
@@ -34,6 +36,15 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error?: { message: string } }>;
   signInWithMagicLink: (email: string) => Promise<{ error?: { message: string } }>;
+
+  // Impersonation functionality
+  impersonationState: ImpersonationState;
+  isImpersonating: boolean;
+  canImpersonate: boolean;
+  startImpersonation: (targetUserId: string, reason: ImpersonationReason, additionalNotes?: string) => Promise<{ success: boolean; error?: string }>;
+  endImpersonation: (reason?: string) => Promise<{ success: boolean; error?: string }>;
+  getEffectiveUser: () => AuthUser | null;
+  getOriginalUser: () => AuthUser | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,6 +54,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Impersonation state
+  const [impersonationState, setImpersonationState] = useState<ImpersonationState>({
+    isImpersonating: false,
+    originalUser: null,
+    impersonatedUser: null,
+    sessionId: null,
+    reason: null,
+    startTime: null,
+    maxDuration: 120, // 2 hours default
+    warningShown: false
+  });
+
+  const auditService = ImpersonationAuditService.getInstance();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -276,6 +301,219 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Impersonation functionality
+  const canImpersonate = user?.role === 'super-admin' && !impersonationState.isImpersonating;
+
+  const startImpersonation = async (
+    targetUserId: string,
+    reason: ImpersonationReason,
+    additionalNotes?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      if (!canImpersonate) {
+        return { success: false, error: 'Insufficient permissions to impersonate users' };
+      }
+
+      if (impersonationState.isImpersonating) {
+        return { success: false, error: 'Already impersonating a user. End current session first.' };
+      }
+
+      // Get target user details
+      const { data: targetUser, error: userError } = await supabase.auth.admin.getUserById(targetUserId);
+      if (userError || !targetUser) {
+        return { success: false, error: 'Target user not found' };
+      }
+
+      // Check if target user is also a super-admin (prevent impersonating other admins)
+      if (targetUser.user.user_metadata?.role === 'super-admin') {
+        return { success: false, error: 'Cannot impersonate other super-admin users' };
+      }
+
+      // Get user permissions
+      const permissions = await auditService.getUserPermissions(user!.id);
+      if (!permissions || !permissions.is_active) {
+        return { success: false, error: 'No active impersonation permissions found' };
+      }
+
+      // Check if user can impersonate this role
+      if (!permissions.can_impersonate_roles.includes(targetUser.user.user_metadata?.role || '')) {
+        return { success: false, error: 'Not authorized to impersonate users with this role' };
+      }
+
+      // Check daily session limits
+      const activeSessions = await auditService.getActiveSessions(user!.id);
+      if (activeSessions.length >= permissions.max_concurrent_sessions) {
+        return { success: false, error: 'Maximum concurrent sessions reached' };
+      }
+
+      // Start audit logging
+      const { sessionId } = await auditService.startImpersonationSession(
+        user!.id,
+        user!.email!,
+        targetUserId,
+        targetUser.user.email!,
+        targetUser.user.user_metadata?.role || 'unknown',
+        reason,
+        additionalNotes,
+        targetUser.user.user_metadata?.buildingId
+      );
+
+      // Create impersonated user object
+      const impersonatedUser: AuthUser = {
+        ...targetUser.user,
+        role: targetUser.user.user_metadata?.role,
+        metadata: targetUser.user.user_metadata
+      };
+
+      // Update impersonation state
+      setImpersonationState({
+        isImpersonating: true,
+        originalUser: user,
+        impersonatedUser,
+        sessionId,
+        reason,
+        startTime: new Date(),
+        maxDuration: permissions.max_session_duration_minutes,
+        warningShown: false
+      });
+
+      // Update current user to impersonated user
+      setUser(impersonatedUser);
+
+      // Store impersonation state in session storage (not localStorage for security)
+      sessionStorage.setItem('impersonation_state', JSON.stringify({
+        sessionId,
+        originalUserId: user!.id,
+        targetUserId,
+        startTime: new Date().toISOString(),
+        maxDuration: permissions.max_session_duration_minutes
+      }));
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error starting impersonation:', error);
+      return { success: false, error: 'Failed to start impersonation session' };
+    }
+  };
+
+  const endImpersonation = async (reason: string = 'manual'): Promise<{ success: boolean; error?: string }> => {
+    try {
+      if (!impersonationState.isImpersonating || !impersonationState.sessionId) {
+        return { success: false, error: 'No active impersonation session' };
+      }
+
+      // End audit logging
+      await auditService.endImpersonationSession(
+        impersonationState.sessionId,
+        reason === 'manual' ? 'ended_manually' : 'ended_timeout',
+        `Session ended: ${reason}`
+      );
+
+      // Restore original user
+      if (impersonationState.originalUser) {
+        setUser(impersonationState.originalUser);
+      }
+
+      // Clear impersonation state
+      setImpersonationState({
+        isImpersonating: false,
+        originalUser: null,
+        impersonatedUser: null,
+        sessionId: null,
+        reason: null,
+        startTime: null,
+        maxDuration: 120,
+        warningShown: false
+      });
+
+      // Clear session storage
+      sessionStorage.removeItem('impersonation_state');
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error ending impersonation:', error);
+      return { success: false, error: 'Failed to end impersonation session' };
+    }
+  };
+
+  const getEffectiveUser = (): AuthUser | null => {
+    return impersonationState.isImpersonating ? impersonationState.impersonatedUser : user;
+  };
+
+  const getOriginalUser = (): AuthUser | null => {
+    return impersonationState.isImpersonating ? impersonationState.originalUser : user;
+  };
+
+  // Session timeout and warning management
+  useEffect(() => {
+    if (!impersonationState.isImpersonating || !impersonationState.startTime) return;
+
+    const checkSessionTimeout = () => {
+      const now = new Date();
+      const elapsed = (now.getTime() - impersonationState.startTime!.getTime()) / (1000 * 60); // minutes
+
+      // Show warning at 25 minutes before timeout
+      if (elapsed >= impersonationState.maxDuration - 25 && !impersonationState.warningShown) {
+        setImpersonationState(prev => ({ ...prev, warningShown: true }));
+        // You could show a toast notification here
+        console.warn('Impersonation session will expire in 25 minutes');
+      }
+
+      // Auto-end session if exceeded max duration
+      if (elapsed >= impersonationState.maxDuration) {
+        endImpersonation('timeout');
+      }
+    };
+
+    const interval = setInterval(checkSessionTimeout, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [impersonationState.isImpersonating, impersonationState.startTime, impersonationState.maxDuration, impersonationState.warningShown]);
+
+  // Restore impersonation state on page refresh
+  useEffect(() => {
+    const storedState = sessionStorage.getItem('impersonation_state');
+    if (storedState && user?.role === 'super-admin') {
+      try {
+        const parsed = JSON.parse(storedState);
+        const startTime = new Date(parsed.startTime);
+        const elapsed = (new Date().getTime() - startTime.getTime()) / (1000 * 60);
+
+        // If session hasn't expired, restore it
+        if (elapsed < parsed.maxDuration) {
+          // Re-fetch target user and restore state
+          supabase.auth.admin.getUserById(parsed.targetUserId).then(({ data: targetUser }) => {
+            if (targetUser) {
+              const impersonatedUser: AuthUser = {
+                ...targetUser.user,
+                role: targetUser.user.user_metadata?.role,
+                metadata: targetUser.user.user_metadata
+              };
+
+              setImpersonationState({
+                isImpersonating: true,
+                originalUser: user,
+                impersonatedUser,
+                sessionId: parsed.sessionId,
+                reason: 'Customer Support', // Default reason for restored sessions
+                startTime,
+                maxDuration: parsed.maxDuration,
+                warningShown: false
+              });
+
+              setUser(impersonatedUser);
+            }
+          });
+        } else {
+          // Session expired, clean up
+          sessionStorage.removeItem('impersonation_state');
+        }
+      } catch (error) {
+        console.error('Error restoring impersonation state:', error);
+        sessionStorage.removeItem('impersonation_state');
+      }
+    }
+  }, [user?.id, user?.role]);
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -284,7 +522,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signIn,
       signOut,
       resetPassword,
-      signInWithMagicLink
+      signInWithMagicLink,
+
+      // Impersonation functionality
+      impersonationState,
+      isImpersonating: impersonationState.isImpersonating,
+      canImpersonate,
+      startImpersonation,
+      endImpersonation,
+      getEffectiveUser,
+      getOriginalUser
     }}>
       {children}
     </AuthContext.Provider>
