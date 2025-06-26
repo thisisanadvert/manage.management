@@ -11,7 +11,7 @@ import {
   ArrowRight,
   Shield,
   BookOpen,
-  CheckCircle2
+  CheckCircle2 // Success icon for compliance status
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
