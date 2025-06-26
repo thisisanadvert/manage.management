@@ -22,8 +22,8 @@ const DevPanel: React.FC = () => {
       simulatedEmail: user?.metadata?.simulatedEmail
     },
     environment: {
-      nodeEnv: process.env.NODE_ENV,
-      supabaseUrl: process.env.REACT_APP_SUPABASE_URL?.substring(0, 30) + '...',
+      nodeEnv: import.meta.env.MODE,
+      supabaseUrl: import.meta.env.VITE_SUPABASE_URL?.substring(0, 30) + '...',
       buildTime: new Date().toISOString()
     }
   };

@@ -10,7 +10,8 @@ import {
   Plus,
   ArrowRight,
   Shield,
-  BookOpen
+  BookOpen,
+  CheckCircle2
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
