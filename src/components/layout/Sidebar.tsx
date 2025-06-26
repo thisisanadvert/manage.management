@@ -261,6 +261,14 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
     </div>
   );
 
+  // Add comprehensive debugging
+  console.log('🔍 Sidebar Debug - Current User:', {
+    user: user,
+    role: user?.role,
+    email: user?.email,
+    isSuperAdmin: user?.email === 'frankie@manage.management'
+  });
+
   const filteredNavigation = navigation.filter(item => {
     const hasRole = item.roles.includes(user?.role || '');
     const hasFeature = !item.requiresFeature || isFeatureEnabled(item.requiresFeature);
