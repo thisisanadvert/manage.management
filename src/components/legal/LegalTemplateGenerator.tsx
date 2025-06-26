@@ -39,24 +39,35 @@ const LegalTemplateGenerator: React.FC<LegalTemplateGeneratorProps> = ({
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-    
+
     template.variables.forEach(variable => {
       if (variable.required && !variables[variable.name]) {
+        console.log(`Missing required field: ${variable.name} (${variable.description})`);
         newErrors[variable.name] = `${variable.description} is required`;
       }
     });
-    
+
+    console.log('Validation errors:', newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleGenerate = () => {
-    if (!validateForm()) return;
-    
+    console.log('Generate button clicked');
+    console.log('Current variables:', variables);
+    console.log('Template variables:', template.variables);
+
+    if (!validateForm()) {
+      console.log('Validation failed, errors:', errors);
+      return;
+    }
+
+    console.log('Validation passed, generating content...');
     const content = LegalComplianceService.processTemplate(template.id, variables);
+    console.log('Generated content:', content);
     setGeneratedContent(content);
     setShowPreview(true);
-    
+
     if (onGenerate) {
       onGenerate(content, variables);
     }

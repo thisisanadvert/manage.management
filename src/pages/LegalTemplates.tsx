@@ -17,7 +17,10 @@ const LegalTemplates: React.FC = () => {
   const [showGenerator, setShowGenerator] = useState(false);
 
   // Get templates available to current user
+  console.log('Current user role:', user?.role);
+  console.log('All templates:', LEGAL_TEMPLATES.length);
   const availableTemplates = user?.role ? getTemplatesByRole(user.role) : LEGAL_TEMPLATES;
+  console.log('Available templates for role:', availableTemplates.length, availableTemplates.map(t => t.id));
 
   // Filter templates based on search and category
   const filteredTemplates = availableTemplates.filter(template => {
@@ -57,6 +60,9 @@ const LegalTemplates: React.FC = () => {
   };
 
   const handleTemplateSelect = (template: LegalTemplate) => {
+    console.log('Template selected:', template.id, template.title);
+    console.log('Template applicable roles:', template.applicableRoles);
+    console.log('Current user role:', user?.role);
     setSelectedTemplate(template);
     setShowGenerator(true);
   };

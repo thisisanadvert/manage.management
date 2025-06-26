@@ -3,10 +3,10 @@
  * Core service for managing legal compliance across the platform
  */
 
-import { 
-  LegalRequirement, 
-  ComplianceItem, 
-  ComplianceAlert, 
+import {
+  LegalRequirement,
+  ComplianceItem,
+  ComplianceAlert,
   LegalTemplate,
   ComplianceStatus,
   LegalFramework,
@@ -14,6 +14,7 @@ import {
   BuildingType,
   UK_PROPERTY_LAW
 } from '../types/legal';
+import { LEGAL_TEMPLATES } from '../data/legalTemplates';
 
 export class LegalComplianceService {
   
@@ -227,7 +228,6 @@ export class LegalComplianceService {
    */
   private static getAllTemplates(): LegalTemplate[] {
     // Import templates from the legal templates data file
-    const { LEGAL_TEMPLATES } = require('../data/legalTemplates');
     return LEGAL_TEMPLATES;
   }
 }
