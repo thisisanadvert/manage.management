@@ -54,7 +54,6 @@ import DocumentManagement from './pages/features/DocumentManagement';
 import VotingSystem from './pages/features/VotingSystem';
 import CommunicationHub from './pages/features/CommunicationHub';
 import PageLoader from './components/ui/PageLoader';
-import { useAuth } from './contexts/AuthContext';
 
 // Helper function to get the correct base path for a user role
 function getRoleBasePath(role?: string): string {
