@@ -33,6 +33,9 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isFeatureEnabled, isDevelopmentEnvironment } = useFeatures();
+
+  // Simple test to confirm component is loading
+  console.log('🚀 SIDEBAR LOADED - User:', user?.email, 'Role:', user?.role, 'Time:', new Date().toLocaleTimeString());
   const [showContactModal, setShowContactModal] = useState(false);
   const [contactForm, setContactForm] = useState({
     name: '',
