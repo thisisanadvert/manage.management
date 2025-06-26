@@ -269,6 +269,16 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
     isSuperAdmin: user?.email === 'frankie@manage.management'
   });
 
+  console.log('🔍 Sidebar Debug - Navigation Setup:', {
+    baseRoute,
+    currentLocation: location.pathname,
+    navigationItems: navigation.map(item => ({
+      name: item.name,
+      href: item.href,
+      roles: item.roles
+    }))
+  });
+
   const filteredNavigation = navigation.filter(item => {
     const hasRole = item.roles.includes(user?.role || '');
     const hasFeature = !item.requiresFeature || isFeatureEnabled(item.requiresFeature);
@@ -307,7 +317,14 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
             <Link
               key={item.name}
               to={item.href}
-              onClick={onItemClick}
+              onClick={(e) => {
+                console.log('🔗 Navigation Click:', {
+                  itemName: item.name,
+                  targetHref: item.href,
+                  currentLocation: location.pathname
+                });
+                onItemClick?.();
+              }}
               className={`
                 group flex items-center px-2 py-3 text-sm font-medium rounded-md transition-all
                 ${isActive 

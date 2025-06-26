@@ -350,6 +350,50 @@ const Finances = () => {
           </div>
         </Card>
       </div>
+    </>
+  );
+
+  return (
+    <div className="space-y-6 pb-16 lg:pb-0">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Financial Management</h1>
+          <p className="text-gray-600 mt-1">Track and manage building finances</p>
+        </div>
+        {isDirector && (
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              leftIcon={<Upload size={16} />}
+              onClick={() => setShowImportModal(true)}
+            >
+              Import Data
+            </Button>
+            <Button
+              variant="outline"
+              leftIcon={<Download size={16} />}
+            >
+              Export
+            </Button>
+            <Button
+              variant="primary"
+              leftIcon={<Plus size={16} />}
+            >
+              Record Transaction
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+        </div>
+      ) : !financialSetup ? (
+        renderEmptyState()
+      ) : (
+        renderFinancialDashboard()
+      )}
 
       {/* Tabs */}
       <div className="border-b border-gray-200">
@@ -826,54 +870,11 @@ const Finances = () => {
           </div>
         </Card>
       </div>
-    </>
-  );
-
-  return (
-    <div className="space-y-6 pb-16 lg:pb-0">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Financial Management</h1>
-          <p className="text-gray-600 mt-1">Track and manage building finances</p>
-        </div>
-        {isDirector && (
-          <div className="flex space-x-2">
-            <Button 
-              variant="outline"
-              leftIcon={<Upload size={16} />}
-              onClick={() => setShowImportModal(true)}
-            >
-              Import Data
-            </Button>
-            <Button 
-              variant="outline"
-              leftIcon={<Download size={16} />}
-            >
-              Export
-            </Button>
-            <Button 
-              variant="primary"
-              leftIcon={<Plus size={16} />}
-            >
-              Record Transaction
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
-        </div>
-      ) : !financialSetup ? (
-        renderEmptyState()
-      ) : (
-        renderFinancialDashboard()
       )}
 
       {showImportModal && <ImportDataModal />}
-      <FinancialSetupModal 
-        isOpen={showFinancialSetupModal} 
+      <FinancialSetupModal
+        isOpen={showFinancialSetupModal}
         onClose={() => setShowFinancialSetupModal(false)}
         onSetupComplete={handleSetupComplete}
       />
