@@ -113,8 +113,8 @@ export default MyComponent;
 
 ### Number Inputs
 - Default to zero
-- Increment by 1 with arrows
-- Display with leading zeros (e.g., '01' when user enters 1)
+- Do not increment by 1 with arrows, allow for free text entry but ask for numbers
+- Do not display with leading zeros (e.g., display '1' when user enters 1)
 
 ### Accessibility
 - High contrast mode support
@@ -127,8 +127,8 @@ export default MyComponent;
 ### User Types
 - RTM/RMC Director (combined)
 - Homeowner (with Leaseholder and Share of Freeholders)
-- Block Freeholders/Management Companies
 - Management Company
+- Block Freeholders
 
 ### Super User Features
 - frankie@manage.management has dev tools access
