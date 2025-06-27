@@ -54,6 +54,73 @@
   color: rgb(55 65 81) !important; /* gray-700 */
 }
 
+/* Additional tooltip visibility fixes */
+/* Ensure all absolute positioned tooltips are visible */
+.absolute.bottom-full.left-0.mb-2.z-\[1000\] {
+  z-index: 1000 !important;
+}
+
+.absolute.bottom-full.left-0.mb-2.z-\[1000\] > div {
+  background-color: rgb(255 255 255) !important; /* white */
+  color: rgb(17 24 39) !important; /* gray-900 */
+  border: 1px solid rgb(229 231 235) !important; /* gray-200 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  z-index: 1000 !important;
+}
+
+/* Fix click-based tooltip visibility */
+.absolute.bottom-full.left-0.mb-2 {
+  z-index: 1000 !important;
+}
+
+/* Ensure tooltip content is always readable */
+.absolute.bottom-full.left-0.mb-2 h3,
+.absolute.bottom-full.left-0.mb-2 h4,
+.absolute.bottom-full.left-0.mb-2 p,
+.absolute.bottom-full.left-0.mb-2 span,
+.absolute.bottom-full.left-0.mb-2 div {
+  color: inherit !important;
+}
+
+/* Fix mandatory indicators */
+.text-red-600 {
+  color: rgb(220 38 38) !important; /* red-600 */
+}
+
+/* Comprehensive tooltip visibility override */
+/* This ensures ALL tooltips are visible regardless of implementation */
+div[class*="absolute"][class*="bottom-full"],
+div[class*="absolute"][class*="top-full"],
+div[class*="absolute"][class*="left-full"],
+div[class*="absolute"][class*="right-full"] {
+  z-index: 1000 !important;
+}
+
+/* Ensure tooltip content containers are visible */
+div[class*="absolute"][class*="bottom-full"] > div,
+div[class*="absolute"][class*="top-full"] > div,
+div[class*="absolute"][class*="left-full"] > div,
+div[class*="absolute"][class*="right-full"] > div {
+  background-color: rgb(255 255 255) !important;
+  color: rgb(17 24 39) !important;
+  border: 1px solid rgb(229 231 235) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  z-index: 1000 !important;
+}
+
+/* Force visibility for any hidden tooltips */
+.absolute[style*="display: none"] {
+  display: block !important;
+}
+
+/* Ensure tooltip triggers are clickable */
+button[aria-label*="guidance"],
+button[aria-label*="tooltip"],
+button[aria-label*="help"] {
+  pointer-events: auto !important;
+  z-index: 999 !important;
+}
+
 /* Hide number input spinners across all browsers */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {

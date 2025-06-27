@@ -149,6 +149,29 @@ const TooltipTestComponent: React.FC = () => {
               mandatory={false}
             />
           </div>
+
+          {/* Mandatory Legal Tooltip (Red Circle with Asterisk) */}
+          <div className="flex items-center space-x-2">
+            <span className="text-gray-700">Mandatory Legal Requirement:</span>
+            <LegalGuidanceTooltip
+              title="Section 20 Consultation (Mandatory)"
+              guidance={{
+                basic: "This is a mandatory legal requirement. You MUST consult leaseholders before carrying out major works costing more than £250 per leaseholder.",
+                intermediate: "Failure to follow Section 20 consultation procedures can result in service charge limitations and legal challenges.",
+                advanced: "The consultation process is governed by strict statutory timelines under LTA 1985 and Service Charges Regulations 2003."
+              }}
+              framework="LTA_1985"
+              mandatory={true}
+              externalResources={[
+                {
+                  title: "LEASE Section 20 Guide",
+                  url: "https://www.lease-advice.org/advice-guide/service-charges-consultation/",
+                  type: "guidance",
+                  description: "Official guidance on Section 20 consultation requirements"
+                }
+              ]}
+            />
+          </div>
         </div>
       </Card>
 

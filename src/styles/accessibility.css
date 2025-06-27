@@ -401,6 +401,25 @@ textarea:focus {
   border: 2px solid black !important;
 }
 
+/* Additional fixes for click-based tooltips */
+.high-contrast .absolute.bottom-full.left-0.mb-2.z-\[1000\] > div {
+  background-color: white !important;
+  color: black !important;
+  border: 2px solid black !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Ensure mandatory tooltip indicators are visible */
+.high-contrast .text-red-600 {
+  color: red !important;
+  background-color: white !important;
+}
+
+/* Fix tooltip backdrop */
+.high-contrast .fixed.inset-0.z-40 {
+  background-color: transparent !important;
+}
+
 /* Easter Egg Animations (respect reduced motion) */
 @media (prefers-reduced-motion: no-preference) {
   .easter-egg-bounce {
