@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Building2, Users, FileText, Download, ExternalLink, CheckCircle2, AlertTriangle, Info, Scale, BookOpen } from 'lucide-react';
+import { Building2, Users, FileText, Download, ExternalLink, CheckCircle2, AlertTriangle, Info, Scale, BookOpen, Mail, UserPlus } from 'lucide-react';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import LegalGuidanceTooltip from '../legal/LegalGuidanceTooltip';
+import { useFormPersistence } from '../../hooks/useFormPersistence';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Director {
   id: string;
@@ -11,6 +13,8 @@ interface Director {
   email: string;
   isQualifyingTenant: boolean;
   hasConsented: boolean;
+  isExistingUser?: boolean;
+  invitationSent?: boolean;
 }
 
 interface CompanyDetails {
@@ -22,12 +26,28 @@ interface CompanyDetails {
 }
 
 const RTMCompanyFormation: React.FC = () => {
-  const [companyDetails, setCompanyDetails] = useState<CompanyDetails>({
+  const { user } = useAuth();
+
+  // Form persistence setup
+  const initialCompanyDetails: CompanyDetails = {
     proposedName: '',
     alternativeNames: ['', ''],
     registeredAddress: '',
     directors: [],
     companySecretary: ''
+  };
+
+  const {
+    formData: companyDetails,
+    setFormData: setCompanyDetails,
+    persistenceState,
+    saveNow,
+    clearSavedData
+  } = useFormPersistence(initialCompanyDetails, {
+    formId: 'rtm-company-formation',
+    version: '1.0',
+    autoSave: true,
+    showSaveIndicator: true
   });
 
   const [newDirector, setNewDirector] = useState<Partial<Director>>({
@@ -39,6 +59,7 @@ const RTMCompanyFormation: React.FC = () => {
   });
 
   const [showAddDirector, setShowAddDirector] = useState(false);
+  const [invitingDirectors, setInvitingDirectors] = useState<Set<string>>(new Set());
   const [checklist, setChecklist] = useState({
     nameChecked: false,
     articlesReviewed: false,
@@ -47,22 +68,27 @@ const RTMCompanyFormation: React.FC = () => {
     bankAccountPlanned: false
   });
 
-  const addDirector = () => {
+  const addDirector = async () => {
     if (newDirector.name && newDirector.flatNumber && newDirector.email) {
+      // Check if user exists in the system
+      const isExistingUser = await checkIfUserExists(newDirector.email || '');
+
       const director: Director = {
         id: Date.now().toString(),
         name: newDirector.name || '',
         flatNumber: newDirector.flatNumber || '',
         email: newDirector.email || '',
         isQualifyingTenant: newDirector.isQualifyingTenant || true,
-        hasConsented: newDirector.hasConsented || false
+        hasConsented: newDirector.hasConsented || false,
+        isExistingUser,
+        invitationSent: false
       };
-      
+
       setCompanyDetails(prev => ({
         ...prev,
         directors: [...prev.directors, director]
       }));
-      
+
       setNewDirector({
         name: '',
         flatNumber: '',
@@ -71,6 +97,66 @@ const RTMCompanyFormation: React.FC = () => {
         hasConsented: false
       });
       setShowAddDirector(false);
+    }
+  };
+
+  const checkIfUserExists = async (email: string): Promise<boolean> => {
+    try {
+      // This would typically call your backend to check if user exists
+      // For now, we'll assume they don't exist and need invitation
+      return false;
+    } catch (error) {
+      console.error('Error checking user existence:', error);
+      return false;
+    }
+  };
+
+  const inviteDirector = async (directorId: string) => {
+    const director = companyDetails.directors.find(d => d.id === directorId);
+    if (!director || !user) return;
+
+    setInvitingDirectors(prev => new Set(prev).add(directorId));
+
+    try {
+      // Create invitation data
+      const inviteData = {
+        email: director.email,
+        firstName: director.name.split(' ')[0] || director.name,
+        lastName: director.name.split(' ').slice(1).join(' ') || '',
+        role: 'rtm-director',
+        unitNumber: director.flatNumber,
+        inviterName: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email,
+        inviterEmail: user.email,
+        context: 'rtm-formation',
+        companyName: companyDetails.proposedName || 'RTM Company'
+      };
+
+      // Send invitation via Supabase Edge Function
+      const response = await fetch('/functions/v1/send-rtm-director-invite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.accessToken || ''}`
+        },
+        body: JSON.stringify(inviteData)
+      });
+
+      if (response.ok) {
+        // Update director as invited
+        updateDirector(directorId, { invitationSent: true });
+        console.log('Invitation sent successfully');
+      } else {
+        throw new Error('Failed to send invitation');
+      }
+    } catch (error) {
+      console.error('Error sending invitation:', error);
+      // You might want to show a toast notification here
+    } finally {
+      setInvitingDirectors(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(directorId);
+        return newSet;
+      });
     }
   };
 
@@ -233,6 +319,30 @@ Date: ${currentDate}
 
   return (
     <div className="space-y-6">
+      {/* Form Persistence Indicator */}
+      {persistenceState.showSaveIndicator && (
+        <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-center space-x-2">
+            <div className={`w-2 h-2 rounded-full ${persistenceState.isSaving ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`}></div>
+            <span className="text-sm text-blue-800">
+              {persistenceState.isSaving ? 'Saving...' :
+               persistenceState.lastSaved ? `Last saved: ${persistenceState.lastSaved.toLocaleTimeString()}` :
+               'Form data will be automatically saved'}
+            </span>
+          </div>
+          {persistenceState.hasSavedData && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearSavedData}
+              className="text-xs"
+            >
+              Clear Saved Data
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Legal Compliance Header */}
       <Card className="bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200">
         <div className="flex items-start justify-between">
@@ -482,10 +592,20 @@ Date: ${currentDate}
                           Qualifying Tenant
                         </span>
                       )}
+                      {director.isExistingUser && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          Existing User
+                        </span>
+                      )}
+                      {director.invitationSent && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                          Invited
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm text-gray-600">Flat {director.flatNumber} • {director.email}</p>
-                    
-                    <div className="mt-2">
+
+                    <div className="mt-2 space-y-2">
                       <label className="flex items-center space-x-2">
                         <input
                           type="checkbox"
@@ -495,15 +615,52 @@ Date: ${currentDate}
                         />
                         <span className="text-sm text-gray-700">Has consented to appointment</span>
                       </label>
+
+                      {/* Invitation section for non-existing users */}
+                      {!director.isExistingUser && !director.invitationSent && (
+                        <div className="flex items-center space-x-2 text-sm text-amber-600">
+                          <AlertTriangle size={14} />
+                          <span>This person needs to be invited to the platform</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => removeDirector(director.id)}
-                  >
-                    Remove
-                  </Button>
+
+                  <div className="flex items-center space-x-2">
+                    {/* Invitation button for non-existing users */}
+                    {!director.isExistingUser && !director.invitationSent && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        leftIcon={<UserPlus size={14} />}
+                        onClick={() => inviteDirector(director.id)}
+                        disabled={invitingDirectors.has(director.id)}
+                      >
+                        {invitingDirectors.has(director.id) ? 'Inviting...' : 'Invite'}
+                      </Button>
+                    )}
+
+                    {/* Resend invitation button */}
+                    {!director.isExistingUser && director.invitationSent && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        leftIcon={<Mail size={14} />}
+                        onClick={() => inviteDirector(director.id)}
+                        disabled={invitingDirectors.has(director.id)}
+                      >
+                        {invitingDirectors.has(director.id) ? 'Sending...' : 'Resend'}
+                      </Button>
+                    )}
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeDirector(director.id)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
