@@ -26,7 +26,7 @@ export function ArcadeEmbed() {
       {/* Gradient Bordered Frame */}
       <div className="relative">
         {/* Gradient Border */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 rounded-2xl p-1">
+        <div className="bg-gradient-to-r from-blue-500 via-teal-500 to-orange-500 rounded-2xl p-1">
           <div className="w-full h-full bg-white rounded-xl"></div>
         </div>
         
