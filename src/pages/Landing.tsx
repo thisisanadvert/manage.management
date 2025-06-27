@@ -31,6 +31,7 @@ import RoleSelector from '../components/landing/RoleSelector';
 import AccessibilityToolbar from '../components/landing/AccessibilityToolbar';
 import EasterEggSystem from '../components/landing/EasterEggSystem';
 import Tooltip from '../components/ui/Tooltip';
+import ArcadeEmbed from '../components/landing/ArcadeEmbed';
 import { testSignupFlow, testDatabasePolicies } from '../utils/testSignup';
 
 const Landing = () => {
@@ -268,6 +269,11 @@ const Landing = () => {
                 <span>Cancel anytime</span>
               </div>
             </div>
+          </div>
+
+          {/* Interactive Demo Section */}
+          <div className="mt-16 sm:mt-20 lg:mt-24">
+            <ArcadeEmbed />
           </div>
 
           {/* Features Grid */}
