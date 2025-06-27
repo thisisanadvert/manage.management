@@ -27,11 +27,9 @@ export function ArcadeEmbed() {
       <div className="relative">
         {/* Demo Container with Gradient Border */}
         <div
-          className="relative bg-white rounded-2xl p-6 shadow-2xl"
+          className="relative bg-white rounded-2xl p-6"
           style={{
-            border: '3px solid',
-            borderImage: 'linear-gradient(45deg, #3b82f6, #14b8a6, #eab308) 1',
-            borderRadius: '1rem'
+            boxShadow: 'inset 0 0 0 3px #3b82f6, 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
           }}
         >
           {/* Demo Frame */}
