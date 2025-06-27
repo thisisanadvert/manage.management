@@ -1,3 +1,4 @@
+import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
 import RTMDashboard from './pages/dashboards/RTMDashboard';
@@ -19,6 +20,7 @@ import LegalResourcesDashboard from './components/legal/LegalResourcesDashboard'
 import LegalAccuracyDashboard from './components/legal/LegalAccuracyDashboard';
 import UserImpersonationDashboard from './components/admin/UserImpersonationDashboard';
 import { useAuth } from './contexts/AuthContext';
+import FormPersistenceService from './services/formPersistenceService';
 
 
 import BuildingDetails from './pages/BuildingDetails';
@@ -123,6 +125,12 @@ function RoleBasedRoute({ children, allowedRoles }: { children: React.ReactNode;
 function App() {
   const { user, loading } = useAuth();
   const location = useLocation();
+
+  // Initialize form persistence service
+  React.useEffect(() => {
+    const formPersistenceService = FormPersistenceService.getInstance();
+    formPersistenceService.initialize();
+  }, []);
 
   // Show loading screen while auth is initializing
   if (loading) {

@@ -4,6 +4,8 @@ import Button from '../ui/Button';
 import Card from '../ui/Card';
 import { LegalTemplate, TemplateVariable } from '../../types/legal';
 import { LegalComplianceService } from '../../services/legalComplianceService';
+import useFormPersistence from '../../hooks/useFormPersistence';
+import FormPersistenceIndicator from '../ui/FormPersistenceIndicator';
 
 interface LegalTemplateGeneratorProps {
   template: LegalTemplate;
@@ -16,17 +18,37 @@ const LegalTemplateGenerator: React.FC<LegalTemplateGeneratorProps> = ({
   onGenerate,
   className = ''
 }) => {
-  const [variables, setVariables] = useState<Record<string, any>>({});
+  // Initialize form persistence
+  const {
+    formData: variables,
+    setFormData: setVariables,
+    updateField,
+    persistenceState,
+    saveNow,
+    restoreData,
+    clearSavedData
+  } = useFormPersistence<Record<string, any>>(
+    {},
+    {
+      formId: `legal_template_${template.id}`,
+      autoSave: true,
+      autoRestore: true,
+      clearOnSubmit: false,
+      debounceMs: 800,
+      storageType: 'localStorage',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours for legal templates
+      excludeFields: ['generatedContent'] // Don't persist generated content
+    }
+  );
+
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const [showPreview, setShowPreview] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleVariableChange = (name: string, value: any) => {
-    setVariables(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
+    // Use the persistence-aware update function
+    updateField(name, value);
+
     // Clear error for this field
     if (errors[name]) {
       setErrors(prev => {
@@ -70,6 +92,10 @@ const LegalTemplateGenerator: React.FC<LegalTemplateGeneratorProps> = ({
 
     if (onGenerate) {
       onGenerate(content, variables);
+      // Clear saved data after successful generation
+      setTimeout(() => {
+        clearSavedData();
+      }, 2000); // Give user time to see the success state
     }
   };
 
@@ -180,6 +206,16 @@ const LegalTemplateGenerator: React.FC<LegalTemplateGeneratorProps> = ({
 
   return (
     <div className={className}>
+      {/* Form Persistence Indicator */}
+      <FormPersistenceIndicator
+        persistenceState={persistenceState}
+        onSaveNow={saveNow}
+        onRestoreData={restoreData}
+        onClearSavedData={clearSavedData}
+        className="mb-4"
+        showActions={true}
+      />
+
       <Card className="p-6">
         {/* Template Header */}
         <div className="flex items-start space-x-3 mb-6">
