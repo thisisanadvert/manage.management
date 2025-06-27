@@ -219,12 +219,205 @@ const TooltipTestComponent: React.FC = () => {
         </div>
       </Card>
 
+      {/* Dashboard Widget Tooltips */}
+      <Card className="p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Dashboard Widget Tooltips</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          {/* Stats Widget Tooltip */}
+          <div className="p-4 bg-blue-50 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-blue-700 font-medium">Total Units</span>
+              <Tooltip content="Total number of units in your building, including occupied and vacant properties" position="top">
+                <Button variant="outline" size="sm">
+                  <HelpCircle className="h-4 w-4" />
+                </Button>
+              </Tooltip>
+            </div>
+            <div className="text-2xl font-bold text-blue-900 mt-2">24</div>
+          </div>
+
+          {/* Compliance Widget Tooltip */}
+          <div className="p-4 bg-green-50 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-green-700 font-medium">Compliance Status</span>
+              <LegalGuidanceTooltip
+                title="Legal Compliance Overview"
+                guidance={{
+                  basic: "Your building's compliance with legal requirements including safety, financial, and governance obligations.",
+                  intermediate: "Tracks compliance across multiple frameworks: LTA 1985, CLRA 2002, BSA 2022, and GDPR requirements.",
+                  advanced: "Automated monitoring of statutory deadlines, consultation requirements, and regulatory obligations with risk assessment."
+                }}
+                framework="LTA_1985"
+                mandatory={true}
+              />
+            </div>
+            <div className="text-2xl font-bold text-green-900 mt-2">98%</div>
+          </div>
+
+          {/* Financial Widget Tooltip */}
+          <div className="p-4 bg-amber-50 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-amber-700 font-medium">Annual Budget</span>
+              <Tooltip content="Total annual service charge budget for building maintenance and management" position="top">
+                <Button variant="outline" size="sm">
+                  <HelpCircle className="h-4 w-4" />
+                </Button>
+              </Tooltip>
+            </div>
+            <div className="text-2xl font-bold text-amber-900 mt-2">£45,000</div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Form Field Tooltips */}
+      <Card className="p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Form Field Tooltips</h2>
+        <div className="space-y-4">
+
+          {/* Text Input with Tooltip */}
+          <div>
+            <div className="flex items-center space-x-2 mb-2">
+              <label className="text-sm font-medium text-gray-700">Building Name</label>
+              <Tooltip content="The official name of your building as registered with the Land Registry" position="right">
+                <Button variant="outline" size="sm">
+                  <HelpCircle className="h-3 w-3" />
+                </Button>
+              </Tooltip>
+            </div>
+            <input
+              type="text"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              placeholder="Enter building name"
+            />
+          </div>
+
+          {/* Select with Legal Guidance */}
+          <div>
+            <div className="flex items-center space-x-2 mb-2">
+              <label className="text-sm font-medium text-gray-700">Consultation Type</label>
+              <LegalGuidanceTooltip
+                title="Section 20 Consultation Types"
+                guidance={{
+                  basic: "Different types of consultations are required depending on the work being carried out and its cost.",
+                  intermediate: "Section 20 consultations include qualifying works, qualifying long term agreements, and public works contracts.",
+                  advanced: "Each consultation type has specific notice periods, procedures, and documentation requirements under the Service Charges Regulations 2003."
+                }}
+                framework="LTA_1985"
+                mandatory={true}
+              />
+            </div>
+            <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+              <option>Select consultation type</option>
+              <option>Qualifying Works</option>
+              <option>Qualifying Long Term Agreement</option>
+              <option>Public Works Contract</option>
+            </select>
+          </div>
+        </div>
+      </Card>
+
+      {/* Settings Page Tooltips */}
+      <Card className="p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Settings & Profile Tooltips</h2>
+        <div className="space-y-4">
+
+          {/* Notification Settings */}
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center space-x-3">
+              <span className="text-gray-700">Email Notifications</span>
+              <Tooltip content="Receive important updates about your building via email, including compliance deadlines and urgent issues" position="top">
+                <Button variant="outline" size="sm">
+                  <HelpCircle className="h-3 w-3" />
+                </Button>
+              </Tooltip>
+            </div>
+            <div className="w-12 h-6 bg-primary-600 rounded-full"></div>
+          </div>
+
+          {/* Privacy Settings */}
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center space-x-3">
+              <span className="text-gray-700">Data Processing Consent</span>
+              <LegalGuidanceTooltip
+                title="GDPR Data Processing"
+                guidance={{
+                  basic: "We process your personal data to provide property management services and comply with legal obligations.",
+                  intermediate: "Data processing includes contact details, property information, and service charge records under legitimate interest and legal obligation lawful bases.",
+                  advanced: "Full data processing details are available in our Privacy Policy, including retention periods, third-party sharing, and your rights under GDPR Articles 15-22."
+                }}
+                framework="GDPR"
+                mandatory={true}
+              />
+            </div>
+            <div className="w-12 h-6 bg-green-600 rounded-full"></div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Document Category Tooltips */}
+      <Card className="p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Document Category Tooltips</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+          {/* Legal Documents */}
+          <div className="flex items-center space-x-2 p-3 border border-gray-200 rounded-lg">
+            <span className="text-gray-700">Legal</span>
+            <LegalGuidanceTooltip
+              title="Legal Documents"
+              guidance={{
+                basic: "Store leases, deeds, legal notices, and statutory documents required for property management.",
+                intermediate: "Includes Section 20 notices, RTM claim notices, lease variations, and tribunal decisions.",
+                advanced: "Maintain complete legal document trail for compliance audits and dispute resolution."
+              }}
+              framework="LTA_1985"
+              mandatory={true}
+            />
+          </div>
+
+          {/* Financial Documents */}
+          <div className="flex items-center space-x-2 p-3 border border-gray-200 rounded-lg">
+            <span className="text-gray-700">Financial</span>
+            <LegalGuidanceTooltip
+              title="Financial Documents"
+              guidance={{
+                basic: "Service charge accounts, budgets, and financial statements required by law.",
+                intermediate: "Annual accounts must be provided to leaseholders within 6 months of year end.",
+                advanced: "Includes certified accounts, audit reports, and Section 21 summary of rights and obligations."
+              }}
+              framework="LTA_1985"
+              mandatory={true}
+            />
+          </div>
+
+          {/* Insurance Documents */}
+          <div className="flex items-center space-x-2 p-3 border border-gray-200 rounded-lg">
+            <span className="text-gray-700">Insurance</span>
+            <Tooltip content="Building insurance policies, certificates, and claims documentation" position="top">
+              <Button variant="outline" size="sm">
+                <HelpCircle className="h-3 w-3" />
+              </Button>
+            </Tooltip>
+          </div>
+
+          {/* Maintenance Documents */}
+          <div className="flex items-center space-x-2 p-3 border border-gray-200 rounded-lg">
+            <span className="text-gray-700">Maintenance</span>
+            <Tooltip content="Maintenance schedules, contractor agreements, and repair documentation" position="top">
+              <Button variant="outline" size="sm">
+                <HelpCircle className="h-3 w-3" />
+              </Button>
+            </Tooltip>
+          </div>
+        </div>
+      </Card>
+
       {/* Status Indicator */}
       <Card className="p-4 bg-green-50 border-green-200">
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-green-500 rounded-full"></div>
           <span className="text-green-800 font-medium">
-            Tooltip visibility fixes applied - Test all scenarios above
+            Universal tooltip visibility fixes applied - Test all scenarios above across the entire platform
           </span>
         </div>
       </Card>

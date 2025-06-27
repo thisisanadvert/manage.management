@@ -394,11 +394,71 @@ textarea:focus {
   color: white !important;
 }
 
-/* Fix any remaining tooltip positioning issues */
-.high-contrast .absolute.bottom-full.left-0.mb-2 > div {
+/* COMPREHENSIVE HIGH CONTRAST TOOLTIP SUPPORT */
+/* Platform-wide high contrast tooltip fixes */
+
+/* Universal high contrast tooltip overrides */
+.high-contrast [role="tooltip"],
+.high-contrast .tooltip-content,
+.high-contrast .legal-guidance-tooltip,
+.high-contrast div[class*="tooltip"],
+.high-contrast div[class*="popover"] {
+  background-color: black !important;
+  color: white !important;
+  border: 2px solid white !important;
+  box-shadow: 0 4px 6px -1px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Light tooltips in high contrast */
+.high-contrast .legal-guidance-tooltip,
+.high-contrast .dashboard-tooltip,
+.high-contrast .settings-tooltip {
   background-color: white !important;
   color: black !important;
   border: 2px solid black !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* High contrast tooltip arrows */
+.high-contrast .tooltip-arrow,
+.high-contrast div[class*="absolute"] div[class*="rotate-45"],
+.high-contrast .absolute div.rotate-45 {
+  background-color: inherit !important;
+  border-color: inherit !important;
+}
+
+/* High contrast mandatory indicators */
+.high-contrast .text-red-600,
+.high-contrast span[class*="text-red"],
+.high-contrast button[class*="text-red"] {
+  color: red !important;
+  background-color: white !important;
+}
+
+/* High contrast tooltip content */
+.high-contrast .absolute.bottom-full.left-0.mb-2 > div,
+.high-contrast .absolute.top-full.left-0.mt-2 > div,
+.high-contrast .absolute.left-full.top-0.ml-2 > div,
+.high-contrast .absolute.right-full.top-0.mr-2 > div {
+  background-color: white !important;
+  color: black !important;
+  border: 2px solid black !important;
+}
+
+/* High contrast tooltip triggers */
+.high-contrast button[aria-label*="guidance"],
+.high-contrast button[aria-label*="tooltip"],
+.high-contrast button[aria-label*="help"] {
+  color: black !important;
+  background-color: white !important;
+  border: 1px solid black !important;
+}
+
+.high-contrast button[aria-label*="guidance"]:hover,
+.high-contrast button[aria-label*="tooltip"]:hover,
+.high-contrast button[aria-label*="help"]:hover {
+  background-color: black !important;
+  color: white !important;
 }
 
 /* Additional fixes for click-based tooltips */

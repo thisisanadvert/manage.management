@@ -121,6 +121,211 @@ button[aria-label*="help"] {
   z-index: 999 !important;
 }
 
+/* UNIVERSAL TOOLTIP FRAMEWORK - PLATFORM-WIDE COVERAGE */
+/* This section ensures ALL tooltips work across the entire platform */
+
+/* 1. Universal Tooltip Container Fixes */
+[role="tooltip"],
+.tooltip-content,
+.legal-guidance-tooltip,
+div[class*="tooltip"],
+div[class*="popover"] {
+  z-index: 1000 !important;
+  position: relative !important;
+  background-color: rgb(255 255 255) !important;
+  color: rgb(17 24 39) !important;
+  border: 1px solid rgb(229 231 235) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 2. Dark Tooltips (like standard Tooltip component) */
+.tooltip-content,
+[role="tooltip"]:not(.legal-guidance-tooltip) {
+  background-color: rgb(17 24 39) !important; /* gray-900 */
+  color: rgb(255 255 255) !important; /* white */
+  border: 1px solid rgb(17 24 39) !important;
+}
+
+/* 3. Universal Positioning Fixes */
+.absolute.bottom-full,
+.absolute.top-full,
+.absolute.left-full,
+.absolute.right-full,
+div[class*="absolute"][class*="bottom-full"],
+div[class*="absolute"][class*="top-full"],
+div[class*="absolute"][class*="left-full"],
+div[class*="absolute"][class*="right-full"] {
+  z-index: 1000 !important;
+}
+
+/* 4. Tooltip Content Visibility */
+.absolute.bottom-full > div,
+.absolute.top-full > div,
+.absolute.left-full > div,
+.absolute.right-full > div,
+div[class*="absolute"][class*="bottom-full"] > div,
+div[class*="absolute"][class*="top-full"] > div,
+div[class*="absolute"][class*="left-full"] > div,
+div[class*="absolute"][class*="right-full"] > div {
+  background-color: inherit !important;
+  color: inherit !important;
+  border: inherit !important;
+  box-shadow: inherit !important;
+  z-index: 1000 !important;
+}
+
+/* 5. Tooltip Arrows */
+.tooltip-arrow,
+div[class*="absolute"] div[class*="rotate-45"],
+.absolute div.rotate-45 {
+  background-color: inherit !important;
+  z-index: 999 !important;
+}
+
+/* 6. Mandatory Indicators (Red Circles with Asterisks) */
+.text-red-600,
+span[class*="text-red"],
+button[class*="text-red"] {
+  color: rgb(220 38 38) !important; /* red-600 */
+}
+
+/* 7. Tooltip Triggers */
+button[aria-label*="guidance"],
+button[aria-label*="tooltip"],
+button[aria-label*="help"],
+button[aria-label*="information"],
+.tooltip-trigger,
+[data-tooltip] {
+  pointer-events: auto !important;
+  z-index: 999 !important;
+  position: relative !important;
+}
+
+/* 8. Backdrop Fixes */
+.fixed.inset-0.z-40,
+.fixed.inset-0[class*="z-"] {
+  background-color: transparent !important;
+  pointer-events: none !important;
+}
+
+/* 9. Platform-Specific Component Fixes */
+/* Dashboard tooltips */
+.dashboard-tooltip,
+.stats-tooltip,
+.widget-tooltip {
+  z-index: 1000 !important;
+  background-color: rgb(255 255 255) !important;
+  color: rgb(17 24 39) !important;
+  border: 1px solid rgb(229 231 235) !important;
+}
+
+/* Form tooltips */
+.form-tooltip,
+.field-tooltip,
+.input-tooltip {
+  z-index: 1000 !important;
+  background-color: rgb(17 24 39) !important;
+  color: rgb(255 255 255) !important;
+}
+
+/* Settings page tooltips */
+.settings-tooltip,
+.preference-tooltip {
+  z-index: 1000 !important;
+  background-color: rgb(255 255 255) !important;
+  color: rgb(17 24 39) !important;
+  border: 1px solid rgb(229 231 235) !important;
+}
+
+/* ADDITIONAL PLATFORM-WIDE TOOLTIP FIXES */
+/* Ensure tooltips work in all possible scenarios */
+
+/* 10. Override any potential CSS conflicts */
+* [role="tooltip"],
+* .tooltip-content,
+* .legal-guidance-tooltip {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* 11. Fix tooltips in modals and overlays */
+.modal [role="tooltip"],
+.modal .tooltip-content,
+.modal .legal-guidance-tooltip,
+.overlay [role="tooltip"],
+.overlay .tooltip-content,
+.overlay .legal-guidance-tooltip {
+  z-index: 1100 !important;
+}
+
+/* 12. Fix tooltips in cards and containers */
+.card [role="tooltip"],
+.card .tooltip-content,
+.card .legal-guidance-tooltip {
+  z-index: 1000 !important;
+  position: relative !important;
+}
+
+/* 13. Ensure tooltip content is never hidden */
+[role="tooltip"] *,
+.tooltip-content *,
+.legal-guidance-tooltip * {
+  color: inherit !important;
+  background-color: transparent !important;
+}
+
+/* 14. Fix tooltip positioning in flex containers */
+.flex [role="tooltip"],
+.flex .tooltip-content,
+.flex .legal-guidance-tooltip {
+  position: absolute !important;
+  z-index: 1000 !important;
+}
+
+/* 15. Override Tailwind utilities that might hide tooltips */
+.hidden [role="tooltip"],
+.invisible [role="tooltip"] {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* 16. Ensure tooltips work with transforms */
+.transform [role="tooltip"],
+.transform .tooltip-content,
+.transform .legal-guidance-tooltip {
+  transform: none !important;
+  z-index: 1000 !important;
+}
+
+/* 17. Fix tooltips in grid layouts */
+.grid [role="tooltip"],
+.grid .tooltip-content,
+.grid .legal-guidance-tooltip {
+  position: absolute !important;
+  z-index: 1000 !important;
+}
+
+/* 18. Ensure tooltips work in all viewport sizes */
+@media (max-width: 768px) {
+  [role="tooltip"],
+  .tooltip-content,
+  .legal-guidance-tooltip {
+    max-width: 90vw !important;
+    z-index: 1000 !important;
+  }
+}
+
+/* 19. Fix tooltips in print mode */
+@media print {
+  [role="tooltip"],
+  .tooltip-content,
+  .legal-guidance-tooltip {
+    display: none !important;
+  }
+}
+
 /* Hide number input spinners across all browsers */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
