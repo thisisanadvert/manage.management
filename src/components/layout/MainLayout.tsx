@@ -8,6 +8,7 @@ import DevUserSwitcher from '../dev/DevUserSwitcher';
 import DevPanel from '../dev/DevPanel';
 import ImpersonationBanner from '../admin/ImpersonationBanner';
 import ImpersonationStyleProvider from '../admin/ImpersonationStyleProvider';
+import AccessibilityToolbar from '../landing/AccessibilityToolbar';
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -71,8 +72,11 @@ const MainLayout = () => {
       <div className="lg:hidden">
         <MobileNav />
       </div>
-      
+
       <Footer />
+
+        {/* Accessibility Toolbar - Available for all logged-in users */}
+        <AccessibilityToolbar />
 
         {/* Developer Tools - Only visible to super user */}
         <DevPanel />
