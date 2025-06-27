@@ -9,11 +9,6 @@ import { Play, Sparkles } from 'lucide-react';
 export function ArcadeEmbed() {
   return (
     <div className="w-full max-w-6xl mx-auto">
-      {/* Test Element - Remove after confirming changes work */}
-      <div className="bg-red-500 text-white p-2 text-center mb-4 rounded">
-        🔴 TEST: If you see this red box, changes are being applied
-      </div>
-
       {/* Demo Header */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary-50 to-secondary-50 px-4 py-2 rounded-full border border-primary-200 mb-4">
@@ -32,14 +27,15 @@ export function ArcadeEmbed() {
       <div className="relative">
         {/* Gradient Border Background */}
         <div
-          className="rounded-2xl"
+          className="rounded-2xl p-1"
           style={{
             background: 'linear-gradient(45deg, #3b82f6, #14b8a6, #f97316, #3b82f6)',
-            padding: '4px'
           }}
         >
           {/* Demo Container */}
-          <div className="relative bg-white rounded-xl p-6 shadow-2xl">
+          <div className="relative bg-white rounded-xl shadow-2xl">
+            {/* Content Padding */}
+            <div className="p-6">
           {/* Demo Frame */}
           <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 shadow-inner">
             {/* Play Button Overlay (optional - can be removed if demo auto-plays) */}
@@ -104,6 +100,8 @@ export function ArcadeEmbed() {
               </div>
               <h4 className="font-semibold text-gray-900 text-sm">Try Interactions</h4>
               <p className="text-xs text-gray-600 mt-1">Click, explore, and discover</p>
+            </div>
+          </div>
             </div>
           </div>
         </div>
