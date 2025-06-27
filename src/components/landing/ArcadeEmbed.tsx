@@ -25,15 +25,10 @@ export function ArcadeEmbed() {
 
       {/* Gradient Bordered Frame */}
       <div className="relative">
-        {/* Demo Container with Gradient Border */}
-        <div
-          className="relative bg-white rounded-2xl p-6 shadow-2xl"
-          style={{
-            background: 'linear-gradient(white, white) padding-box, linear-gradient(90deg, #3b82f6, #14b8a6, #f97316) border-box',
-            border: '3px solid transparent',
-            borderRadius: '1rem'
-          }}
-        >
+        {/* Gradient Border Background */}
+        <div className="bg-gradient-to-r from-blue-500 via-teal-500 to-orange-500 rounded-2xl" style={{ padding: '3px' }}>
+          {/* Demo Container */}
+          <div className="relative bg-white rounded-xl p-6 shadow-2xl">
           {/* Demo Frame */}
           <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 shadow-inner">
             {/* Play Button Overlay (optional - can be removed if demo auto-plays) */}
@@ -100,6 +95,7 @@ export function ArcadeEmbed() {
               <p className="text-xs text-gray-600 mt-1">Click, explore, and discover</p>
             </div>
           </div>
+        </div>
       </div>
       
       {/* Call to Action */}
