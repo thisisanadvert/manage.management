@@ -4,6 +4,56 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Tooltip Visibility Fixes - Critical for User Experience */
+.tooltip-content {
+  background-color: rgb(17 24 39) !important; /* gray-900 */
+  color: rgb(255 255 255) !important; /* white */
+  z-index: 1000 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.tooltip-arrow {
+  background-color: rgb(17 24 39) !important; /* gray-900 */
+  z-index: 999 !important;
+}
+
+/* Ensure tooltips are always visible above other content */
+[role="tooltip"] {
+  z-index: 1000 !important;
+  position: relative !important;
+}
+
+/* Legal Guidance Tooltip Fixes */
+.legal-guidance-tooltip {
+  background-color: rgb(255 255 255) !important; /* white */
+  color: rgb(17 24 39) !important; /* gray-900 */
+  border: 1px solid rgb(229 231 235) !important; /* gray-200 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  z-index: 1000 !important;
+}
+
+/* Ensure legal guidance tooltip content is readable */
+.legal-guidance-tooltip h3,
+.legal-guidance-tooltip h4,
+.legal-guidance-tooltip p,
+.legal-guidance-tooltip span,
+.legal-guidance-tooltip div {
+  color: inherit !important;
+}
+
+/* Fix legal guidance tooltip buttons */
+.legal-guidance-tooltip button {
+  background-color: rgb(249 250 251) !important; /* gray-50 */
+  color: rgb(75 85 99) !important; /* gray-600 */
+  border: 1px solid rgb(229 231 235) !important; /* gray-200 */
+}
+
+.legal-guidance-tooltip button:hover,
+.legal-guidance-tooltip button:focus {
+  background-color: rgb(243 244 246) !important; /* gray-100 */
+  color: rgb(55 65 81) !important; /* gray-700 */
+}
+
 /* Hide number input spinners across all browsers */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {

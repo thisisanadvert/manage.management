@@ -326,9 +326,79 @@ textarea:focus {
   color: white !important;
 }
 
-/* Tooltip Accessibility */
+/* Tooltip Accessibility and High Contrast Fixes */
 [role="tooltip"] {
-  z-index: 1000;
+  z-index: 1000 !important;
+}
+
+/* Enhanced tooltip styling for better visibility */
+.tooltip-content {
+  z-index: 1000 !important;
+  position: relative;
+}
+
+.tooltip-arrow {
+  z-index: 999 !important;
+}
+
+/* Fix tooltip visibility in high contrast mode */
+.high-contrast [role="tooltip"],
+.high-contrast .tooltip-content {
+  background-color: black !important;
+  color: white !important;
+  border: 2px solid white !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Fix tooltip arrows in high contrast mode */
+.high-contrast [role="tooltip"] > div:last-child,
+.high-contrast .tooltip-arrow {
+  background-color: black !important;
+  border-color: black !important;
+}
+
+/* Ensure tooltip triggers remain visible */
+.high-contrast [role="tooltip"] + *,
+.high-contrast .tooltip-content + * {
+  color: black !important;
+}
+
+/* Fix LegalGuidanceTooltip in high contrast mode */
+.high-contrast .legal-guidance-tooltip {
+  background-color: white !important;
+  color: black !important;
+  border: 2px solid black !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Ensure legal guidance tooltip content is readable in high contrast */
+.high-contrast .legal-guidance-tooltip h3,
+.high-contrast .legal-guidance-tooltip h4,
+.high-contrast .legal-guidance-tooltip p,
+.high-contrast .legal-guidance-tooltip span,
+.high-contrast .legal-guidance-tooltip div {
+  color: black !important;
+  background-color: transparent !important;
+}
+
+/* Fix legal guidance tooltip buttons in high contrast mode */
+.high-contrast .legal-guidance-tooltip button {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid black !important;
+}
+
+.high-contrast .legal-guidance-tooltip button:hover,
+.high-contrast .legal-guidance-tooltip button:focus {
+  background-color: black !important;
+  color: white !important;
+}
+
+/* Fix any remaining tooltip positioning issues */
+.high-contrast .absolute.bottom-full.left-0.mb-2 > div {
+  background-color: white !important;
+  color: black !important;
+  border: 2px solid black !important;
 }
 
 /* Easter Egg Animations (respect reduced motion) */

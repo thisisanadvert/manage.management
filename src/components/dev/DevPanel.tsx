@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Code, Database, User, Building2, Eye, EyeOff } from 'lucide-react';
+import { Code, Database, User, Building2, Eye, EyeOff, TestTube } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import TooltipTestComponent from './TooltipTestComponent';
 
 const DevPanel: React.FC = () => {
   const { user } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
+  const [showTooltipTest, setShowTooltipTest] = useState(false);
 
   // Only show for super user
   if (user?.email !== 'frankie@manage.management') {
@@ -160,7 +162,36 @@ const DevPanel: React.FC = () => {
             </span>
           </div>
         </div>
+
+        {/* Tooltip Test Button */}
+        <div className="pt-4 border-t border-gray-700">
+          <button
+            onClick={() => setShowTooltipTest(!showTooltipTest)}
+            className="flex items-center space-x-2 text-sm text-gray-300 hover:text-white transition-colors"
+          >
+            <TestTube className="h-4 w-4" />
+            <span>{showTooltipTest ? 'Hide' : 'Show'} Tooltip Test</span>
+          </button>
+        </div>
       </div>
+
+      {/* Tooltip Test Component */}
+      {showTooltipTest && (
+        <div className="fixed inset-0 bg-white z-50 overflow-auto">
+          <div className="min-h-screen">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
+              <h1 className="text-lg font-semibold text-gray-900">Tooltip Test Mode</h1>
+              <button
+                onClick={() => setShowTooltipTest(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <Eye className="h-5 w-5" />
+              </button>
+            </div>
+            <TooltipTestComponent />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
