@@ -3,6 +3,7 @@ import { Users, Mail, Phone, Home, CheckCircle2, Send, Download, Eye, Scale, Boo
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import LegalGuidanceTooltip from '../legal/LegalGuidanceTooltip';
+import { useFormPersistence } from '../../hooks/useFormPersistence';
 
 interface LeaseholderInfo {
   id: string;
@@ -24,8 +25,31 @@ interface SurveyStats {
   pending: number;
 }
 
+interface SurveyData {
+  leaseholders: LeaseholderInfo[];
+  surveyTemplate: string;
+}
+
 const LeaseholderSurvey: React.FC = () => {
-  const [leaseholders, setLeaseholders] = useState<LeaseholderInfo[]>([]);
+  // Form persistence setup
+  const initialSurveyData: SurveyData = {
+    leaseholders: [],
+    surveyTemplate: ''
+  };
+
+  const {
+    formData: surveyData,
+    setFormData: setSurveyData,
+    persistenceState,
+    saveNow,
+    clearSavedData
+  } = useFormPersistence(initialSurveyData, {
+    formId: 'leaseholder-survey',
+    version: '1.0',
+    autoSave: true,
+    showSaveIndicator: true
+  });
+
   const [newLeaseholder, setNewLeaseholder] = useState<Partial<LeaseholderInfo>>({
     flatNumber: '',
     name: '',
@@ -36,7 +60,6 @@ const LeaseholderSurvey: React.FC = () => {
     contactMethod: 'email'
   });
   const [showAddForm, setShowAddForm] = useState(false);
-  const [surveyTemplate, setSurveyTemplate] = useState('');
 
   const addLeaseholder = () => {
     if (newLeaseholder.flatNumber && newLeaseholder.name) {
@@ -50,8 +73,12 @@ const LeaseholderSurvey: React.FC = () => {
         concerns: newLeaseholder.concerns || '',
         contactMethod: newLeaseholder.contactMethod || 'email'
       };
-      
-      setLeaseholders([...leaseholders, leaseholder]);
+
+      setSurveyData(prev => ({
+        ...prev,
+        leaseholders: [...prev.leaseholders, leaseholder]
+      }));
+
       setNewLeaseholder({
         flatNumber: '',
         name: '',
@@ -66,22 +93,28 @@ const LeaseholderSurvey: React.FC = () => {
   };
 
   const updateLeaseholder = (id: string, updates: Partial<LeaseholderInfo>) => {
-    setLeaseholders(leaseholders.map(lh => 
-      lh.id === id ? { ...lh, ...updates } : lh
-    ));
+    setSurveyData(prev => ({
+      ...prev,
+      leaseholders: prev.leaseholders.map(lh =>
+        lh.id === id ? { ...lh, ...updates } : lh
+      )
+    }));
   };
 
   const removeLeaseholder = (id: string) => {
-    setLeaseholders(leaseholders.filter(lh => lh.id !== id));
+    setSurveyData(prev => ({
+      ...prev,
+      leaseholders: prev.leaseholders.filter(lh => lh.id !== id)
+    }));
   };
 
   const calculateStats = (): SurveyStats => {
-    const total = leaseholders.length;
-    const responded = leaseholders.filter(lh => lh.interested !== 'pending').length;
-    const interested = leaseholders.filter(lh => lh.interested === 'yes').length;
-    const notInterested = leaseholders.filter(lh => lh.interested === 'no').length;
-    const maybe = leaseholders.filter(lh => lh.interested === 'maybe').length;
-    const pending = leaseholders.filter(lh => lh.interested === 'pending').length;
+    const total = surveyData.leaseholders.length;
+    const responded = surveyData.leaseholders.filter(lh => lh.interested !== 'pending').length;
+    const interested = surveyData.leaseholders.filter(lh => lh.interested === 'yes').length;
+    const notInterested = surveyData.leaseholders.filter(lh => lh.interested === 'no').length;
+    const maybe = surveyData.leaseholders.filter(lh => lh.interested === 'maybe').length;
+    const pending = surveyData.leaseholders.filter(lh => lh.interested === 'pending').length;
 
     return { total, responded, interested, notInterested, maybe, pending };
   };
@@ -128,7 +161,10 @@ Best regards,
 This is an informal survey. No legal obligations arise from your response.
     `.trim();
 
-    setSurveyTemplate(template);
+    setSurveyData(prev => ({
+      ...prev,
+      surveyTemplate: template
+    }));
   };
 
   const stats = calculateStats();
@@ -136,6 +172,30 @@ This is an informal survey. No legal obligations arise from your response.
 
   return (
     <div className="space-y-6">
+      {/* Form Persistence Indicator */}
+      {persistenceState.showSaveIndicator && (
+        <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-center space-x-2">
+            <div className={`w-2 h-2 rounded-full ${persistenceState.isSaving ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`}></div>
+            <span className="text-sm text-blue-800">
+              {persistenceState.isSaving ? 'Saving...' :
+               persistenceState.lastSaved ? `Last saved: ${persistenceState.lastSaved.toLocaleTimeString()}` :
+               'Form data will be automatically saved'}
+            </span>
+          </div>
+          {persistenceState.hasSavedData && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearSavedData}
+              className="text-xs"
+            >
+              Clear Saved Data
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Legal Compliance Header */}
       <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
         <div className="flex items-start justify-between">
@@ -257,12 +317,12 @@ This is an informal survey. No legal obligations arise from your response.
             >
               Generate Template
             </Button>
-            {surveyTemplate && (
-              <Button 
-                variant="outline" 
+            {surveyData.surveyTemplate && (
+              <Button
+                variant="outline"
                 leftIcon={<Download size={16} />}
                 onClick={() => {
-                  const blob = new Blob([surveyTemplate], { type: 'text/plain' });
+                  const blob = new Blob([surveyData.surveyTemplate], { type: 'text/plain' });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
@@ -275,11 +335,14 @@ This is an informal survey. No legal obligations arise from your response.
             )}
           </div>
 
-          {surveyTemplate && (
+          {surveyData.surveyTemplate && (
             <div className="mt-4">
               <textarea
-                value={surveyTemplate}
-                onChange={(e) => setSurveyTemplate(e.target.value)}
+                value={surveyData.surveyTemplate}
+                onChange={(e) => setSurveyData(prev => ({
+                  ...prev,
+                  surveyTemplate: e.target.value
+                }))}
                 className="w-full h-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm font-mono"
                 placeholder="Survey template will appear here..."
               />
@@ -349,7 +412,7 @@ This is an informal survey. No legal obligations arise from your response.
 
           {/* Leaseholder List */}
           <div className="space-y-3">
-            {leaseholders.map((leaseholder) => (
+            {surveyData.leaseholders.map((leaseholder) => (
               <div key={leaseholder.id} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex justify-between items-start">
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -394,7 +457,7 @@ This is an informal survey. No legal obligations arise from your response.
               </div>
             ))}
             
-            {leaseholders.length === 0 && (
+            {surveyData.leaseholders.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 No leaseholders added yet. Click "Add Leaseholder" to get started.
               </div>
