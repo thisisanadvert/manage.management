@@ -19,7 +19,7 @@ import {
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
 
 const defaultPreferences: SearchPreferences = {
-  defaultContentTypes: ['issues', 'announcements', 'documents'],
+  defaultContentTypes: ['issues', 'announcements', 'documents', 'legal_templates', 'suppliers', 'rtm_tools'],
   resultsPerPage: 20,
   enableSearchHistory: true,
   enableSearchSuggestions: true,

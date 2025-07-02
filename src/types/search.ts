@@ -23,15 +23,16 @@ export interface SearchFilters {
   buildingId?: string;
 }
 
-export type SearchContentType = 
-  | 'issues' 
-  | 'announcements' 
-  | 'documents' 
-  | 'transactions' 
-  | 'users' 
+export type SearchContentType =
+  | 'issues'
+  | 'announcements'
+  | 'documents'
+  | 'transactions'
+  | 'users'
   | 'legal_templates'
   | 'suppliers'
-  | 'polls';
+  | 'polls'
+  | 'rtm_tools';
 
 export interface SearchResult {
   id: string;
@@ -199,6 +200,12 @@ export const SEARCH_CONTENT_TYPES: Record<SearchContentType, {
     icon: 'CheckSquare',
     color: 'text-teal-600',
     description: 'Polls and voting records'
+  },
+  rtm_tools: {
+    label: 'RTM Tools',
+    icon: 'Building',
+    color: 'text-blue-600',
+    description: 'RTM formation tools and guidance'
   }
 };
 
@@ -212,7 +219,8 @@ export const generateSearchResultUrl = (result: SearchResult): string => {
     users: '/residents',
     legal_templates: '/legal/templates',
     suppliers: '/suppliers',
-    polls: '/voting'
+    polls: '/voting',
+    rtm_tools: '/rtm'
   };
   
   return `${baseUrls[result.type]}?highlight=${result.id}`;

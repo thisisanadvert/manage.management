@@ -14,6 +14,7 @@ import {
   Scale, 
   Truck, 
   CheckSquare,
+  Building,
   Clock,
   ExternalLink,
   ChevronRight
@@ -48,7 +49,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     users: Users,
     legal_templates: Scale,
     suppliers: Truck,
-    polls: CheckSquare
+    polls: CheckSquare,
+    rtm_tools: Building
   };
 
   // Group results by content type
@@ -133,6 +135,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
             result.type === 'users' ? 'bg-purple-100 text-purple-600' :
             result.type === 'legal_templates' ? 'bg-indigo-100 text-indigo-600' :
             result.type === 'suppliers' ? 'bg-orange-100 text-orange-600' :
+            result.type === 'rtm_tools' ? 'bg-blue-100 text-blue-600' :
             'bg-teal-100 text-teal-600'
           }`}>
             <Icon size={compact ? 16 : 18} />

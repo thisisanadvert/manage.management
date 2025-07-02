@@ -39,7 +39,7 @@ class GlobalSearchService {
 
       // Determine which content types to search
       const contentTypes = filters.contentTypes || [
-        'issues', 'announcements', 'documents', 'transactions', 'users', 'polls'
+        'issues', 'announcements', 'documents', 'transactions', 'users', 'polls', 'legal_templates', 'suppliers', 'rtm_tools'
       ];
       console.log('🔍 Content types to search:', contentTypes);
 
@@ -110,6 +110,12 @@ class GlobalSearchService {
         return this.searchUsers(query, filters, limit, offset);
       case 'polls':
         return this.searchPolls(query, filters, limit, offset);
+      case 'legal_templates':
+        return this.searchLegalTemplates(query, filters, limit, offset);
+      case 'suppliers':
+        return this.searchSuppliers(query, filters, limit, offset);
+      case 'rtm_tools':
+        return this.searchRTMTools(query, filters, limit, offset);
       default:
         return [];
     }
@@ -562,6 +568,191 @@ class GlobalSearchService {
     return commonTerms
       .filter(term => term.toLowerCase().includes(query.toLowerCase()))
       .slice(0, 5);
+  }
+
+  /**
+   * Search legal templates
+   */
+  private async searchLegalTemplates(
+    query: string,
+    filters: SearchFilters,
+    limit: number,
+    offset: number
+  ): Promise<SearchResult[]> {
+    // For now, return static legal template results
+    // This would be enhanced with a proper legal templates database table
+    const legalTemplates = [
+      {
+        id: 'rtm-notice-template',
+        title: 'RTM Claim Notice Template',
+        description: 'Template for serving RTM claim notice under CLRA 2002',
+        category: 'RTM Formation',
+        type: 'legal_templates'
+      },
+      {
+        id: 'section-20-template',
+        title: 'Section 20 Consultation Notice',
+        description: 'Template for major works consultation under Landlord and Tenant Act',
+        category: 'Service Charges',
+        type: 'legal_templates'
+      },
+      {
+        id: 'articles-association',
+        title: 'RTM Articles of Association',
+        description: 'Standard articles of association for RTM companies',
+        category: 'RTM Formation',
+        type: 'legal_templates'
+      }
+    ];
+
+    const filteredTemplates = legalTemplates.filter(template =>
+      template.title.toLowerCase().includes(query.toLowerCase()) ||
+      template.description.toLowerCase().includes(query.toLowerCase()) ||
+      template.category.toLowerCase().includes(query.toLowerCase())
+    );
+
+    return filteredTemplates.map(template => ({
+      id: template.id,
+      type: 'legal_templates' as SearchContentType,
+      title: template.title,
+      description: template.description,
+      url: `/legal/templates?highlight=${template.id}`,
+      metadata: {
+        createdAt: new Date().toISOString(),
+        category: template.category
+      }
+    }));
+  }
+
+  /**
+   * Search suppliers
+   */
+  private async searchSuppliers(
+    query: string,
+    filters: SearchFilters,
+    limit: number,
+    offset: number
+  ): Promise<SearchResult[]> {
+    let queryBuilder = supabase
+      .from('suppliers')
+      .select(`
+        id,
+        name,
+        description,
+        category,
+        contact_email,
+        contact_phone,
+        website,
+        verified,
+        created_at
+      `);
+
+    if (query) {
+      queryBuilder = queryBuilder.or(
+        `name.ilike.%${query}%,description.ilike.%${query}%,category.ilike.%${query}%`
+      );
+    }
+
+    if (filters.category?.length) {
+      queryBuilder = queryBuilder.in('category', filters.category);
+    }
+
+    const { data, error } = await queryBuilder
+      .order('verified', { ascending: false })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('Suppliers search error:', error);
+      return [];
+    }
+
+    return (data || []).map(supplier => ({
+      id: supplier.id,
+      type: 'suppliers' as SearchContentType,
+      title: supplier.name,
+      description: supplier.description || `${supplier.category} supplier`,
+      url: `/suppliers?highlight=${supplier.id}`,
+      metadata: {
+        createdAt: supplier.created_at,
+        category: supplier.category,
+        tags: supplier.verified ? ['Verified'] : []
+      }
+    }));
+  }
+
+  /**
+   * Search RTM tools and guidance
+   */
+  private async searchRTMTools(
+    query: string,
+    filters: SearchFilters,
+    limit: number,
+    offset: number
+  ): Promise<SearchResult[]> {
+    // Static RTM tools content that can be searched
+    const rtmTools = [
+      {
+        id: 'eligibility-checker',
+        title: 'RTM Eligibility Checker',
+        description: 'Check if your building qualifies for Right to Manage',
+        category: 'RTM Formation',
+        url: '/rtm/eligibility'
+      },
+      {
+        id: 'leaseholder-survey',
+        title: 'Leaseholder Survey Tool',
+        description: 'Survey leaseholders to gauge support for RTM',
+        category: 'RTM Formation',
+        url: '/rtm/survey'
+      },
+      {
+        id: 'company-formation',
+        title: 'RTM Company Formation',
+        description: 'Step-by-step guide to forming your RTM company',
+        category: 'RTM Formation',
+        url: '/rtm/company-formation'
+      },
+      {
+        id: 'notice-generator',
+        title: 'RTM Notice Generator',
+        description: 'Generate legal notices for RTM claim process',
+        category: 'Legal Notices',
+        url: '/rtm/notices'
+      },
+      {
+        id: 'acquisition-planner',
+        title: 'RTM Acquisition Planner',
+        description: 'Plan and track your RTM acquisition timeline',
+        category: 'Project Management',
+        url: '/rtm/planner'
+      },
+      {
+        id: 'articles-generator',
+        title: 'Articles of Association Generator',
+        description: 'Generate compliant Articles of Association for RTM company',
+        category: 'Legal Documents',
+        url: '/rtm/articles'
+      }
+    ];
+
+    const filteredTools = rtmTools.filter(tool =>
+      tool.title.toLowerCase().includes(query.toLowerCase()) ||
+      tool.description.toLowerCase().includes(query.toLowerCase()) ||
+      tool.category.toLowerCase().includes(query.toLowerCase())
+    );
+
+    return filteredTools.slice(offset, offset + limit).map(tool => ({
+      id: tool.id,
+      type: 'rtm_tools' as SearchContentType,
+      title: tool.title,
+      description: tool.description,
+      url: tool.url,
+      metadata: {
+        createdAt: new Date().toISOString(),
+        category: tool.category
+      }
+    }));
   }
 
   /**
