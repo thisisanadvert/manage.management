@@ -32,7 +32,7 @@ const DevPanel: React.FC = () => {
 
   if (!isVisible) {
     return (
-      <div className="fixed top-4 left-4 z-50">
+      <div className="fixed top-4 left-4 z-[1300]">
         <button
           onClick={() => setIsVisible(true)}
           className="p-2 bg-gray-800 text-white rounded-lg shadow-lg hover:bg-gray-700 transition-colors"
@@ -45,7 +45,7 @@ const DevPanel: React.FC = () => {
   }
 
   return (
-    <div className="fixed top-4 left-4 z-50 w-80 bg-gray-900 text-white rounded-lg shadow-xl border border-gray-700 overflow-hidden">
+    <div className="fixed top-4 left-4 z-[1300] w-80 bg-gray-900 text-white rounded-lg shadow-xl border border-gray-700 overflow-hidden">
       {/* Header */}
       <div className="bg-gray-800 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">

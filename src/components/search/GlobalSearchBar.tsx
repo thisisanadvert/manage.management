@@ -305,7 +305,7 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
       {showSuggestions && suggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto"
+          className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-[1100] max-h-64 overflow-y-auto"
         >
           {suggestions.map((suggestion, index) => (
             <button
@@ -339,7 +339,7 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
 
       {/* Filters Panel */}
       {showFilters && showFiltersPanel && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-40 p-4">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-[1050] p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-medium text-gray-900">Search Filters</h3>
             {hasActiveFilters && (
