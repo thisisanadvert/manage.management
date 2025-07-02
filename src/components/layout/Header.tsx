@@ -161,7 +161,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
               
               {/* Dropdown menu */}
               {showDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200 animate-slide-down">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-[1000] border border-gray-200 animate-slide-down">
                   <Link
                     to="/profile"
                     className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"

@@ -130,12 +130,12 @@ button[aria-label*="help"] {
 .legal-guidance-tooltip,
 div[class*="tooltip"],
 div[class*="popover"] {
-  z-index: 1000 !important;
+  z-index: 1001 !important;
   position: relative !important;
   background-color: rgb(255 255 255) !important;
   color: rgb(17 24 39) !important;
   border: 1px solid rgb(229 231 235) !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
 }
 
 /* 2. Dark Tooltips (like standard Tooltip component) */
@@ -155,7 +155,24 @@ div[class*="absolute"][class*="bottom-full"],
 div[class*="absolute"][class*="top-full"],
 div[class*="absolute"][class*="left-full"],
 div[class*="absolute"][class*="right-full"] {
-  z-index: 1000 !important;
+  z-index: 1001 !important;
+}
+
+/* 3a. Specific Legal Guidance Tooltip Fixes */
+.legal-guidance-tooltip {
+  z-index: 1001 !important;
+  background-color: rgb(255 255 255) !important;
+  color: rgb(17 24 39) !important;
+  border: 1px solid rgb(229 231 235) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* 3b. Tooltip Backdrop Fixes */
+div[class*="fixed"][class*="inset-0"] {
+  z-index: 999 !important;
 }
 
 /* 4. Tooltip Content Visibility */
@@ -248,6 +265,7 @@ button[aria-label*="information"],
   visibility: visible !important;
   opacity: 1 !important;
   pointer-events: auto !important;
+  z-index: 1001 !important;
 }
 
 /* 11. Fix tooltips in modals and overlays */
@@ -258,6 +276,45 @@ button[aria-label*="information"],
 .overlay .tooltip-content,
 .overlay .legal-guidance-tooltip {
   z-index: 1100 !important;
+}
+
+/* 12. Critical Z-Index Hierarchy for Tooltips */
+/* Ensure tooltips always appear above all other content */
+.z-\\[1001\\] {
+  z-index: 1001 !important;
+}
+
+.z-\\[999\\] {
+  z-index: 999 !important;
+}
+
+/* 13. Specific Component Layer Fixes */
+/* Cards and containers should not interfere with tooltips */
+.card,
+.bg-white,
+.bg-gray-50,
+.bg-blue-50,
+.bg-purple-50,
+.bg-amber-50,
+.bg-green-50 {
+  position: relative;
+  z-index: auto !important;
+}
+
+/* 14. Tooltip Container Positioning */
+div[class*="absolute"][class*="z-[1001]"] {
+  z-index: 1001 !important;
+  position: absolute !important;
+}
+
+/* 15. Force tooltip visibility over all content */
+.legal-guidance-tooltip,
+[role="tooltip"] {
+  z-index: 1001 !important;
+  position: relative !important;
+  background: white !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
 }
 
 /* 12. Fix tooltips in cards and containers */
@@ -324,6 +381,51 @@ button[aria-label*="information"],
   .legal-guidance-tooltip {
     display: none !important;
   }
+}
+
+/* 20. COMPREHENSIVE Z-INDEX HIERARCHY ENFORCEMENT */
+/* This section ensures proper layering across the entire platform */
+
+/* 20a. Override any remaining z-50, z-40, z-30 classes that might interfere */
+.z-50 {
+  z-index: 1000 !important;
+}
+
+.z-40 {
+  z-index: 1050 !important;
+}
+
+.z-30 {
+  z-index: 1030 !important;
+}
+
+/* 20b. Ensure tooltips always win the z-index battle */
+[role="tooltip"],
+.tooltip-content,
+.legal-guidance-tooltip {
+  z-index: 1001 !important;
+  position: relative !important;
+}
+
+/* 20c. Force tooltip visibility in all scenarios */
+div[class*="z-[1001]"],
+div[class*="z-[1000]"] {
+  z-index: 1001 !important;
+}
+
+/* 20d. Tooltip close buttons should be clickable */
+button[aria-label="Close tooltip"],
+button[aria-label*="close"] {
+  z-index: 1002 !important;
+  position: relative !important;
+  pointer-events: auto !important;
+}
+
+/* 20e. Final override for any stubborn tooltips */
+.legal-guidance-tooltip button,
+[role="tooltip"] button {
+  z-index: 1002 !important;
+  pointer-events: auto !important;
 }
 
 /* Hide number input spinners across all browsers */

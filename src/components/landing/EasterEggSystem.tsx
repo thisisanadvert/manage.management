@@ -213,7 +213,7 @@ const EasterEggSystem: React.FC<EasterEggSystemProps> = ({ onLogoClick }) => {
     <>
       {/* Easter Egg Notification */}
       {activeEgg && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[1200] animate-bounce">
           <div className={`bg-gradient-to-r ${activeEgg.color} text-white px-6 py-3 rounded-full shadow-lg flex items-center space-x-2 max-w-sm`}>
             {activeEgg.icon}
             <span className="font-medium text-sm">{activeEgg.message}</span>

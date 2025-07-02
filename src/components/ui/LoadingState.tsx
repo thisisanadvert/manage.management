@@ -49,7 +49,7 @@ const LoadingState: React.FC<LoadingStateProps> = ({
 
     case 'overlay':
       return (
-        <div className={`fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center ${className}`}>
+        <div className={`fixed inset-0 z-[1100] bg-black bg-opacity-50 flex items-center justify-center ${className}`}>
           <div className="bg-white rounded-lg p-8 max-w-sm mx-4">
             {renderContent()}
           </div>

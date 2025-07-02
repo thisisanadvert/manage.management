@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HelpCircle, ExternalLink, BookOpen, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { HelpCircle, ExternalLink, BookOpen, AlertTriangle, CheckCircle2, X } from 'lucide-react';
 import { LegalFramework, ComplianceLevel, LEGAL_FRAMEWORK_INFO } from '../../types/legal';
 
 interface LegalGuidanceTooltipProps {
@@ -77,15 +77,15 @@ const LegalGuidanceTooltip: React.FC<LegalGuidanceTooltipProps> = ({
       {isOpen && (
         <>
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 z-40" 
+          <div
+            className="fixed inset-0 z-[999]"
             onClick={() => setIsOpen(false)}
           />
-          
+
           {/* Tooltip */}
-          <div className="absolute bottom-full left-0 mb-2 z-[1000] w-96 max-w-screen-sm">
-            <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 legal-guidance-tooltip">
-              {/* Header */}
+          <div className="absolute bottom-full left-0 mb-2 z-[1001] w-96 max-w-screen-sm">
+            <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-4 legal-guidance-tooltip">
+              {/* Header with Close Button */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900 text-sm">
@@ -108,6 +108,15 @@ const LegalGuidanceTooltip: React.FC<LegalGuidanceTooltipProps> = ({
                     </a>
                   </div>
                 </div>
+
+                {/* Close Button */}
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="ml-2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                  aria-label="Close tooltip"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
 
               {/* Level Selector */}

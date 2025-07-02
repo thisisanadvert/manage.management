@@ -90,7 +90,7 @@ const Pricing = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
-      <nav className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+      <nav className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[1000]">
         <div className="bg-white/80 backdrop-blur-md rounded-full px-4 py-2 shadow-lg border border-gray-200">
           <div className="flex items-center space-x-4">
             <Button 

@@ -43,16 +43,16 @@ const MainLayout = () => {
         
         {/* Mobile sidebar */}
         {isMobile && (
-          <div 
-            className={`fixed inset-0 z-40 transition-opacity duration-300 ${
+          <div
+            className={`fixed inset-0 z-[1050] transition-opacity duration-300 ${
               isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
           >
-            <div 
-              className="absolute inset-0 bg-gray-600 opacity-75" 
+            <div
+              className="absolute inset-0 bg-gray-600 opacity-75"
               onClick={toggleSidebar}
             ></div>
-            <div className={`fixed inset-y-0 left-0 flex flex-col z-50 w-64 bg-white transform transition-transform duration-300 ease-in-out ${
+            <div className={`fixed inset-y-0 left-0 flex flex-col z-[1060] w-64 bg-white transform transition-transform duration-300 ease-in-out ${
               isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
             }`}>
               <Sidebar onItemClick={() => setIsSidebarOpen(false)} />
