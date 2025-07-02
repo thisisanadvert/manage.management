@@ -147,6 +147,29 @@ export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [user?.id]);
 
   /**
+   * Add search to history
+   */
+  const addToHistory = useCallback((query: string, resultCount: number, filters?: SearchFilters) => {
+    if (!preferences.enableSearchHistory) return;
+
+    const historyItem: SearchHistory = {
+      id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      query,
+      timestamp: new Date().toISOString(),
+      resultCount,
+      filters
+    };
+
+    setSearchHistory(prev => {
+      // Remove duplicate queries
+      const filtered = prev.filter(item => item.query !== query);
+      const newHistory = [historyItem, ...filtered].slice(0, 50);
+      saveSearchHistory(newHistory);
+      return newHistory;
+    });
+  }, [preferences.enableSearchHistory, saveSearchHistory]);
+
+  /**
    * Perform a search
    */
   const search = useCallback(async (query: string, filters?: SearchFilters) => {
@@ -173,7 +196,7 @@ export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       });
 
       setCurrentResults(results);
-      
+
       // Add to search history
       if (preferences.enableSearchHistory) {
         addToHistory(query, results.total, searchFilters);
@@ -210,28 +233,7 @@ export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setIsSearchOpen(false);
   }, []);
 
-  /**
-   * Add search to history
-   */
-  const addToHistory = useCallback((query: string, resultCount: number, filters?: SearchFilters) => {
-    if (!preferences.enableSearchHistory) return;
 
-    const historyItem: SearchHistory = {
-      id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      query,
-      timestamp: new Date().toISOString(),
-      resultCount,
-      filters
-    };
-
-    setSearchHistory(prev => {
-      // Remove duplicate queries
-      const filtered = prev.filter(item => item.query !== query);
-      const newHistory = [historyItem, ...filtered].slice(0, 50);
-      saveSearchHistory(newHistory);
-      return newHistory;
-    });
-  }, [preferences.enableSearchHistory, saveSearchHistory]);
 
   /**
    * Clear search history

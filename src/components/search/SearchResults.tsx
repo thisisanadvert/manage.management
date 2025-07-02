@@ -13,7 +13,7 @@ import {
   Users, 
   Scale, 
   Truck, 
-  Vote,
+  CheckSquare,
   Clock,
   ExternalLink,
   ChevronRight
@@ -48,7 +48,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     users: Users,
     legal_templates: Scale,
     suppliers: Truck,
-    polls: Vote
+    polls: CheckSquare
   };
 
   // Group results by content type

@@ -196,7 +196,7 @@ export const SEARCH_CONTENT_TYPES: Record<SearchContentType, {
   },
   polls: {
     label: 'Voting',
-    icon: 'Vote',
+    icon: 'CheckSquare',
     color: 'text-teal-600',
     description: 'Polls and voting records'
   }
