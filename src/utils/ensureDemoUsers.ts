@@ -196,6 +196,65 @@ export const getDemoUserCredentials = (): Array<{ email: string; password: strin
 };
 
 /**
+ * Check if a specific user exists in the system
+ */
+export const checkSpecificUser = async (email: string): Promise<{
+  exists: boolean;
+  user?: any;
+  message: string;
+}> => {
+  try {
+    console.log(`🔍 Checking for user: ${email}`);
+
+    const { data: user, error } = await supabase
+      .from('auth.users')
+      .select(`
+        id,
+        email,
+        raw_user_meta_data,
+        created_at,
+        last_sign_in_at,
+        building_users(
+          building_id,
+          role,
+          buildings(name)
+        )
+      `)
+      .eq('email', email)
+      .single();
+
+    if (error) {
+      console.error(`❌ Error checking user ${email}:`, error);
+      return {
+        exists: false,
+        message: `Error: ${error.message}`
+      };
+    }
+
+    if (user) {
+      console.log(`✅ Found user ${email}:`, user);
+      return {
+        exists: true,
+        user,
+        message: `User found with role: ${user.raw_user_meta_data?.role || 'no role'}`
+      };
+    }
+
+    return {
+      exists: false,
+      message: 'User not found'
+    };
+
+  } catch (error) {
+    console.error(`❌ Error checking user ${email}:`, error);
+    return {
+      exists: false,
+      message: `Error: ${error}`
+    };
+  }
+};
+
+/**
  * Test function to verify demo users can be found by impersonation search
  */
 export const testDemoUserSearch = async (): Promise<{

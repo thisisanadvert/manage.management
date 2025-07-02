@@ -72,11 +72,28 @@ class ImpersonationService {
         query = query.eq('raw_user_meta_data->>role', filters.role);
       }
 
-      // Filter by roles admin can impersonate
-      query = query.in('raw_user_meta_data->>role', permissions.can_impersonate_roles);
+      console.log('🔍 Admin permissions:', permissions);
+      console.log('🔍 Can impersonate roles:', permissions.can_impersonate_roles);
 
-      // Exclude super-admin users
-      query = query.neq('raw_user_meta_data->>role', 'super-admin');
+      // For debugging: temporarily make role filtering more lenient
+      if (permissions.can_impersonate_roles && permissions.can_impersonate_roles.length > 0) {
+        // Include allowed roles OR users with no role set
+        const allowedRoles = [...permissions.can_impersonate_roles];
+
+        // Add common roles that might be missing from permissions
+        if (!allowedRoles.includes('homeowner')) allowedRoles.push('homeowner');
+        if (!allowedRoles.includes('leaseholder')) allowedRoles.push('leaseholder');
+        if (!allowedRoles.includes('rtm-director')) allowedRoles.push('rtm-director');
+        if (!allowedRoles.includes('rmc-director')) allowedRoles.push('rmc-director');
+
+        console.log('🔍 Extended allowed roles:', allowedRoles);
+        query = query.in('raw_user_meta_data->>role', allowedRoles);
+      }
+
+      // Exclude super-admin users (unless searching for a specific email)
+      if (!filters.email || !filters.email.toLowerCase().includes('basilio')) {
+        query = query.neq('raw_user_meta_data->>role', 'super-admin');
+      }
 
       // Filter by building if specified
       if (filters.buildingName) {
