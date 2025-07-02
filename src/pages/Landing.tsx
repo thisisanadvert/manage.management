@@ -129,13 +129,13 @@ const Landing = () => {
       <EasterEggSystem />
 
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-[1000] bg-white/95 backdrop-blur-md border-b border-gray-200">
+      <nav className="fixed top-0 left-0 right-0 z-[1000] bg-white/80 backdrop-blur-md border-b border-gray-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex-shrink-0">
               <a
-                href="https://manage.management"
+                href="https://app.manage.management"
                 data-logo
                 className="text-lg font-bold text-primary-800 pixel-font hover:text-primary-600 transition-colors cursor-pointer"
                 title="Click me 3 times for a surprise! 🎉"
@@ -146,12 +146,6 @@ const Landing = () => {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-4">
-              <a
-                href="https://manage.management"
-                className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-              >
-                Home
-              </a>
               <Button
                 variant="ghost"
                 size="sm"

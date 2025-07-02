@@ -217,7 +217,7 @@ const RTMQualify = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex-shrink-0">
               <a
-                href="https://manage.management"
+                href="https://app.manage.management"
                 className="text-lg font-bold text-primary-800 pixel-font"
               >
                 Manage.Management

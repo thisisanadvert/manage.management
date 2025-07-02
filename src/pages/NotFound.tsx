@@ -37,12 +37,12 @@ const NotFound = () => {
               Go Back
             </Button>
             <Button
-              onClick={() => navigate('/')}
+              onClick={() => window.location.href = 'https://app.manage.management'}
               variant="outline"
               className="w-full"
               leftIcon={<Home size={16} />}
             >
-              Go to Homepage
+              Go to App
             </Button>
           </div>
         </div>
