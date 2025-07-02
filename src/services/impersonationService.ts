@@ -48,7 +48,7 @@ class ImpersonationService {
         throw new Error('No active impersonation permissions');
       }
 
-      // Build query
+      // Build query - use left join to include users even without building associations
       let query = supabase
         .from('auth.users')
         .select(`
@@ -57,7 +57,7 @@ class ImpersonationService {
           raw_user_meta_data,
           created_at,
           last_sign_in_at,
-          building_users!inner(
+          building_users(
             building_id,
             buildings(name)
           )
@@ -107,6 +107,9 @@ class ImpersonationService {
       query = query.range(offset, offset + limit - 1);
 
       const { data, error, count } = await query;
+
+      console.log('🔍 User search query result:', { data, error, count });
+      console.log('🔍 Search filters applied:', filters);
 
       if (error) {
         console.error('Error searching users:', error);
