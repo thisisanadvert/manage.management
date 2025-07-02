@@ -187,7 +187,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                   )}
                   
                   {result.metadata.status && (
-                    <Badge variant="outline" size="sm">
+                    <Badge variant="gray" size="sm">
                       {result.metadata.status}
                     </Badge>
                   )}

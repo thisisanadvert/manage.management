@@ -39,7 +39,7 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
 
   const [inputValue, setInputValue] = useState(currentQuery);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [showFilters, setShowFiltersPanel] = useState(false);
+  const [showFiltersPanel, setShowFiltersPanel] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({});
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
 
