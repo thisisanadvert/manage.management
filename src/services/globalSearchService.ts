@@ -27,20 +27,28 @@ class GlobalSearchService {
     const startTime = Date.now();
     const { query, filters = {}, limit = this.SEARCH_LIMIT, offset = 0 } = searchQuery;
 
+    console.log('🔍 GlobalSearchService: Starting search');
+    console.log('🔍 Query:', query);
+    console.log('🔍 Filters:', filters);
+    console.log('🔍 Limit:', limit);
+
     try {
       // Sanitize search query for PostgreSQL full-text search
       const sanitizedQuery = this.sanitizeQuery(query);
-      
+      console.log('🔍 Sanitized query:', sanitizedQuery);
+
       // Determine which content types to search
       const contentTypes = filters.contentTypes || [
         'issues', 'announcements', 'documents', 'transactions', 'users', 'polls'
       ];
+      console.log('🔍 Content types to search:', contentTypes);
 
       // Execute searches in parallel for better performance
-      const searchPromises = contentTypes.map(type => 
+      const searchPromises = contentTypes.map(type =>
         this.searchContentType(type, sanitizedQuery, filters, limit, offset)
       );
 
+      console.log('🔍 Executing', searchPromises.length, 'search promises...');
       const searchResults = await Promise.allSettled(searchPromises);
       
       // Combine and process results

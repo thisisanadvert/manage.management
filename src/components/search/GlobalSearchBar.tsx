@@ -71,14 +71,23 @@ const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
   const handleSearch = useCallback(async (query: string) => {
     if (!query.trim()) return;
 
+    console.log('🔍 GlobalSearchBar: Executing search for:', query);
+    console.log('🔍 GlobalSearchBar: Filters:', filters);
+
     try {
+      // Open search modal if not already open (for header search bar)
+      if (!isSearchOpen) {
+        openSearch();
+      }
+
       await search(query, filters);
       setShowSuggestions(false);
+      console.log('✅ GlobalSearchBar: Search completed successfully');
     } catch (error) {
-      console.error('Search failed:', error);
+      console.error('❌ GlobalSearchBar: Search failed:', error);
       // TODO: Show error toast
     }
-  }, [search, filters]);
+  }, [search, filters, isSearchOpen, openSearch]);
 
   /**
    * Handle input change with debounced search

@@ -173,8 +173,13 @@ export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
    * Perform a search
    */
   const search = useCallback(async (query: string, filters?: SearchFilters) => {
+    console.log('🔍 SearchContext: Starting search for:', query);
+    console.log('🔍 SearchContext: User building ID:', user?.metadata?.buildingId);
+    console.log('🔍 SearchContext: Preferences:', preferences);
+
     const validation = validateSearchQuery(query);
     if (!validation.valid) {
+      console.error('❌ SearchContext: Invalid query:', validation.error);
       throw new Error(validation.error);
     }
 
@@ -189,12 +194,15 @@ export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         contentTypes: filters?.contentTypes || preferences.defaultContentTypes
       };
 
+      console.log('🔍 SearchContext: Final search filters:', searchFilters);
+
       const results = await globalSearchService.search({
         query,
         filters: searchFilters,
         limit: preferences.resultsPerPage
       });
 
+      console.log('✅ SearchContext: Search results:', results);
       setCurrentResults(results);
 
       // Add to search history
@@ -203,7 +211,7 @@ export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
 
     } catch (error) {
-      console.error('Search error:', error);
+      console.error('❌ SearchContext: Search error:', error);
       throw error;
     } finally {
       setIsSearching(false);
