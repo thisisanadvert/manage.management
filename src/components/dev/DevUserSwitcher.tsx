@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Settings, User, Crown, Building2, Users, Briefcase, Home, Loader2 } from 'lucide-react';
+import { Settings, User, Crown, Building2, Users, Briefcase, Home, Loader2, Shield } from 'lucide-react';
 import Button from '../ui/Button';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface DevUser {
   email: string;
@@ -61,6 +62,7 @@ const DEV_USERS: DevUser[] = [
 
 const DevUserSwitcher: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
 
@@ -223,6 +225,20 @@ const DevUserSwitcher: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* User Impersonation Button */}
+      <div className="mb-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          leftIcon={<Shield className="h-4 w-4" />}
+          onClick={() => navigate('/management/user-impersonation')}
+          className="shadow-lg w-full"
+          disabled={isSwitching}
+        >
+          User Impersonation
+        </Button>
+      </div>
 
       {/* User Switcher Button */}
       <div className="relative">
