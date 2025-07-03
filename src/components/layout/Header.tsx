@@ -2,12 +2,7 @@ import { useState, useEffect } from 'react';
 import { Bell, Search, Menu, Settings, User, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNotifications } from '../../contexts/NotificationContext';
-import { useSearch } from '../../contexts/SearchContext';
 import Logo from '../ui/Logo';
-import NotificationDropdown from '../notifications/NotificationDropdown';
-import GlobalSearchBar from '../search/GlobalSearchBar';
-import GlobalSearchModal from '../search/GlobalSearchModal';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -16,10 +11,7 @@ interface HeaderProps {
 const Header = ({ toggleSidebar }: HeaderProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const { user, signOut } = useAuth();
-  const { unreadCount } = useNotifications();
-  const { isSearchOpen, openSearch, closeSearch } = useSearch();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,7 +29,6 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
       const target = event.target as Element;
       if (!target.closest('.dropdown-container')) {
         setShowDropdown(false);
-        setShowNotifications(false);
       }
     };
 
@@ -112,50 +103,34 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
             </a>
           </div>
           
-          {/* Global Search Bar */}
+          {/* Search - Coming Soon */}
           <div className="hidden md:flex items-center w-1/3 relative">
-            <GlobalSearchBar
-              placeholder="Search issues, documents, announcements..."
-              showFilters={false}
-              onResultClick={() => {
-                // Results will be shown in the modal
-              }}
-              className="w-full"
-            />
-          </div>
-
-          {/* Mobile Search Button */}
-          <div className="md:hidden">
-            <button
-              onClick={openSearch}
-              className="p-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
-              aria-label="Search"
-            >
-              <Search size={20} />
-            </button>
+            <div className="w-full relative">
+              <input
+                type="text"
+                placeholder="Search coming soon..."
+                disabled
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 bg-gray-50 text-gray-400 cursor-not-allowed"
+              />
+              <Search
+                size={18}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              />
+            </div>
           </div>
           
           {/* Right-side actions */}
           <div className="flex items-center space-x-4">
-            {/* Notifications */}
-            <div className="relative dropdown-container">
+            {/* Notifications - Coming Soon */}
+            <div className="relative">
               <button
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors relative"
-                aria-label="Notifications"
+                disabled
+                className="p-2 rounded-md text-gray-400 cursor-not-allowed"
+                aria-label="Notifications (Coming Soon)"
+                title="Notifications coming soon"
               >
                 <Bell size={20} />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </span>
-                )}
               </button>
-
-              <NotificationDropdown
-                isOpen={showNotifications}
-                onClose={() => setShowNotifications(false)}
-              />
             </div>
             
             {/* User profile */}
@@ -205,11 +180,6 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
         </div>
       </div>
 
-      {/* Global Search Modal */}
-      <GlobalSearchModal
-        isOpen={isSearchOpen}
-        onClose={closeSearch}
-      />
     </header>
   );
 };
