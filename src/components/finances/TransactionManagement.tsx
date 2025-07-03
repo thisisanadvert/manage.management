@@ -428,9 +428,10 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
             <option value="expense">Expense</option>
           </select>
 
-          <Button variant="outline" leftIcon={<Filter className="h-4 w-4" />}>
-            Advanced Filters
-          </Button>
+          <button className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center space-x-2">
+            <Filter className="h-4 w-4" />
+            <span>Advanced Filters</span>
+          </button>
         </div>
       </Card>
 
@@ -506,19 +507,21 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
                     </div>
                     
                     <div className="flex items-center space-x-2 mt-2">
-                      <Button variant="ghost" size="sm" onClick={() => setSelectedTransaction(transaction)}>
+                      <button
+                        onClick={() => setSelectedTransaction(transaction)}
+                        className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded"
+                      >
                         <Eye className="h-4 w-4" />
-                      </Button>
-                      
+                      </button>
+
                       {transaction.status === 'pending' && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
+                        <button
                           onClick={() => handleApproveTransaction(transaction.id)}
+                          className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-1"
                         >
-                          <CheckCircle2 className="h-4 w-4 mr-1" />
-                          Approve
-                        </Button>
+                          <CheckCircle2 className="h-4 w-4" />
+                          <span>Approve</span>
+                        </button>
                       )}
                     </div>
                   </div>
