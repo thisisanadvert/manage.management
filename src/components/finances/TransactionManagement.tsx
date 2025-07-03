@@ -69,6 +69,8 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterType, setFilterType] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
 
   // Form state for new transaction
   const [transactionForm, setTransactionForm] = useState<TransactionFormData>({
@@ -238,7 +240,7 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
     setTransactions(prev => prev.map(t => {
       if (t.id === transactionId) {
         const updatedApprovals = { ...t.approvals };
-        
+
         // Simulate director approval
         if (!updatedApprovals.director1) {
           updatedApprovals.director1 = {
@@ -254,13 +256,52 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
           };
         }
 
-        const newStatus = (updatedApprovals.director1?.approved && updatedApprovals.director2?.approved) 
+        const newStatus = (updatedApprovals.director1?.approved && updatedApprovals.director2?.approved)
           ? 'approved' : 'pending';
 
         return { ...t, approvals: updatedApprovals, status: newStatus };
       }
       return t;
     }));
+  };
+
+  const handleImportFile = (file: File) => {
+    setImportFile(file);
+    // Process CSV/Excel file
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const lines = text.split('\n');
+      const headers = lines[0].split(',');
+
+      const importedTransactions: Transaction[] = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',');
+        if (values.length >= 4) {
+          const transaction: Transaction = {
+            id: Date.now().toString() + i,
+            description: values[0]?.trim() || 'Imported Transaction',
+            amount: parseFloat(values[1]) || 0,
+            type: values[2]?.toLowerCase().includes('income') ? 'income' : 'expense',
+            category: values[3]?.trim() || 'Other',
+            date: values[4] || new Date().toISOString().split('T')[0],
+            status: 'pending',
+            approvals: {},
+            receipts: [],
+            createdBy: user?.email || 'imported',
+            aiCategory: values[3]?.trim() || 'Other',
+            aiConfidence: 0.7
+          };
+          importedTransactions.push(transaction);
+        }
+      }
+
+      setTransactions(prev => [...importedTransactions, ...prev]);
+      setShowImportModal(false);
+      setImportFile(null);
+    };
+    reader.readAsText(file);
   };
 
   const filteredTransactions = transactions.filter(transaction => {
@@ -297,19 +338,42 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
             <p className="text-sm text-gray-600">Manage income and expenses with dual approval workflow</p>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline" leftIcon={<Upload className="h-4 w-4" />}>
-              Import
-            </Button>
-            <Button variant="outline" leftIcon={<Download className="h-4 w-4" />}>
-              Export
-            </Button>
-            <Button 
-              variant="primary" 
-              leftIcon={<Plus className="h-4 w-4" />}
-              onClick={() => setShowAddForm(true)}
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
             >
-              Add Transaction
-            </Button>
+              <Upload className="h-4 w-4" />
+              <span>Import</span>
+            </button>
+            <button
+              onClick={() => {
+                // Export functionality
+                const csvContent = "data:text/csv;charset=utf-8," +
+                  "Description,Amount,Type,Category,Date,Status\n" +
+                  transactions.map(t =>
+                    `"${t.description}",${t.amount},${t.type},"${t.category}",${t.date},${t.status}`
+                  ).join("\n");
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "transactions.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+            >
+              <Download className="h-4 w-4" />
+              <span>Export</span>
+            </button>
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center space-x-2"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Transaction</span>
+            </button>
           </div>
         </div>
 
@@ -713,6 +777,81 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
                   Approve Transaction
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Import Transactions</h3>
+              <button
+                onClick={() => setShowImportModal(false)}
+                className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-600 mb-4">
+                  Upload a CSV file with transaction data. The file should have columns for:
+                  Description, Amount, Type (income/expense), Category, Date
+                </p>
+
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600 mb-2">
+                    Drag and drop your CSV file here, or click to select
+                  </p>
+                  <input
+                    type="file"
+                    accept=".csv,.xlsx,.xls"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleImportFile(file);
+                      }
+                    }}
+                    className="hidden"
+                    id="import-file"
+                  />
+                  <label
+                    htmlFor="import-file"
+                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
+                  >
+                    Choose File
+                  </label>
+                </div>
+
+                {importFile && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    Selected: {importFile.name}
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <h4 className="font-medium text-blue-900 mb-1">CSV Format Example:</h4>
+                <code className="text-xs text-blue-800 block">
+                  Description,Amount,Type,Category,Date<br/>
+                  "Office Supplies",150.00,expense,"Administration","2025-07-01"<br/>
+                  "Service Charge Collection",45000.00,income,"Service Charges","2025-07-01"
+                </code>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-2 mt-6">
+              <button
+                onClick={() => setShowImportModal(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
