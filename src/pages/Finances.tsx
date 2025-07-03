@@ -34,6 +34,8 @@ import Badge from '../components/ui/Badge';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import FinancialSetupModal from '../components/modals/FinancialSetupModal';
+import FinancialOverview from '../components/finances/FinancialOverview';
+import TransactionManagement from '../components/finances/TransactionManagement';
 import { getUserBuildingId } from '../utils/buildingUtils';
 import LegalGuidanceTooltip from '../components/legal/LegalGuidanceTooltip';
 import ComplianceStatusIndicator from '../components/legal/ComplianceStatusIndicator';
@@ -442,6 +444,15 @@ const Finances = () => {
 
       {/* Tab Content */}
       {activeTab === 'overview' && (
+        <FinancialOverview onNavigateToTab={setActiveTab} />
+      )}
+
+      {activeTab === 'transactions' && (
+        <TransactionManagement />
+      )}
+
+      {/* Legacy Overview Content - Keep for other tabs */}
+      {activeTab === 'legacy-overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Legal Compliance Section */}
           <Card className="lg:col-span-2">
