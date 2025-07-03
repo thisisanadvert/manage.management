@@ -291,23 +291,27 @@ export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setPreferences(prev => ({ ...prev, ...newPreferences }));
   }, []);
 
-  // Keyboard shortcut handler
+  // Keyboard shortcut handler - DISABLED (search feature removed)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Cmd/Ctrl + K to open search
-      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
-        event.preventDefault();
-        openSearch();
-      }
-      
-      // Escape to close search
-      if (event.key === 'Escape' && isSearchOpen) {
-        closeSearch();
-      }
+      // Search shortcuts disabled - feature removed
+      // TODO: Re-enable when search feature is ready
+
+      // Cmd/Ctrl + K to open search - DISABLED
+      // if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+      //   event.preventDefault();
+      //   openSearch();
+      // }
+
+      // Escape to close search - DISABLED
+      // if (event.key === 'Escape' && isSearchOpen) {
+      //   closeSearch();
+      // }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    // Keyboard shortcuts disabled for now
+    // document.addEventListener('keydown', handleKeyDown);
+    // return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isSearchOpen, openSearch, closeSearch]);
 
   const contextValue: SearchContextType = {
