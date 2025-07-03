@@ -24,7 +24,6 @@ import Card from '../ui/Card';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
 import { useAuth } from '../../contexts/AuthContext';
-import { useFormPersistence } from '../../hooks/useFormPersistence';
 
 interface Transaction {
   id: string;
@@ -71,8 +70,8 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
   const [filterType, setFilterType] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Form persistence for new transaction
-  const initialFormData: TransactionFormData = {
+  // Form state for new transaction
+  const [transactionForm, setTransactionForm] = useState<TransactionFormData>({
     description: '',
     amount: 0,
     type: 'expense',
@@ -80,18 +79,6 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
     date: new Date().toISOString().split('T')[0],
     notes: '',
     receipts: []
-  };
-
-  const {
-    formData: transactionForm,
-    setFormData: setTransactionForm,
-    persistenceState,
-    clearSavedData
-  } = useFormPersistence(initialFormData, {
-    formId: 'transaction-form',
-    version: '1.0',
-    autoSave: true,
-    showSaveIndicator: true
   });
 
   const formatCurrency = (amount: number) => {
@@ -236,8 +223,15 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
 
     setTransactions(prev => [newTransaction, ...prev]);
     setShowAddForm(false);
-    clearSavedData();
-    setTransactionForm(initialFormData);
+    setTransactionForm({
+      description: '',
+      amount: 0,
+      type: 'expense',
+      category: '',
+      date: new Date().toISOString().split('T')[0],
+      notes: '',
+      receipts: []
+    });
   };
 
   const handleApproveTransaction = (transactionId: string) => {
@@ -469,9 +463,12 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Add New Transaction</h3>
-              <Button variant="ghost" size="sm" onClick={() => setShowAddForm(false)}>
+              <button
+                onClick={() => setShowAddForm(false)}
+                className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+              >
                 ×
-              </Button>
+              </button>
             </div>
             
             <div className="space-y-4">
@@ -501,10 +498,10 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
                   <input
                     type="number"
                     step="0.01"
-                    value={transactionForm.amount || ''}
-                    onChange={(e) => setTransactionForm(prev => ({ 
-                      ...prev, 
-                      amount: parseFloat(e.target.value) || 0 
+                    value={transactionForm.amount === 0 ? '' : transactionForm.amount}
+                    onChange={(e) => setTransactionForm(prev => ({
+                      ...prev,
+                      amount: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
                     }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     placeholder="0.00"
@@ -597,12 +594,18 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
             </div>
             
             <div className="flex justify-end space-x-2 mt-6">
-              <Button variant="outline" onClick={() => setShowAddForm(false)}>
+              <button
+                onClick={() => setShowAddForm(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
                 Cancel
-              </Button>
-              <Button variant="primary" onClick={handleSubmitTransaction}>
+              </button>
+              <button
+                onClick={handleSubmitTransaction}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
                 Submit for Approval
-              </Button>
+              </button>
             </div>
           </div>
         </div>
@@ -614,9 +617,12 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Transaction Details</h3>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedTransaction(null)}>
+              <button
+                onClick={() => setSelectedTransaction(null)}
+                className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+              >
                 ×
-              </Button>
+              </button>
             </div>
             
             <div className="space-y-4">
@@ -690,19 +696,22 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
             </div>
             
             <div className="flex justify-end space-x-2 mt-6">
-              <Button variant="outline" onClick={() => setSelectedTransaction(null)}>
+              <button
+                onClick={() => setSelectedTransaction(null)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
                 Close
-              </Button>
+              </button>
               {selectedTransaction.status === 'pending' && (
-                <Button 
-                  variant="primary"
+                <button
                   onClick={() => {
                     handleApproveTransaction(selectedTransaction.id);
                     setSelectedTransaction(null);
                   }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Approve Transaction
-                </Button>
+                </button>
               )}
             </div>
           </div>
