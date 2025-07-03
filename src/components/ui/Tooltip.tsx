@@ -46,20 +46,20 @@ const Tooltip: React.FC<TooltipProps> = ({
   }, [isVisible, position]);
 
   const getPositionClasses = () => {
-    // Enhanced base classes with better z-index and contrast-safe styling
-    const baseClasses = 'absolute z-[1000] px-4 py-3 text-sm text-white bg-gray-900 rounded-lg shadow-lg max-w-md tooltip-content';
+    // Enhanced base classes with better z-index, borders, and glow effects
+    const baseClasses = 'absolute z-[1100] px-4 py-3 text-sm text-white bg-gray-900 rounded-lg shadow-xl max-w-md tooltip-content border-2 border-gray-700';
 
     switch (actualPosition) {
       case 'top':
-        return `${baseClasses} bottom-full left-1/2 transform -translate-x-1/2 mb-2`;
+        return `${baseClasses} bottom-full left-1/2 transform -translate-x-1/2 mb-3`;
       case 'bottom':
-        return `${baseClasses} top-full left-1/2 transform -translate-x-1/2 mt-2`;
+        return `${baseClasses} top-full left-1/2 transform -translate-x-1/2 mt-3`;
       case 'left':
-        return `${baseClasses} right-full top-1/2 transform -translate-y-1/2 mr-2`;
+        return `${baseClasses} right-full top-1/2 transform -translate-y-1/2 mr-3`;
       case 'right':
-        return `${baseClasses} left-full top-1/2 transform -translate-y-1/2 ml-2`;
+        return `${baseClasses} left-full top-1/2 transform -translate-y-1/2 ml-3`;
       default:
-        return `${baseClasses} bottom-full left-1/2 transform -translate-x-1/2 mb-2`;
+        return `${baseClasses} bottom-full left-1/2 transform -translate-x-1/2 mb-3`;
     }
   };
 
@@ -106,7 +106,13 @@ const Tooltip: React.FC<TooltipProps> = ({
           ref={tooltipRef}
           className={getPositionClasses()}
           role="tooltip"
+          style={{
+            filter: 'drop-shadow(0 0 8px rgba(0, 0, 0, 0.3))',
+            isolation: 'isolate'
+          }}
         >
+          {/* Glow effect background */}
+          <div className="absolute inset-0 rounded-lg bg-gray-900/20 -z-10 blur-sm"></div>
           {content}
           <div className={getArrowClasses()} />
         </div>

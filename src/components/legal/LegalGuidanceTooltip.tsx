@@ -83,8 +83,10 @@ const LegalGuidanceTooltip: React.FC<LegalGuidanceTooltipProps> = ({
           />
 
           {/* Tooltip */}
-          <div className="absolute bottom-full left-0 mb-2 z-[1001] w-96 max-w-screen-sm">
-            <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-4 legal-guidance-tooltip">
+          <div className="absolute bottom-full left-0 mb-3 z-[1100] w-96 max-w-screen-sm">
+            <div className="bg-white rounded-lg shadow-xl border-2 border-blue-500 p-4 legal-guidance-tooltip relative">
+              {/* Glow effect */}
+              <div className="absolute inset-0 rounded-lg bg-blue-500/10 -z-10"></div>
               {/* Header with Close Button */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">

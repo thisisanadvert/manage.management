@@ -8,28 +8,37 @@
 .tooltip-content {
   background-color: rgb(17 24 39) !important; /* gray-900 */
   color: rgb(255 255 255) !important; /* white */
-  z-index: 1000 !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  z-index: 1100 !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(75, 85, 99, 0.1) !important;
+  border: 2px solid rgb(75 85 99) !important; /* gray-600 border */
+  backdrop-filter: blur(8px) !important;
+  isolation: isolate !important;
+  position: relative !important;
 }
 
 .tooltip-arrow {
   background-color: rgb(17 24 39) !important; /* gray-900 */
-  z-index: 999 !important;
+  z-index: 1099 !important;
+  border: 1px solid rgb(75 85 99) !important;
 }
 
 /* Ensure tooltips are always visible above other content */
 [role="tooltip"] {
-  z-index: 1000 !important;
+  z-index: 1100 !important;
   position: relative !important;
+  isolation: isolate !important;
 }
 
 /* Legal Guidance Tooltip Fixes */
 .legal-guidance-tooltip {
   background-color: rgb(255 255 255) !important; /* white */
   color: rgb(17 24 39) !important; /* gray-900 */
-  border: 1px solid rgb(229 231 235) !important; /* gray-200 */
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-  z-index: 1000 !important;
+  border: 2px solid rgb(59 130 246) !important; /* blue-500 border */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(59, 130, 246, 0.1) !important;
+  z-index: 1100 !important;
+  backdrop-filter: blur(8px) !important;
+  position: relative !important;
+  isolation: isolate !important;
 }
 
 /* Ensure legal guidance tooltip content is readable */
@@ -130,20 +139,35 @@ button[aria-label*="help"] {
 .legal-guidance-tooltip,
 div[class*="tooltip"],
 div[class*="popover"] {
-  z-index: 1001 !important;
+  z-index: 1100 !important;
   position: relative !important;
-  background-color: rgb(255 255 255) !important;
-  color: rgb(17 24 39) !important;
-  border: 1px solid rgb(229 231 235) !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  isolation: isolate !important;
+  backdrop-filter: blur(8px) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 8px !important;
 }
 
-/* 2. Dark Tooltips (like standard Tooltip component) */
+/* 2. Tooltip Isolation and Containment */
+.tooltip-content,
+.legal-guidance-tooltip {
+  contain: layout style paint !important;
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+}
+
+/* 3. Dark Tooltips (like standard Tooltip component) */
 .tooltip-content,
 [role="tooltip"]:not(.legal-guidance-tooltip) {
   background-color: rgb(17 24 39) !important; /* gray-900 */
   color: rgb(255 255 255) !important; /* white */
-  border: 1px solid rgb(17 24 39) !important;
+  border: 2px solid rgb(75 85 99) !important; /* gray-600 border */
+}
+
+/* 4. Light Tooltips (like legal guidance tooltips) */
+.legal-guidance-tooltip {
+  background-color: rgb(255 255 255) !important; /* white */
+  color: rgb(17 24 39) !important; /* gray-900 */
+  border: 2px solid rgb(59 130 246) !important; /* blue-500 border */
 }
 
 /* 3. Universal Positioning Fixes */
