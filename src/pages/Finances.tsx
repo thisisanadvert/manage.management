@@ -36,6 +36,9 @@ import { supabase } from '../lib/supabase';
 import FinancialSetupModal from '../components/modals/FinancialSetupModal';
 import FinancialOverview from '../components/finances/FinancialOverview';
 import TransactionManagement from '../components/finances/TransactionManagement';
+import BudgetsPlanning from '../components/finances/BudgetsPlanning';
+import ServiceCharges from '../components/finances/ServiceCharges';
+import ReportsAnalysis from '../components/finances/ReportsAnalysis';
 import { getUserBuildingId } from '../utils/buildingUtils';
 import LegalGuidanceTooltip from '../components/legal/LegalGuidanceTooltip';
 import ComplianceStatusIndicator from '../components/legal/ComplianceStatusIndicator';
@@ -457,6 +460,18 @@ const Finances = () => {
           externalShowAddForm={showRecordTransaction}
           onExternalFormClose={() => setShowRecordTransaction(false)}
         />
+      )}
+
+      {activeTab === 'budgets' && (
+        <BudgetsPlanning />
+      )}
+
+      {activeTab === 'service-charges' && (
+        <ServiceCharges />
+      )}
+
+      {activeTab === 'reports' && (
+        <ReportsAnalysis />
       )}
 
       {/* Legacy Overview Content - Keep for other tabs */}
