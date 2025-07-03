@@ -1,20 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Building2, 
-  Calendar, 
+import {
+  Building2,
+  Calendar,
   Home,
   MapPin,
-  CheckCircle2, 
+  CheckCircle2,
   ArrowRight,
   Save,
   AlertTriangle,
-  Info
+  Info,
+  Loader2
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import { useFormPersistence } from '../hooks/useFormPersistence';
+
+interface BuildingData {
+  name: string;
+  address: string;
+  totalUnits: number;
+  buildingAge: number;
+  buildingType: string;
+  serviceChargeFrequency: string;
+  managementStructure: string;
+}
 
 const BuildingSetup = () => {
   const { user } = useAuth();
@@ -23,7 +35,10 @@ const BuildingSetup = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
-  const [buildingData, setBuildingData] = useState({
+  const [hasLoadedFromDatabase, setHasLoadedFromDatabase] = useState(false);
+
+  // Form persistence setup
+  const initialBuildingData: BuildingData = {
     name: user?.metadata?.buildingName || '',
     address: user?.metadata?.buildingAddress || '',
     totalUnits: 0,
@@ -31,6 +46,19 @@ const BuildingSetup = () => {
     buildingType: '',
     serviceChargeFrequency: 'Quarterly',
     managementStructure: user?.role?.includes('rtm') ? 'rtm' : 'share-of-freehold'
+  };
+
+  const {
+    formData: buildingData,
+    setFormData: setBuildingData,
+    persistenceState,
+    saveNow,
+    clearSavedData
+  } = useFormPersistence(initialBuildingData, {
+    formId: 'building-setup',
+    version: '1.0',
+    autoSave: true,
+    showSaveIndicator: true
   });
 
   useEffect(() => {
@@ -40,12 +68,14 @@ const BuildingSetup = () => {
         return;
       }
 
-      // Try to get building ID from user metadata first
-      let buildingId = user?.metadata?.buildingId;
+      setError(null);
 
-      if (!buildingId) {
-        // If not in metadata, try to get it from building_users table
-        try {
+      try {
+        // Try to get building ID from user metadata first
+        let buildingId = user?.metadata?.buildingId;
+
+        if (!buildingId) {
+          // If not in metadata, try to get it from building_users table
           const { data: buildingUserData, error: buildingUserError } = await supabase
             .from('building_users')
             .select('building_id')
@@ -59,11 +89,7 @@ const BuildingSetup = () => {
             if (!buildingUserError.message?.includes('infinite recursion')) {
               setError('Error loading building data: ' + buildingUserError.message);
             }
-            setIsLoading(false);
-            return;
-          }
-
-          if (buildingUserData) {
+          } else if (buildingUserData) {
             buildingId = buildingUserData.building_id;
 
             // Update user metadata with the building ID
@@ -75,19 +101,10 @@ const BuildingSetup = () => {
               console.error('Error updating user metadata:', updateError);
             }
           }
-        } catch (error: any) {
-          console.error('Error fetching building user data:', error);
-          if (!error.message?.includes('infinite recursion')) {
-            setError('Error loading building data: ' + error.message);
-          }
-          setIsLoading(false);
-          return;
         }
-      }
 
-      // If we have a building ID, fetch the building data
-      if (buildingId) {
-        try {
+        // If we have a building ID, fetch the building data from database
+        if (buildingId) {
           const { data, error } = await supabase
             .from('buildings')
             .select('*')
@@ -98,7 +115,8 @@ const BuildingSetup = () => {
             console.error('Error fetching building data:', error);
             setError('Error loading building data: ' + error.message);
           } else if (data) {
-            setBuildingData({
+            // Database data takes priority over form persistence
+            const databaseData: BuildingData = {
               name: data.name || '',
               address: data.address || user?.metadata?.buildingAddress || '',
               totalUnits: data.total_units || 1,
@@ -106,15 +124,21 @@ const BuildingSetup = () => {
               buildingType: data.building_type || '',
               serviceChargeFrequency: data.service_charge_frequency || 'Quarterly',
               managementStructure: data.management_structure || (user?.role?.includes('rtm') ? 'rtm' : 'share-of-freehold')
-            });
-          }
-        } catch (error: any) {
-          console.error('Error fetching building data:', error);
-          setError('Error loading building data: ' + error.message);
-        }
-      }
+            };
 
-      setIsLoading(false);
+            setBuildingData(databaseData);
+            setHasLoadedFromDatabase(true);
+
+            // Clear any persisted form data since we have database data
+            clearSavedData();
+          }
+        }
+      } catch (error: any) {
+        console.error('Error in fetchBuildingData:', error);
+        setError('Error loading building data: ' + error.message);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchBuildingData();
@@ -122,6 +146,7 @@ const BuildingSetup = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    setError(null); // Clear any previous errors when user makes changes
     setBuildingData(prev => ({
       ...prev,
       [name]: name === 'totalUnits' || name === 'buildingAge' ? parseInt(value) || 0 : value
@@ -131,7 +156,27 @@ const BuildingSetup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccess(false);
     setIsSaving(true);
+
+    // Validate required fields
+    if (!buildingData.name.trim()) {
+      setError('Building name is required');
+      setIsSaving(false);
+      return;
+    }
+
+    if (!buildingData.address.trim()) {
+      setError('Building address is required');
+      setIsSaving(false);
+      return;
+    }
+
+    if (buildingData.totalUnits < 1) {
+      setError('Total units must be at least 1');
+      setIsSaving(false);
+      return;
+    }
 
     try {
       // Get the building ID from user metadata or from building_users table
@@ -246,7 +291,13 @@ const BuildingSetup = () => {
         .eq('id', buildingId)
         .select();
 
-      if (error) throw error;
+      if (error) {
+        throw new Error(`Failed to save building data: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('Building data was not saved properly. Please try again.');
+      }
 
       // Update onboarding steps if they exist
       const { error: stepsError } = await supabase
@@ -258,16 +309,28 @@ const BuildingSetup = () => {
         .eq('user_id', user.id)
         .eq('step_name', 'building');
 
-      if (stepsError) console.error('Error updating onboarding step:', stepsError);
+      if (stepsError) {
+        console.error('Error updating onboarding step:', stepsError);
+        // Don't fail the whole operation for this
+      }
+
+      // Clear form persistence data since we've successfully saved to database
+      clearSavedData();
+
+      // Mark as successfully loaded from database
+      setHasLoadedFromDatabase(true);
 
       setSuccess(true);
+
+      // Navigate after a delay to show success message
       setTimeout(() => {
         const basePath = user?.role?.split('-')[0];
         navigate(`/${basePath || ''}`);
       }, 2000);
+
     } catch (error: any) {
-      setError(error.message);
       console.error('Building setup error:', error);
+      setError(error.message || 'An unexpected error occurred while saving building data');
     } finally {
       setIsSaving(false);
     }
@@ -287,7 +350,35 @@ const BuildingSetup = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Building Setup</h1>
           <p className="text-gray-600 mt-1">Configure your building information</p>
+          {hasLoadedFromDatabase && (
+            <p className="text-sm text-green-600 mt-1 flex items-center">
+              <CheckCircle2 className="h-4 w-4 mr-1" />
+              Data loaded from database
+            </p>
+          )}
         </div>
+
+        {/* Form Persistence Indicator */}
+        {persistenceState.showSaveIndicator && (
+          <div className="flex items-center space-x-2 text-sm">
+            {persistenceState.isSaving ? (
+              <div className="flex items-center text-blue-600">
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                <span>Saving...</span>
+              </div>
+            ) : persistenceState.lastSaved ? (
+              <div className="flex items-center text-green-600">
+                <CheckCircle2 className="h-4 w-4 mr-1" />
+                <span>Auto-saved {persistenceState.lastSaved.toLocaleTimeString()}</span>
+              </div>
+            ) : persistenceState.hasUnsavedChanges ? (
+              <div className="flex items-center text-yellow-600">
+                <AlertTriangle className="h-4 w-4 mr-1" />
+                <span>Unsaved changes</span>
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
 
       <Card>
@@ -298,7 +389,7 @@ const BuildingSetup = () => {
             </div>
             <h3 className="mb-2 text-xl font-semibold text-gray-900">Building Setup Complete!</h3>
             <p className="text-center text-gray-600">
-              Your building information has been saved successfully. This data will be used to customise your dashboard and provide relevant features.
+              Your building information has been saved successfully to the database. This data will be used to customise your dashboard and provide relevant features. You can return to this page anytime to update your building details.
             </p>
             <Button 
               variant="primary" 
