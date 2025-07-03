@@ -187,14 +187,14 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
       setTransactions(generateMockTransactions());
       setIsLoading(false);
     }, 1000);
-  }, []);
+  }, [user]); // Add user dependency
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'success';
       case 'approved': return 'primary';
       case 'pending': return 'warning';
-      case 'rejected': return 'danger';
+      case 'rejected': return 'error';
       default: return 'secondary';
     }
   };
@@ -483,14 +483,14 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
                       </Badge>
                       
                       {transaction.aiCategory && (
-                        <Badge variant="outline">
+                        <Badge variant="gray">
                           <Brain className="h-3 w-3 mr-1" />
                           AI: {Math.round((transaction.aiConfidence || 0) * 100)}%
                         </Badge>
                       )}
-                      
+
                       {transaction.receipts.length > 0 && (
-                        <Badge variant="outline">
+                        <Badge variant="gray">
                           <FileText className="h-3 w-3 mr-1" />
                           {transaction.receipts.length} receipt{transaction.receipts.length > 1 ? 's' : ''}
                         </Badge>
