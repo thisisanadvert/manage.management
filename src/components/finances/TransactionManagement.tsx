@@ -21,7 +21,6 @@ import {
   DollarSign
 } from 'lucide-react';
 import Card from '../ui/Card';
-import Button from '../ui/Button';
 import Badge from '../ui/Badge';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -56,14 +55,30 @@ interface TransactionFormData {
 
 interface TransactionManagementProps {
   className?: string;
+  externalShowAddForm?: boolean;
+  onExternalFormClose?: () => void;
 }
 
 const TransactionManagement: React.FC<TransactionManagementProps> = ({
-  className = ''
+  className = '',
+  externalShowAddForm = false,
+  onExternalFormClose
 }) => {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
+
+  // Use external control if provided, otherwise use internal state
+  const isFormVisible = externalShowAddForm || showAddForm;
+
+  // Function to handle closing the form
+  const handleCloseForm = () => {
+    if (externalShowAddForm && onExternalFormClose) {
+      onExternalFormClose();
+    } else {
+      setShowAddForm(false);
+    }
+  };
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -224,7 +239,8 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
     };
 
     setTransactions(prev => [newTransaction, ...prev]);
-    setShowAddForm(false);
+    handleCloseForm();
+
     setTransactionForm({
       description: '',
       amount: 0,
@@ -522,13 +538,13 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
       </Card>
 
       {/* Add Transaction Modal */}
-      {showAddForm && (
+      {isFormVisible && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Add New Transaction</h3>
               <button
-                onClick={() => setShowAddForm(false)}
+                onClick={handleCloseForm}
                 className="text-gray-400 hover:text-gray-600 text-xl font-bold"
               >
                 ×
@@ -650,16 +666,16 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
                   <p className="text-sm text-gray-600">
                     Drag and drop files here, or click to select
                   </p>
-                  <Button variant="outline" size="sm" className="mt-2">
+                  <button className="mt-2 px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">
                     Choose Files
-                  </Button>
+                  </button>
                 </div>
               </div>
             </div>
             
             <div className="flex justify-end space-x-2 mt-6">
               <button
-                onClick={() => setShowAddForm(false)}
+                onClick={handleCloseForm}
                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
               >
                 Cancel

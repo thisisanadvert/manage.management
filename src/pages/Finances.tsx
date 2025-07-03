@@ -47,6 +47,7 @@ const Finances = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showFinancialSetupModal, setShowFinancialSetupModal] = useState(false);
   const [showSection20Workflow, setShowSection20Workflow] = useState(false);
+  const [showRecordTransaction, setShowRecordTransaction] = useState(false);
   const [financialSetup, setFinancialSetup] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { user, signOut } = useAuth();
@@ -380,6 +381,10 @@ const Finances = () => {
             <Button
               variant="primary"
               leftIcon={<Plus size={16} />}
+              onClick={() => {
+                setActiveTab('transactions');
+                setShowRecordTransaction(true);
+              }}
             >
               Record Transaction
             </Button>
@@ -448,7 +453,10 @@ const Finances = () => {
       )}
 
       {activeTab === 'transactions' && (
-        <TransactionManagement />
+        <TransactionManagement
+          externalShowAddForm={showRecordTransaction}
+          onExternalFormClose={() => setShowRecordTransaction(false)}
+        />
       )}
 
       {/* Legacy Overview Content - Keep for other tabs */}
