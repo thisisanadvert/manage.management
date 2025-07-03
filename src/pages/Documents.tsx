@@ -20,7 +20,10 @@ import {
   Eye,
   Edit2,
   Save,
-  MoreVertical
+  MoreVertical,
+  Tag,
+  Trash2,
+  Plus
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -48,6 +51,18 @@ const Documents = () => {
   const [editingDocumentId, setEditingDocumentId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+
+  // Tagging state
+  const [showTagModal, setShowTagModal] = useState(false);
+  const [tagDocument, setTagDocument] = useState<any>(null);
+  const [documentTags, setDocumentTags] = useState<string>('');
+  const [allTags, setAllTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  // Deletion state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteDocument, setDeleteDocument] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { user } = useAuth();
 
   const categories = [
@@ -192,6 +207,143 @@ const Documents = () => {
     setEditingName('');
   };
 
+  // Load document metadata and tags
+  const loadDocumentMetadata = async (documentId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('document_metadata')
+        .select('*')
+        .eq('document_id', documentId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
+    } catch (error) {
+      console.error('Error loading document metadata:', error);
+      return null;
+    }
+  };
+
+  // Load all unique tags
+  const loadAllTags = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('document_metadata')
+        .select('tags');
+
+      if (error) throw error;
+
+      const uniqueTags = new Set<string>();
+      data?.forEach(item => {
+        if (item.tags) {
+          item.tags.forEach((tag: string) => uniqueTags.add(tag));
+        }
+      });
+
+      setAllTags(Array.from(uniqueTags).sort());
+    } catch (error) {
+      console.error('Error loading tags:', error);
+    }
+  };
+
+  // Tagging functionality
+  const handleOpenTagModal = async (doc: any) => {
+    setTagDocument(doc);
+    const metadata = await loadDocumentMetadata(doc.id);
+    const currentTags = metadata?.tags || [];
+    setSelectedTags(currentTags);
+    setDocumentTags(currentTags.join(', '));
+    setShowTagModal(true);
+  };
+
+  const handleSaveTags = async () => {
+    if (!tagDocument) return;
+
+    try {
+      const tagsArray = documentTags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+
+      // Check if metadata exists
+      const existingMetadata = await loadDocumentMetadata(tagDocument.id);
+
+      if (existingMetadata) {
+        // Update existing metadata
+        const { error } = await supabase
+          .from('document_metadata')
+          .update({ tags: tagsArray })
+          .eq('document_id', tagDocument.id);
+
+        if (error) throw error;
+      } else {
+        // Create new metadata
+        const { error } = await supabase
+          .from('document_metadata')
+          .insert([{
+            document_id: tagDocument.id,
+            tags: tagsArray,
+            category: tagDocument.document_type
+          }]);
+
+        if (error) throw error;
+      }
+
+      await loadAllTags();
+      await fetchDocuments();
+      setShowTagModal(false);
+      setTagDocument(null);
+      setDocumentTags('');
+      setSelectedTags([]);
+    } catch (error) {
+      console.error('Error saving tags:', error);
+    }
+  };
+
+  // Deletion functionality
+  const handleOpenDeleteModal = (doc: any) => {
+    setDeleteDocument(doc);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteDocument = async () => {
+    if (!deleteDocument) return;
+
+    try {
+      setIsDeleting(true);
+
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('documents')
+        .remove([deleteDocument.storage_path]);
+
+      if (storageError) throw storageError;
+
+      // Delete metadata if exists
+      await supabase
+        .from('document_metadata')
+        .delete()
+        .eq('document_id', deleteDocument.id);
+
+      // Delete document record
+      const { error: dbError } = await supabase
+        .from('onboarding_documents')
+        .delete()
+        .eq('id', deleteDocument.id);
+
+      if (dbError) throw dbError;
+
+      await fetchDocuments();
+      await loadAllTags();
+      setShowDeleteModal(false);
+      setDeleteDocument(null);
+    } catch (error) {
+      console.error('Error deleting document:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleCloseUploadModal = () => {
     setShowUploadModal(false);
     setUploadingFiles([]);
@@ -238,7 +390,14 @@ const Documents = () => {
     try {
       let query = supabase
         .from('onboarding_documents')
-        .select('*')
+        .select(`
+          *,
+          document_metadata (
+            tags,
+            description,
+            category
+          )
+        `)
         .eq('building_id', user.metadata.buildingId);
 
       if (selectedCategory !== 'all') {
@@ -247,6 +406,11 @@ const Documents = () => {
 
       if (searchQuery) {
         query = query.ilike('storage_path', `%${searchQuery}%`);
+      }
+
+      // Filter by selected tags if any
+      if (selectedTags.length > 0) {
+        query = query.overlaps('document_metadata.tags', selectedTags);
       }
 
       const { data, error } = await query;
@@ -264,7 +428,14 @@ const Documents = () => {
   // Fetch documents when component mounts or category changes
   useEffect(() => {
     fetchDocuments();
-  }, [user?.metadata?.buildingId, selectedCategory, searchQuery]);
+  }, [user?.metadata?.buildingId, selectedCategory, searchQuery, selectedTags]);
+
+  // Load all tags when component mounts
+  useEffect(() => {
+    if (user?.metadata?.buildingId) {
+      loadAllTags();
+    }
+  }, [user?.metadata?.buildingId]);
 
   const uploadFiles = async () => {
     console.log('Upload button clicked!');
@@ -631,6 +802,44 @@ const Documents = () => {
             Filter
           </Button>
         </div>
+
+        {/* Tag Filter */}
+        {allTags.length > 0 && (
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Filter by Tags
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {allTags.map((tag, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    if (selectedTags.includes(tag)) {
+                      setSelectedTags(selectedTags.filter(t => t !== tag));
+                    } else {
+                      setSelectedTags([...selectedTags, tag]);
+                    }
+                  }}
+                  className={`px-3 py-1 text-sm rounded-full border transition-colors ${
+                    selectedTags.includes(tag)
+                      ? 'bg-blue-100 text-blue-800 border-blue-300'
+                      : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+              {selectedTags.length > 0 && (
+                <button
+                  onClick={() => setSelectedTags([])}
+                  className="px-3 py-1 text-sm text-red-600 hover:text-red-800"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Documents List */}
@@ -711,6 +920,20 @@ const Documents = () => {
                       <span>{doc.document_type}</span>
                     </div>
                   </div>
+
+                  {/* Tags Display */}
+                  {doc.document_metadata?.[0]?.tags && doc.document_metadata[0].tags.length > 0 && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <Tag size={14} className="text-gray-400" />
+                      <div className="flex flex-wrap gap-1">
+                        {doc.document_metadata[0].tags.map((tag: string, index: number) => (
+                          <Badge key={index} variant="gray" size="sm">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -730,6 +953,15 @@ const Documents = () => {
                     onClick={() => handleStartRename(doc)}
                   >
                     Rename
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<Tag size={16} />}
+                    onClick={() => handleOpenTagModal(doc)}
+                  >
+                    Tags
                   </Button>
 
                   <Button
@@ -760,6 +992,16 @@ const Documents = () => {
                   >
                     Download
                   </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<Trash2 size={16} />}
+                    onClick={() => handleOpenDeleteModal(doc)}
+                    className="text-red-600 hover:text-red-700 hover:border-red-300"
+                  >
+                    Delete
+                  </Button>
                 </div>
               </div>
             </Card>
@@ -769,8 +1011,147 @@ const Documents = () => {
 
       {showUploadModal && <UploadModal />}
       {showPreviewModal && <PreviewModal />}
+      {showTagModal && <TagModal />}
+      {showDeleteModal && <DeleteModal />}
     </div>
   );
+
+  // Tag Modal Component
+  function TagModal() {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 max-w-lg w-full m-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Manage Tags</h2>
+            <button onClick={() => setShowTagModal(false)}>
+              <X size={20} className="text-gray-500" />
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Document: {tagDocument?.storage_path.split('/').pop()?.replace(/^\d+-/, '')}
+              </label>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tags (comma-separated)
+              </label>
+              <input
+                type="text"
+                value={documentTags}
+                onChange={(e) => setDocumentTags(e.target.value)}
+                placeholder="e.g. important, legal, contract"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Separate multiple tags with commas
+              </p>
+            </div>
+
+            {allTags.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Existing Tags (click to add)
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {allTags.map((tag, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        const currentTags = documentTags.split(',').map(t => t.trim()).filter(t => t);
+                        if (!currentTags.includes(tag)) {
+                          setDocumentTags(currentTags.length > 0 ? `${documentTags}, ${tag}` : tag);
+                        }
+                      }}
+                      className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end space-x-2 mt-6">
+            <Button
+              variant="outline"
+              onClick={() => setShowTagModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSaveTags}
+            >
+              Save Tags
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Delete Modal Component
+  function DeleteModal() {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 max-w-md w-full m-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-red-600">Delete Document</h2>
+            <button onClick={() => setShowDeleteModal(false)}>
+              <X size={20} className="text-gray-500" />
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg">
+              <AlertTriangle className="h-6 w-6 text-red-600" />
+              <div>
+                <p className="font-medium text-red-800">This action cannot be undone</p>
+                <p className="text-sm text-red-600">
+                  The document will be permanently deleted from storage.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-700">
+                <strong>Document:</strong> {deleteDocument?.storage_path.split('/').pop()?.replace(/^\d+-/, '')}
+              </p>
+              <p className="text-sm text-gray-700 mt-1">
+                <strong>Type:</strong> {deleteDocument?.document_type}
+              </p>
+              <p className="text-sm text-gray-700 mt-1">
+                <strong>Uploaded:</strong> {deleteDocument && new Date(deleteDocument.created_at).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-2 mt-6">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteModal(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleDeleteDocument}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Document'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 };
 
 export default Documents;
