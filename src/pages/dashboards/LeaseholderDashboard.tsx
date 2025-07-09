@@ -47,33 +47,39 @@ const LeaseholderDashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Enhanced Building Overview */}
-      <Card className="bg-gradient-to-br from-primary-800 to-primary-900 rounded-xl p-6 text-white overflow-hidden relative">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-16 translate-x-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-12 -translate-x-12"></div>
+    <div className="space-y-6 pb-16 lg:pb-0">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Welcome back, {user?.metadata?.firstName || 'Leaseholder'}</h1>
+          <p className="text-gray-600 mt-1">Here's what's happening in your building</p>
         </div>
+        <div className="text-sm text-gray-500">
+          Last updated: {new Date().toLocaleDateString()}
+        </div>
+      </div>
 
-        <div className="relative">
-          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
-            {/* Building Info */}
-            <div className="flex items-start space-x-4 flex-1">
-              <div className="p-3 bg-white/10 rounded-lg backdrop-blur-sm">
+      {/* Building Overview - Moved to top */}
+      <Card className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-600 via-green-700 to-green-800"></div>
+        <div className="relative p-6 text-white">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
                 <Building2 size={32} />
               </div>
-              <div className="flex-1">
-                <h1 className="text-2xl font-bold">{user?.metadata?.buildingName || 'Your Building'}</h1>
-                <p className="text-primary-200 text-sm">
-                  {user?.metadata?.unitNumber ? `Unit ${user.metadata.unitNumber}` : 'Add unit number'}
-                  {user?.metadata?.buildingAddress && ` • ${user.metadata.buildingAddress}`}
-                </p>
-                <div className="flex flex-wrap items-center gap-2 mt-3">
-                  <span className="text-xs px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm">Leaseholder</span>
-                  <span className="text-xs px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm">2 bed apartment</span>
+              <div>
+                <h2 className="text-xl font-bold">{user?.metadata?.buildingName || 'Central Park'}</h2>
+                <p className="text-green-100">{user?.metadata?.buildingAddress || 'Central Park, London'}</p>
+                <div className="flex items-center space-x-2 mt-2">
+                  <span className="text-xs px-3 py-1 bg-green-500/30 rounded-full backdrop-blur-sm">
+                    Homeowner
+                  </span>
+                  <span className="text-xs px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm">
+                    {user?.metadata?.unitNumber ? `Unit ${user.metadata.unitNumber}` : 'Unit 12A'}
+                  </span>
                   <span className="text-xs px-3 py-1 bg-blue-500/30 rounded-full backdrop-blur-sm">
-                    Resident
+                    Leaseholder
                   </span>
                 </div>
               </div>

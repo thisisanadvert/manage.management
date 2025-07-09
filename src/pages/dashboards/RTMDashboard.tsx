@@ -90,35 +90,25 @@ const RTMDashboard = () => {
           Last updated: {new Date().toLocaleDateString()}
         </div>
       </div>
-      
-      {/* Dashboard Stats Overview */}
-      <StatsOverview stats={dashboardData.stats} />
 
-      {/* Action Items */}
-      <ActionItems actionItems={dashboardData.actionItems} />
-
-      {/* Enhanced Building Overview */}
-      <Card className="bg-gradient-to-br from-primary-800 to-primary-900 rounded-xl p-6 text-white overflow-hidden relative">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-16 translate-x-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-12 -translate-x-12"></div>
-        </div>
-
-        <div className="relative">
-          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
-            {/* Building Info */}
-            <div className="flex items-start space-x-4 flex-1">
-              <div className="p-3 bg-white/10 rounded-lg backdrop-blur-sm">
+      {/* Building Overview - Moved to top */}
+      <Card className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800"></div>
+        <div className="relative p-6 text-white">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
                 <Building2 size={32} />
               </div>
-              <div className="flex-1">
-                <h1 className="text-2xl font-bold">{user?.metadata?.buildingName || 'Your Building'}</h1>
-                <p className="text-primary-200 text-sm">{user?.metadata?.buildingAddress || 'Add your building address'}</p>
-                <div className="flex flex-wrap items-center gap-2 mt-3">
-                  <span className="text-xs px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm">RTM Director</span>
+              <div>
+                <h2 className="text-xl font-bold">{user?.metadata?.buildingName || 'Central Park'}</h2>
+                <p className="text-blue-100">{user?.metadata?.buildingAddress || 'Central Park, London'}</p>
+                <div className="flex items-center space-x-2 mt-2">
+                  <span className="text-xs px-3 py-1 bg-blue-500/30 rounded-full backdrop-blur-sm">
+                    RTM Director
+                  </span>
                   <span className="text-xs px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm">
-                    {user?.metadata?.unitNumber ? `Unit ${user.metadata.unitNumber}` : 'Add unit number'}
+                    {user?.metadata?.unitNumber ? `Unit ${user.metadata.unitNumber}` : 'Unit Penthouse'}
                   </span>
                   <span className="text-xs px-3 py-1 bg-green-500/30 rounded-full backdrop-blur-sm">
                     RTM Active
@@ -131,19 +121,19 @@ const RTMDashboard = () => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:w-auto w-full">
               <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm text-center">
                 <div className="text-lg font-bold">{dashboardData.stats.totalUnits}</div>
-                <div className="text-xs text-primary-200">Total Units</div>
+                <div className="text-xs text-blue-200">Total Units</div>
               </div>
               <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm text-center">
                 <div className="text-lg font-bold">{dashboardData.stats.openIssues}</div>
-                <div className="text-xs text-primary-200">Open Issues</div>
+                <div className="text-xs text-blue-200">Open Issues</div>
               </div>
               <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm text-center">
                 <div className="text-lg font-bold">£{(dashboardData.stats.totalBudget / 1000).toFixed(0)}k</div>
-                <div className="text-xs text-primary-200">Annual Budget</div>
+                <div className="text-xs text-blue-200">Annual Budget</div>
               </div>
               <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm text-center">
                 <div className="text-lg font-bold">{dashboardData.stats.complianceItems}</div>
-                <div className="text-xs text-primary-200">Compliance</div>
+                <div className="text-xs text-blue-200">Compliance</div>
               </div>
             </div>
           </div>
@@ -189,9 +179,83 @@ const RTMDashboard = () => {
           </div>
         </div>
       </Card>
-      
-      {/* Legal Compliance Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+      {/* RTM-Specific Dashboard Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Action Items & RTM Tools */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Action Items */}
+          <ActionItems actionItems={dashboardData.actionItems} />
+
+          {/* RTM Formation Tools */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <Shield className="h-5 w-5 text-blue-600" />
+                <h3 className="text-lg font-semibold text-gray-900">RTM Formation Tools</h3>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/rtm')}
+              >
+                View All Tools
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
+                   onClick={() => navigate('/rtm/eligibility')}>
+                <div className="flex items-center space-x-3">
+                  <CheckCircle2 className="h-8 w-8 text-green-600" />
+                  <div>
+                    <h4 className="font-medium text-gray-900">Eligibility Check</h4>
+                    <p className="text-sm text-gray-600">Verify RTM qualification</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
+                   onClick={() => navigate('/rtm/company-formation')}>
+                <div className="flex items-center space-x-3">
+                  <Building2 className="h-8 w-8 text-blue-600" />
+                  <div>
+                    <h4 className="font-medium text-gray-900">Company Formation</h4>
+                    <p className="text-sm text-gray-600">Set up RTM company</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
+                   onClick={() => navigate('/rtm/notices')}>
+                <div className="flex items-center space-x-3">
+                  <FileText className="h-8 w-8 text-orange-600" />
+                  <div>
+                    <h4 className="font-medium text-gray-900">Legal Notices</h4>
+                    <p className="text-sm text-gray-600">Generate required notices</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
+                   onClick={() => navigate('/rtm/guidance')}>
+                <div className="flex items-center space-x-3">
+                  <BookOpen className="h-8 w-8 text-purple-600" />
+                  <div>
+                    <h4 className="font-medium text-gray-900">Legal Guidance</h4>
+                    <p className="text-sm text-gray-600">Expert advice & templates</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Right Column - Quick Actions & Resources */}
+        <div className="space-y-6">
+          <QuickActions userRole={user?.role || 'rtm-director'} />
+
+          {/* Legal Compliance Overview */}
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
@@ -308,18 +372,6 @@ const RTMDashboard = () => {
             </div>
           )}
         </Card>
-      </div>
-
-      {/* Main Dashboard Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Recent Activity */}
-        <div className="lg:col-span-2">
-          <RecentActivityWidget activities={dashboardData.recentActivity} />
-        </div>
-
-        {/* Right Column - Quick Actions */}
-        <div>
-          <QuickActions userRole={user?.role || 'rtm-director'} />
         </div>
       </div>
     </div>
