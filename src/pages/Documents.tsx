@@ -311,34 +311,50 @@ const Documents = () => {
 
     try {
       setIsDeleting(true);
+      console.log('🗑️ Starting deletion for document:', deleteDocument.id);
 
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('documents')
-        .remove([deleteDocument.storage_path]);
-
-      if (storageError) throw storageError;
-
-      // Delete metadata if exists
-      await supabase
+      // Delete metadata first (if exists)
+      console.log('🗑️ Deleting metadata...');
+      const { error: metadataError } = await supabase
         .from('document_metadata')
         .delete()
         .eq('document_id', deleteDocument.id);
 
-      // Delete document record
+      if (metadataError) {
+        console.log('⚠️ Metadata deletion error (might not exist):', metadataError);
+      }
+
+      // Delete document record from database
+      console.log('🗑️ Deleting database record...');
       const { error: dbError } = await supabase
         .from('onboarding_documents')
         .delete()
         .eq('id', deleteDocument.id);
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error('❌ Database deletion error:', dbError);
+        throw dbError;
+      }
 
+      // Delete from storage last
+      console.log('🗑️ Deleting from storage...');
+      const { error: storageError } = await supabase.storage
+        .from('documents')
+        .remove([deleteDocument.storage_path]);
+
+      if (storageError) {
+        console.error('❌ Storage deletion error:', storageError);
+        // Don't throw here - database record is already deleted
+      }
+
+      console.log('✅ Document deleted successfully');
       await fetchDocuments();
       await loadAllTags();
       setShowDeleteModal(false);
       setDeleteDocument(null);
     } catch (error) {
-      console.error('Error deleting document:', error);
+      console.error('❌ Error deleting document:', error);
+      alert('Failed to delete document. Please try again.');
     } finally {
       setIsDeleting(false);
     }
@@ -889,21 +905,19 @@ const Documents = () => {
                         }}
                         autoFocus
                       />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        leftIcon={<Save size={14} />}
+                      <button
                         onClick={() => handleSaveRename(doc)}
+                        className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-1"
                       >
-                        Save
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
+                        <Save size={14} />
+                        <span>Save</span>
+                      </button>
+                      <button
                         onClick={handleCancelRename}
+                        className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50"
                       >
                         Cancel
-                      </Button>
+                      </button>
                     </div>
                   ) : (
                     <h3 className="text-lg font-medium">
@@ -937,37 +951,31 @@ const Documents = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    leftIcon={<Eye size={16} />}
+                  <button
                     onClick={() => handlePreview(doc)}
+                    className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-1"
                   >
-                    Preview
-                  </Button>
+                    <Eye size={14} />
+                    <span>Preview</span>
+                  </button>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    leftIcon={<Edit2 size={16} />}
+                  <button
                     onClick={() => handleStartRename(doc)}
+                    className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-1"
                   >
-                    Rename
-                  </Button>
+                    <Edit2 size={14} />
+                    <span>Rename</span>
+                  </button>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    leftIcon={<Tag size={16} />}
+                  <button
                     onClick={() => handleOpenTagModal(doc)}
+                    className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-1"
                   >
-                    Tags
-                  </Button>
+                    <Tag size={14} />
+                    <span>Tags</span>
+                  </button>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    leftIcon={<Download size={16} />}
+                  <button
                     onClick={async () => {
                       try {
                         const { data, error } = await supabase.storage
@@ -989,19 +997,19 @@ const Documents = () => {
                         console.error('Error downloading file:', error);
                       }
                     }}
+                    className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-1"
                   >
-                    Download
-                  </Button>
+                    <Download size={14} />
+                    <span>Download</span>
+                  </button>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    leftIcon={<Trash2 size={16} />}
+                  <button
                     onClick={() => handleOpenDeleteModal(doc)}
-                    className="text-red-600 hover:text-red-700 hover:border-red-300"
+                    className="px-3 py-1 border border-red-300 rounded text-sm text-red-600 hover:bg-red-50 hover:border-red-400 flex items-center space-x-1"
                   >
-                    Delete
-                  </Button>
+                    <Trash2 size={14} />
+                    <span>Delete</span>
+                  </button>
                 </div>
               </div>
             </Card>
@@ -1019,25 +1027,35 @@ const Documents = () => {
   // Tag Modal Component
   function TagModal() {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 max-w-lg w-full m-4">
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowTagModal(false);
+          }
+        }}
+      >
+        <div className="bg-white rounded-lg p-6 max-w-md w-full m-4 max-h-[80vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Manage Tags</h2>
-            <button onClick={() => setShowTagModal(false)}>
+            <h2 className="text-lg font-semibold">Manage Tags</h2>
+            <button
+              onClick={() => setShowTagModal(false)}
+              className="p-1 hover:bg-gray-100 rounded"
+            >
               <X size={20} className="text-gray-500" />
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Document: {tagDocument?.storage_path.split('/').pop()?.replace(/^\d+-/, '')}
-              </label>
+              <p className="text-sm text-gray-600 mb-3">
+                <strong>{tagDocument?.storage_path.split('/').pop()?.replace(/^\d+-/, '')}</strong>
+              </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tags (comma-separated)
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tags
               </label>
               <input
                 type="text"
@@ -1047,17 +1065,17 @@ const Documents = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Separate multiple tags with commas
+                Separate with commas
               </p>
             </div>
 
             {allTags.length > 0 && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Existing Tags (click to add)
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Quick Add
                 </label>
-                <div className="flex flex-wrap gap-2">
-                  {allTags.map((tag, index) => (
+                <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                  {allTags.slice(0, 8).map((tag, index) => (
                     <button
                       key={index}
                       onClick={() => {
@@ -1077,18 +1095,18 @@ const Documents = () => {
           </div>
 
           <div className="flex justify-end space-x-2 mt-6">
-            <Button
-              variant="outline"
+            <button
               onClick={() => setShowTagModal(false)}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
               Cancel
-            </Button>
-            <Button
-              variant="primary"
+            </button>
+            <button
               onClick={handleSaveTags}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
               Save Tags
-            </Button>
+            </button>
           </div>
         </div>
       </div>
@@ -1098,55 +1116,61 @@ const Documents = () => {
   // Delete Modal Component
   function DeleteModal() {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 max-w-md w-full m-4">
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowDeleteModal(false);
+          }
+        }}
+      >
+        <div className="bg-white rounded-lg p-6 max-w-sm w-full m-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-red-600">Delete Document</h2>
-            <button onClick={() => setShowDeleteModal(false)}>
+            <h2 className="text-lg font-semibold text-red-600">Delete Document</h2>
+            <button
+              onClick={() => setShowDeleteModal(false)}
+              className="p-1 hover:bg-gray-100 rounded"
+            >
               <X size={20} className="text-gray-500" />
             </button>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
+          <div className="space-y-3">
+            <div className="flex items-start space-x-3 p-3 bg-red-50 rounded-lg">
+              <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
               <div>
-                <p className="font-medium text-red-800">This action cannot be undone</p>
-                <p className="text-sm text-red-600">
-                  The document will be permanently deleted from storage.
+                <p className="font-medium text-red-800 text-sm">Cannot be undone</p>
+                <p className="text-xs text-red-600">
+                  Document will be permanently deleted.
                 </p>
               </div>
             </div>
 
-            <div>
-              <p className="text-sm text-gray-700">
-                <strong>Document:</strong> {deleteDocument?.storage_path.split('/').pop()?.replace(/^\d+-/, '')}
+            <div className="text-sm">
+              <p className="font-medium text-gray-900 mb-1">
+                {deleteDocument?.storage_path.split('/').pop()?.replace(/^\d+-/, '')}
               </p>
-              <p className="text-sm text-gray-700 mt-1">
-                <strong>Type:</strong> {deleteDocument?.document_type}
-              </p>
-              <p className="text-sm text-gray-700 mt-1">
-                <strong>Uploaded:</strong> {deleteDocument && new Date(deleteDocument.created_at).toLocaleDateString()}
+              <p className="text-gray-600">
+                {deleteDocument?.document_type} • {deleteDocument && new Date(deleteDocument.created_at).toLocaleDateString()}
               </p>
             </div>
           </div>
 
           <div className="flex justify-end space-x-2 mt-6">
-            <Button
-              variant="outline"
+            <button
               onClick={() => setShowDeleteModal(false)}
               disabled={isDeleting}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
             >
               Cancel
-            </Button>
-            <Button
-              variant="primary"
+            </button>
+            <button
               onClick={handleDeleteDocument}
               disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
             >
               {isDeleting ? 'Deleting...' : 'Delete Document'}
-            </Button>
+            </button>
           </div>
         </div>
       </div>
