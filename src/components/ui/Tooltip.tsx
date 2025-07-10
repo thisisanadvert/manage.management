@@ -52,7 +52,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   const getPositionClasses = () => {
     // Enhanced base classes with glassmorphism option
     const baseClasses = glassmorphism
-      ? 'absolute z-[1100] px-4 py-3 text-sm text-gray-900 bg-white/90 backdrop-blur-md rounded-lg shadow-xl max-w-md tooltip-content border border-white/20'
+      ? 'absolute z-[1100] px-4 py-3 text-sm text-gray-800 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg max-w-md tooltip-content border border-gray-200/50'
       : 'absolute z-[1100] px-4 py-3 text-sm text-white bg-gray-900 rounded-lg shadow-xl max-w-md tooltip-content border-2 border-gray-700';
 
     switch (actualPosition) {
@@ -71,7 +71,7 @@ const Tooltip: React.FC<TooltipProps> = ({
 
   const getArrowClasses = () => {
     const baseClasses = glassmorphism
-      ? 'absolute w-2 h-2 bg-white/90 transform rotate-45 tooltip-arrow'
+      ? 'absolute w-2 h-2 bg-white/95 border border-gray-200/50 transform rotate-45 tooltip-arrow'
       : 'absolute w-2 h-2 bg-gray-900 transform rotate-45 tooltip-arrow';
 
     switch (actualPosition) {
@@ -117,26 +117,20 @@ const Tooltip: React.FC<TooltipProps> = ({
           style={{
             filter: glassmorphism
               ? 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))'
-              : 'drop-shadow(0 0 8px rgba(0, 0, 0, 0.3))',
-            isolation: 'isolate'
+              : 'drop-shadow(0 0 8px rgba(0, 0, 0, 0.3))'
           }}
         >
-          {/* Glow effect background */}
-          <div className={`absolute inset-0 rounded-lg -z-10 blur-sm ${
-            glassmorphism ? 'bg-white/10' : 'bg-gray-900/20'
-          }`}></div>
-
           {/* Content with optional close button */}
           <div className="flex items-start justify-between">
-            <div className="flex-1 pr-2">
+            <div className="flex-1">
               {content}
             </div>
             {showCloseButton && (
               <button
                 onClick={() => setIsVisible(false)}
-                className={`ml-2 p-1 rounded-full transition-colors ${
+                className={`ml-2 p-1 rounded-full transition-colors flex-shrink-0 ${
                   glassmorphism
-                    ? 'text-gray-600 hover:text-gray-800 hover:bg-gray-100/50'
+                    ? 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
                     : 'text-gray-300 hover:text-white hover:bg-gray-700'
                 }`}
                 aria-label="Close tooltip"
