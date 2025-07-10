@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Building2,
   Users,
@@ -32,8 +33,17 @@ import RTMFeedback from '../components/rtm/RTMFeedback';
 import RTMHelpCenter from '../components/rtm/RTMHelpCenter';
 
 const RTMManagement = () => {
+  const [searchParams] = useSearchParams();
   const [activeView, setActiveView] = useState<'overview' | 'eligibility' | 'survey' | 'formation' | 'notices' | 'acquisition' | 'timeline' | 'help' | 'feedback'>('overview');
   const [currentStep, setCurrentStep] = useState('eligibility');
+
+  // Handle URL parameters to open specific views
+  useEffect(() => {
+    const view = searchParams.get('view');
+    if (view && ['eligibility', 'survey', 'formation', 'notices', 'acquisition', 'timeline', 'help', 'feedback'].includes(view)) {
+      setActiveView(view as any);
+    }
+  }, [searchParams]);
   
   const rtmTools = [
     {

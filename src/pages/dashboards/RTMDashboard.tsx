@@ -197,7 +197,7 @@ const RTMDashboard = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigate('/rtm')}
+                onClick={() => navigate('/rtm/rtm')}
               >
                 View All Tools
               </Button>
@@ -205,7 +205,7 @@ const RTMDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
-                   onClick={() => navigate('/rtm/eligibility')}>
+                   onClick={() => navigate('/rtm/rtm?view=eligibility')}>
                 <div className="flex items-center space-x-3">
                   <CheckCircle2 className="h-8 w-8 text-green-600" />
                   <div>
@@ -216,7 +216,7 @@ const RTMDashboard = () => {
               </div>
 
               <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
-                   onClick={() => navigate('/rtm/company-formation')}>
+                   onClick={() => navigate('/rtm/rtm?view=formation')}>
                 <div className="flex items-center space-x-3">
                   <Building2 className="h-8 w-8 text-blue-600" />
                   <div>
@@ -227,7 +227,7 @@ const RTMDashboard = () => {
               </div>
 
               <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
-                   onClick={() => navigate('/rtm/notices')}>
+                   onClick={() => navigate('/rtm/rtm?view=notices')}>
                 <div className="flex items-center space-x-3">
                   <FileText className="h-8 w-8 text-orange-600" />
                   <div>
@@ -238,7 +238,7 @@ const RTMDashboard = () => {
               </div>
 
               <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
-                   onClick={() => navigate('/rtm/guidance')}>
+                   onClick={() => navigate('/rtm/legal-templates')}>
                 <div className="flex items-center space-x-3">
                   <BookOpen className="h-8 w-8 text-purple-600" />
                   <div>
