@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle, X } from 'lucide-react';
 
 interface TooltipProps {
   content: string;
@@ -7,14 +7,18 @@ interface TooltipProps {
   position?: 'top' | 'bottom' | 'left' | 'right';
   showIcon?: boolean;
   className?: string;
+  showCloseButton?: boolean;
+  glassmorphism?: boolean;
 }
 
-const Tooltip: React.FC<TooltipProps> = ({ 
-  content, 
-  children, 
+const Tooltip: React.FC<TooltipProps> = ({
+  content,
+  children,
   position = 'top',
   showIcon = true,
-  className = ''
+  className = '',
+  showCloseButton = false,
+  glassmorphism = false
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [actualPosition, setActualPosition] = useState(position);
@@ -46,8 +50,10 @@ const Tooltip: React.FC<TooltipProps> = ({
   }, [isVisible, position]);
 
   const getPositionClasses = () => {
-    // Enhanced base classes with better z-index, borders, and glow effects
-    const baseClasses = 'absolute z-[1100] px-4 py-3 text-sm text-white bg-gray-900 rounded-lg shadow-xl max-w-md tooltip-content border-2 border-gray-700';
+    // Enhanced base classes with glassmorphism option
+    const baseClasses = glassmorphism
+      ? 'absolute z-[1100] px-4 py-3 text-sm text-gray-900 bg-white/90 backdrop-blur-md rounded-lg shadow-xl max-w-md tooltip-content border border-white/20'
+      : 'absolute z-[1100] px-4 py-3 text-sm text-white bg-gray-900 rounded-lg shadow-xl max-w-md tooltip-content border-2 border-gray-700';
 
     switch (actualPosition) {
       case 'top':
@@ -64,7 +70,9 @@ const Tooltip: React.FC<TooltipProps> = ({
   };
 
   const getArrowClasses = () => {
-    const baseClasses = 'absolute w-2 h-2 bg-gray-900 transform rotate-45 tooltip-arrow';
+    const baseClasses = glassmorphism
+      ? 'absolute w-2 h-2 bg-white/90 transform rotate-45 tooltip-arrow'
+      : 'absolute w-2 h-2 bg-gray-900 transform rotate-45 tooltip-arrow';
 
     switch (actualPosition) {
       case 'top':
@@ -107,13 +115,36 @@ const Tooltip: React.FC<TooltipProps> = ({
           className={getPositionClasses()}
           role="tooltip"
           style={{
-            filter: 'drop-shadow(0 0 8px rgba(0, 0, 0, 0.3))',
+            filter: glassmorphism
+              ? 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))'
+              : 'drop-shadow(0 0 8px rgba(0, 0, 0, 0.3))',
             isolation: 'isolate'
           }}
         >
           {/* Glow effect background */}
-          <div className="absolute inset-0 rounded-lg bg-gray-900/20 -z-10 blur-sm"></div>
-          {content}
+          <div className={`absolute inset-0 rounded-lg -z-10 blur-sm ${
+            glassmorphism ? 'bg-white/10' : 'bg-gray-900/20'
+          }`}></div>
+
+          {/* Content with optional close button */}
+          <div className="flex items-start justify-between">
+            <div className="flex-1 pr-2">
+              {content}
+            </div>
+            {showCloseButton && (
+              <button
+                onClick={() => setIsVisible(false)}
+                className={`ml-2 p-1 rounded-full transition-colors ${
+                  glassmorphism
+                    ? 'text-gray-600 hover:text-gray-800 hover:bg-gray-100/50'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                }`}
+                aria-label="Close tooltip"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
           <div className={getArrowClasses()} />
         </div>
       )}

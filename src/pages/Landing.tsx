@@ -204,7 +204,12 @@ const Landing = () => {
               Whether you're a first-time homeowner or experienced property manager, our platform makes building management straightforward and stress-free.
             </p>
             <div className="mt-4 flex justify-center">
-              <Tooltip content="Don't worry if these terms are new to you! RTM means 'Right to Manage' - it's when residents take control of managing their building. RMC means 'Resident Management Company' - it's when residents own the freehold and manage the building themselves. Click to learn more about qualifying!">
+              <Tooltip
+                content="Don't worry if these terms are new to you! RTM means 'Right to Manage' - it's when residents take control of managing their building. RMC means 'Resident Management Company' - it's when residents own the freehold and manage the building themselves. Click to learn more about qualifying!"
+                glassmorphism={true}
+                showCloseButton={true}
+                position="bottom"
+              >
                 <button
                   onClick={() => navigate('/qualify')}
                   className="text-sm text-gray-500 flex items-center space-x-1 hover:text-primary-600 transition-colors cursor-pointer"
@@ -292,7 +297,12 @@ const Landing = () => {
                       <div className={`${feature.color} w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform`}>
                         <Icon size={24} />
                       </div>
-                      <Tooltip content={feature.tooltip} className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Tooltip
+                        content={feature.tooltip}
+                        glassmorphism={true}
+                        showCloseButton={true}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
                         <HelpCircle size={16} className="text-gray-400 hover:text-gray-600" />
                       </Tooltip>
                     </div>
