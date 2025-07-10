@@ -5,7 +5,29 @@
 @tailwind utilities;
 
 /* Tooltip Visibility Fixes - Critical for User Experience */
-.tooltip-content {
+/* Glassmorphism Tooltips - Glass Panel Effect */
+.tooltip-glassmorphism {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  color: rgb(31, 41, 55) !important; /* gray-800 */
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05) !important;
+  z-index: 1100 !important;
+  isolation: isolate !important;
+  position: relative !important;
+}
+
+.tooltip-glassmorphism-arrow {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  z-index: 1099 !important;
+}
+
+/* Standard Dark Tooltips */
+.tooltip-content:not(.tooltip-glassmorphism) {
   background-color: rgb(17 24 39) !important; /* gray-900 */
   color: rgb(255 255 255) !important; /* white */
   z-index: 1100 !important;
@@ -16,7 +38,7 @@
   position: relative !important;
 }
 
-.tooltip-arrow {
+.tooltip-arrow:not(.tooltip-glassmorphism-arrow) {
   background-color: rgb(17 24 39) !important; /* gray-900 */
   z-index: 1099 !important;
   border: 1px solid rgb(75 85 99) !important;

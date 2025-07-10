@@ -52,8 +52,8 @@ const Tooltip: React.FC<TooltipProps> = ({
   const getPositionClasses = () => {
     // Enhanced base classes with glassmorphism option
     const baseClasses = glassmorphism
-      ? 'absolute z-[1100] px-4 py-3 text-sm text-gray-800 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg max-w-md tooltip-content border border-gray-200/50'
-      : 'absolute z-[1100] px-4 py-3 text-sm text-white bg-gray-900 rounded-lg shadow-xl max-w-md tooltip-content border-2 border-gray-700';
+      ? 'absolute z-[1100] px-4 py-3 text-sm rounded-lg max-w-md tooltip-content tooltip-glassmorphism'
+      : 'absolute z-[1100] px-4 py-3 text-sm rounded-lg shadow-xl max-w-md tooltip-content';
 
     switch (actualPosition) {
       case 'top':
@@ -71,8 +71,8 @@ const Tooltip: React.FC<TooltipProps> = ({
 
   const getArrowClasses = () => {
     const baseClasses = glassmorphism
-      ? 'absolute w-2 h-2 bg-white/95 border border-gray-200/50 transform rotate-45 tooltip-arrow'
-      : 'absolute w-2 h-2 bg-gray-900 transform rotate-45 tooltip-arrow';
+      ? 'absolute w-2 h-2 transform rotate-45 tooltip-arrow tooltip-glassmorphism-arrow'
+      : 'absolute w-2 h-2 transform rotate-45 tooltip-arrow';
 
     switch (actualPosition) {
       case 'top':
@@ -114,11 +114,6 @@ const Tooltip: React.FC<TooltipProps> = ({
           ref={tooltipRef}
           className={getPositionClasses()}
           role="tooltip"
-          style={{
-            filter: glassmorphism
-              ? 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))'
-              : 'drop-shadow(0 0 8px rgba(0, 0, 0, 0.3))'
-          }}
         >
           {/* Content with optional close button */}
           <div className="flex items-start justify-between">
@@ -130,7 +125,7 @@ const Tooltip: React.FC<TooltipProps> = ({
                 onClick={() => setIsVisible(false)}
                 className={`ml-2 p-1 rounded-full transition-colors flex-shrink-0 ${
                   glassmorphism
-                    ? 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+                    ? 'text-gray-600 hover:text-gray-800 hover:bg-white/40'
                     : 'text-gray-300 hover:text-white hover:bg-gray-700'
                 }`}
                 aria-label="Close tooltip"
