@@ -21,7 +21,7 @@ const Blog = () => {
       fullContent: `
 ## Overview
 
-The UK government has launched a major consultation on **strengthening leaseholder protections over charges and services**, running from 4 July 2025 to 26 September 2025. This consultation represents a significant step forward in implementing the Leasehold and Freehold Reform Act 2024 and introduces additional reforms to address the "wild west" of leasehold management.
+The UK government has launched a major consultation on strengthening leaseholder protections over charges and services, running from 4 July 2025 to 26 September 2025. This consultation represents a significant step forward in implementing the Leasehold and Freehold Reform Act 2024 and introduces additional reforms to address the "wild west" of leasehold management.
 
 ## Key Transparency Measures
 
@@ -29,21 +29,21 @@ The UK government has launched a major consultation on **strengthening leasehold
 
 The government proposes mandatory annual reports that landlords must provide within the first month of each service charge period. These reports will include:
 
-- **Key contact details** for managing agents, landlords, fire safety responsible persons, and Principal Accountable Persons
-- **Important lease dates** including service charge demands and financial year-end dates
-- **Building condition information** including details of previous and planned annual statutory surveys
-- **Major works planning** with details of works planned for the next two years and whether costs are covered by reserve funds
-- **Administration charge schedules** clearly set out for transparency
-- **Formal proceedings information** including any enforcement notices, litigation, or enfranchisement claims
+• Key contact details for managing agents, landlords, fire safety responsible persons, and Principal Accountable Persons
+• Important lease dates including service charge demands and financial year-end dates
+• Building condition information including details of previous and planned annual statutory surveys
+• Major works planning with details of works planned for the next two years and whether costs are covered by reserve funds
+• Administration charge schedules clearly set out for transparency
+• Formal proceedings information including any enforcement notices, litigation, or enfranchisement claims
 
 ### Standardised Service Charge Demand Forms
 
 To address current inconsistencies where landlords have considerable leeway in presenting service charge demands, the reforms mandate a prescribed format for all service charge demands. The new standardised forms will include:
 
-- **Comprehensive cost breakdown** showing planned expenditure on maintenance, insurance, and management
-- **Clear payment details** including amounts, deadlines, and consequences of non-payment
-- **Budget information** for the forthcoming year
-- **Property and party identification** with clear landlord and leaseholder details
+• Comprehensive cost breakdown showing planned expenditure on maintenance, insurance, and management
+• Clear payment details including amounts, deadlines, and consequences of non-payment
+• Budget information for the forthcoming year
+• Property and party identification with clear landlord and leaseholder details
 
 Crucially, any deviation from the prescribed format will render non-payment or late payment provisions in the lease unenforceable.
 
@@ -57,18 +57,18 @@ Leaseholders will gain new rights to request detailed information from landlords
 
 The government is proposing comprehensive reforms to the Section 20 major works consultation process, which has not been updated for over 20 years. Key proposals include:
 
-- **Raising financial thresholds** to avoid capturing relatively minor works that add unnecessary costs and delays
-- **Streamlining consultation procedures** to balance leaseholder notification needs with efficient work completion
-- **Improving leaseholder engagement** through standardised forms and clearer information about work implications
-- **Faster consultation processes** for dynamic markets like energy tariffs where delays could disadvantage leaseholders
+• Raising financial thresholds to avoid capturing relatively minor works that add unnecessary costs and delays
+• Streamlining consultation procedures to balance leaseholder notification needs with efficient work completion
+• Improving leaseholder engagement through standardised forms and clearer information about work implications
+• Faster consultation processes for dynamic markets like energy tariffs where delays could disadvantage leaseholders
 
 ### Mandatory Reserve Funds
 
 The consultation proposes making reserve funds mandatory for both new and existing leases. This would include:
 
-- **Professionally certified asset management plans** to underpin reserve fund calculations
-- **Periodic review provisions** to ensure funds remain adequate
-- **Integration with transparency measures** through inclusion in annual reports and detailed information availability
+• Professionally certified asset management plans to underpin reserve fund calculations
+• Periodic review provisions to ensure funds remain adequate
+• Integration with transparency measures through inclusion in annual reports and detailed information availability
 
 This aims to prevent the "lottery of timing" where large one-off bills for major works fall on whoever lives in the property at the time.
 
@@ -81,9 +81,9 @@ Following Lord Best's 2019 recommendations, the government proposes introducing 
 ### Enhanced Leaseholder Powers
 
 The consultation explores giving leaseholders greater powers to:
-- **Veto the appointment** of particular managing agents
-- **Demand replacement** of existing managing agents they are dissatisfied with
-- **Apply for tribunal-appointed managers** through improved Section 24 processes
+• Veto the appointment of particular managing agents
+• Demand replacement of existing managing agents they are dissatisfied with
+• Apply for tribunal-appointed managers through improved Section 24 processes
 
 ## Litigation Costs Reform
 
@@ -91,10 +91,10 @@ The consultation explores giving leaseholders greater powers to:
 
 The reforms fundamentally change how litigation costs are handled by:
 
-- **Removing automatic cost recovery** for landlords, even when lease terms specify otherwise
-- **Requiring tribunal approval** for landlords seeking to recover litigation costs from leaseholders
-- **Granting leaseholders rights** to claim their litigation costs from landlords when successful
-- **Exempting certain cases** such as undefended matters to avoid unnecessary delays
+• Removing automatic cost recovery for landlords, even when lease terms specify otherwise
+• Requiring tribunal approval for landlords seeking to recover litigation costs from leaseholders
+• Granting leaseholders rights to claim their litigation costs from landlords when successful
+• Exempting certain cases such as undefended matters to avoid unnecessary delays
 
 This removes a significant deterrent that previously prevented leaseholders from challenging unreasonable charges.
 
@@ -106,9 +106,9 @@ The consultation recognises that Resident Management Companies and Right-to-Mana
 
 Currently, leaseholders paying fixed service charges have fewer rights than those paying variable charges. The reforms propose extending equal protection to both groups, including:
 
-- **Rights to challenge reasonableness** of fixed service charges
-- **Enhanced transparency measures** through annual reports and standardised demands
-- **Tribunal access** for disputes over service quality or charge appropriateness
+• Rights to challenge reasonableness of fixed service charges
+• Enhanced transparency measures through annual reports and standardised demands
+• Tribunal access for disputes over service quality or charge appropriateness
 
 ## Digital Services and Modernisation
 
@@ -118,9 +118,9 @@ The consultation explores facilitating greater use of digital communication for 
 
 Building on Financial Conduct Authority rules, the reforms propose:
 
-- **Mandatory disclosure** of insurance information without leaseholder requests
-- **Commission structure transparency** including conflicts of interest declarations
-- **Limited recoverable costs** restricted to actual premiums and genuine claims handling services
+• Mandatory disclosure of insurance information without leaseholder requests
+• Commission structure transparency including conflicts of interest declarations
+• Limited recoverable costs restricted to actual premiums and genuine claims handling services
 
 ## Implementation Timeline
 
