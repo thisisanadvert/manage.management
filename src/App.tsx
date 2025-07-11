@@ -203,6 +203,7 @@ function App() {
       <Route path="/rtm-resources" element={<RTMResources />} />
       <Route path="/about" element={<About />} />
       <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:postId" element={<Blog />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/leaseholder-rights" element={<LeaseholderRights />} />
 
