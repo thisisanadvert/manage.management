@@ -130,11 +130,11 @@ const AccessibilityToolbar: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="fixed top-20 right-4 z-50">
       {/* Accessibility Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-20 right-4 z-50 bg-primary-600 text-white p-3 rounded-full shadow-lg hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+        className="bg-primary-600 text-white p-3 rounded-full shadow-lg hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
         aria-label="Open accessibility options"
         title="Accessibility Options"
       >
@@ -143,7 +143,7 @@ const AccessibilityToolbar: React.FC = () => {
 
       {/* Accessibility Panel */}
       {isOpen && (
-        <div className={`accessibility-panel fixed top-20 right-4 z-40 rounded-lg shadow-xl border p-4 w-80 max-w-[calc(100vw-2rem)] ${
+        <div className={`accessibility-panel absolute top-full right-0 mt-2 z-40 rounded-lg shadow-xl border p-4 w-80 max-w-[calc(100vw-2rem)] ${
           settings.highContrast
             ? 'bg-white border-black text-black'
             : 'bg-white border-gray-200 text-gray-900'
@@ -221,7 +221,7 @@ const AccessibilityToolbar: React.FC = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
