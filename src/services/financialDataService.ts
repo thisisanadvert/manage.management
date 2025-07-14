@@ -123,15 +123,23 @@ class FinancialDataService {
 
   async createTransaction(transaction: Transaction): Promise<{ data: Transaction | null; error: any }> {
     try {
+      console.log('financialDataService.createTransaction called with:', transaction);
+
       const { data, error } = await supabase
         .from('transactions')
         .insert([transaction])
         .select()
         .single();
 
+      console.log('Supabase response - data:', data, 'error:', error);
+
+      if (error) {
+        console.error('Supabase error details:', error);
+      }
+
       return { data, error };
     } catch (error) {
-      console.error('Error creating transaction:', error);
+      console.error('Exception in createTransaction:', error);
       return { data: null, error };
     }
   }
