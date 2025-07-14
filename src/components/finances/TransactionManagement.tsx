@@ -22,7 +22,10 @@ import {
 } from 'lucide-react';
 import Card from '../ui/Card';
 import Badge from '../ui/Badge';
+import Button from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
+import { financialDataService, Transaction as DBTransaction } from '../../services/financialDataService';
+import { getUserBuildingId } from '../../utils/buildingUtils';
 
 interface Transaction {
   id: string;
@@ -124,70 +127,56 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
     ]
   };
 
-  // Mock data generation
-  const generateMockTransactions = (): Transaction[] => {
-    return [
-      {
-        id: '1',
-        description: 'Q2 Service Charge Collection',
-        amount: 45000,
-        type: 'income',
-        category: 'Service Charges',
-        date: '2025-04-01',
-        status: 'completed',
-        approvals: {
-          director1: { approved: true, date: '2025-04-01', name: 'John Smith' },
-          director2: { approved: true, date: '2025-04-01', name: 'Jane Doe' }
-        },
-        receipts: [],
-        createdBy: 'system',
-        aiCategory: 'Service Charges',
-        aiConfidence: 0.95
-      },
-      {
-        id: '2',
-        description: 'Emergency Plumbing Repair - Flat 12',
-        amount: 850,
-        type: 'expense',
-        category: 'Emergency Repairs',
-        date: '2025-06-15',
-        status: 'pending',
-        approvals: {
-          director1: { approved: true, date: '2025-06-15', name: 'John Smith' }
-        },
-        receipts: ['receipt1.pdf'],
-        notes: 'Burst pipe in bathroom, emergency callout required',
-        createdBy: user?.email || 'unknown',
-        aiCategory: 'Emergency Repairs',
-        aiConfidence: 0.88
-      },
-      {
-        id: '3',
-        description: 'Annual Building Insurance Premium',
-        amount: 12500,
-        type: 'expense',
-        category: 'Insurance',
-        date: '2025-06-01',
-        status: 'approved',
-        approvals: {
-          director1: { approved: true, date: '2025-06-01', name: 'John Smith' },
-          director2: { approved: true, date: '2025-06-02', name: 'Jane Doe' }
-        },
-        receipts: ['insurance_invoice.pdf'],
-        createdBy: user?.email || 'unknown',
-        aiCategory: 'Insurance',
-        aiConfidence: 0.92
+  // Load transactions from database
+  const loadTransactions = async () => {
+    setIsLoading(true);
+    try {
+      const buildingId = await getUserBuildingId(user);
+      if (!buildingId) {
+        console.error('No building ID found for user');
+        setIsLoading(false);
+        return;
       }
-    ];
+
+      const { data, error } = await financialDataService.getTransactions(buildingId, {
+        limit: 50 // Load recent 50 transactions
+      });
+
+      if (error) {
+        console.error('Error loading transactions:', error);
+        setTransactions([]);
+      } else {
+        // Convert database transactions to component format
+        const formattedTransactions: Transaction[] = (data || []).map(dbTrans => ({
+          id: dbTrans.id || '',
+          description: dbTrans.description,
+          amount: dbTrans.amount,
+          type: dbTrans.type,
+          category: dbTrans.category,
+          date: dbTrans.transaction_date,
+          status: dbTrans.status,
+          approvals: {}, // TODO: Load from transaction_approvals table
+          receipts: dbTrans.receipt_url ? [dbTrans.receipt_url] : [],
+          notes: dbTrans.notes,
+          createdBy: dbTrans.created_by,
+          aiCategory: dbTrans.ai_category,
+          aiConfidence: dbTrans.ai_confidence
+        }));
+        setTransactions(formattedTransactions);
+      }
+    } catch (error) {
+      console.error('Error in loadTransactions:', error);
+      setTransactions([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setTransactions(generateMockTransactions());
-      setIsLoading(false);
-    }, 1000);
-  }, [user]); // Add user dependency
+    if (user?.id) {
+      loadTransactions();
+    }
+  }, [user?.id]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -222,34 +211,55 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
       return;
     }
 
-    const newTransaction: Transaction = {
-      id: Date.now().toString(),
-      description: transactionForm.description,
-      amount: transactionForm.amount,
-      type: transactionForm.type,
-      category: transactionForm.category,
-      date: transactionForm.date,
-      status: 'pending',
-      approvals: {},
-      receipts: [], // In real implementation, handle file uploads
-      notes: transactionForm.notes,
-      createdBy: user?.email || 'unknown',
-      aiCategory: transactionForm.category, // AI would determine this
-      aiConfidence: 0.85
-    };
+    try {
+      const buildingId = await getUserBuildingId(user);
+      if (!buildingId) {
+        alert('Error: No building ID found');
+        return;
+      }
 
-    setTransactions(prev => [newTransaction, ...prev]);
-    handleCloseForm();
+      const newTransaction: DBTransaction = {
+        building_id: buildingId,
+        description: transactionForm.description,
+        amount: transactionForm.amount,
+        type: transactionForm.type,
+        category: transactionForm.category,
+        transaction_date: transactionForm.date,
+        status: 'pending',
+        notes: transactionForm.notes,
+        created_by: user?.id || '',
+        ai_category: transactionForm.category,
+        ai_confidence: 0.85
+      };
 
-    setTransactionForm({
-      description: '',
-      amount: 0,
-      type: 'expense',
-      category: '',
-      date: new Date().toISOString().split('T')[0],
-      notes: '',
-      receipts: []
-    });
+      const { data, error } = await financialDataService.createTransaction(newTransaction);
+
+      if (error) {
+        console.error('Error creating transaction:', error);
+        alert('Error creating transaction. Please try again.');
+        return;
+      }
+
+      // Reload transactions to show the new one
+      await loadTransactions();
+      handleCloseForm();
+
+      // Reset form
+      setTransactionForm({
+        description: '',
+        amount: 0,
+        type: 'expense',
+        category: '',
+        date: new Date().toISOString().split('T')[0],
+        notes: '',
+        receipts: []
+      });
+
+      alert('Transaction created successfully!');
+    } catch (error) {
+      console.error('Error in handleSubmitTransaction:', error);
+      alert('Error creating transaction. Please try again.');
+    }
   };
 
   const handleApproveTransaction = (transactionId: string) => {
