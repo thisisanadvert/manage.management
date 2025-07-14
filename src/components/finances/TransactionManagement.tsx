@@ -206,6 +206,9 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
   };
 
   const handleSubmitTransaction = async () => {
+    console.log('handleSubmitTransaction called');
+    console.log('transactionForm:', transactionForm);
+
     if (!transactionForm.description || !transactionForm.amount || !transactionForm.category) {
       alert('Please fill in all required fields');
       return;
@@ -609,10 +612,13 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
                 <input
                   type="text"
                   value={transactionForm.description}
-                  onChange={(e) => setTransactionForm(prev => ({ 
-                    ...prev, 
-                    description: e.target.value 
-                  }))}
+                  onChange={(e) => {
+                    console.log('Description changed:', e.target.value);
+                    setTransactionForm(prev => ({
+                      ...prev,
+                      description: e.target.value
+                    }));
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   placeholder="Enter transaction description"
                 />

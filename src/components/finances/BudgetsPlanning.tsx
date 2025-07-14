@@ -89,7 +89,7 @@ const BudgetsPlanning: React.FC = () => {
   const loadBudgetData = async () => {
     try {
       setIsLoading(true);
-      const buildingId = await getUserBuildingId(user?.id);
+      const buildingId = await getUserBuildingId(user);
       
       if (!buildingId) return;
 
@@ -123,9 +123,14 @@ const BudgetsPlanning: React.FC = () => {
   };
 
   const saveBudgetItem = async () => {
+    console.log('saveBudgetItem called');
+    console.log('newBudgetItem:', newBudgetItem);
     try {
-      const buildingId = await getUserBuildingId(user?.id);
-      if (!buildingId) return;
+      const buildingId = await getUserBuildingId(user);
+      if (!buildingId) {
+        console.log('No building ID found');
+        return;
+      }
 
       const itemData = {
         ...newBudgetItem,
@@ -481,10 +486,13 @@ const BudgetsPlanning: React.FC = () => {
                 <input
                   type="text"
                   value={newBudgetItem.description}
-                  onChange={(e) => setNewBudgetItem(prev => ({
-                    ...prev,
-                    description: e.target.value
-                  }))}
+                  onChange={(e) => {
+                    console.log('Budget description changed:', e.target.value);
+                    setNewBudgetItem(prev => ({
+                      ...prev,
+                      description: e.target.value
+                    }));
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter description"
                 />
