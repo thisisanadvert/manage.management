@@ -178,6 +178,13 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
     }
   }, [user?.id]);
 
+  // Debug modal visibility
+  useEffect(() => {
+    if (isFormVisible) {
+      console.log('Transaction modal is now visible');
+    }
+  }, [isFormVisible]);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'success';
@@ -397,8 +404,15 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
               <span>Export</span>
             </button>
             <button
-              onClick={() => setShowAddForm(true)}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Add Transaction button clicked');
+                setShowAddForm(true);
+              }}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center space-x-2"
+              style={{ pointerEvents: 'auto' }}
             >
               <Plus className="h-4 w-4" />
               <span>Add Transaction</span>
@@ -555,13 +569,27 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
 
       {/* Add Transaction Modal */}
       {isFormVisible && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          style={{ pointerEvents: 'auto' }}
+        >
+          <div
+            className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+            style={{ pointerEvents: 'auto' }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Add New Transaction</h3>
               <button
-                onClick={handleCloseForm}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Close button clicked');
+                  handleCloseForm();
+                }}
                 className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+                style={{ pointerEvents: 'auto' }}
               >
                 ×
               </button>
@@ -575,12 +603,18 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
                   </label>
                   <select
                     value={transactionForm.type}
-                    onChange={(e) => setTransactionForm(prev => ({ 
-                      ...prev, 
-                      type: e.target.value as 'income' | 'expense',
-                      category: '' // Reset category when type changes
-                    }))}
+                    onChange={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Type changed:', e.target.value);
+                      setTransactionForm(prev => ({
+                        ...prev,
+                        type: e.target.value as 'income' | 'expense',
+                        category: '' // Reset category when type changes
+                      }));
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    style={{ pointerEvents: 'auto' }}
                   >
                     <option value="expense">Expense</option>
                     <option value="income">Income</option>
@@ -595,12 +629,18 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
                     type="number"
                     step="0.01"
                     value={transactionForm.amount === 0 ? '' : transactionForm.amount}
-                    onChange={(e) => setTransactionForm(prev => ({
-                      ...prev,
-                      amount: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
-                    }))}
+                    onChange={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Amount changed:', e.target.value);
+                      setTransactionForm(prev => ({
+                        ...prev,
+                        amount: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
+                      }));
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     placeholder="0.00"
+                    style={{ pointerEvents: 'auto' }}
                   />
                 </div>
               </div>
@@ -613,6 +653,8 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
                   type="text"
                   value={transactionForm.description}
                   onChange={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     console.log('Description changed:', e.target.value);
                     setTransactionForm(prev => ({
                       ...prev,
@@ -621,6 +663,7 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   placeholder="Enter transaction description"
+                  style={{ pointerEvents: 'auto' }}
                 />
               </div>
               
@@ -694,14 +737,28 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
             
             <div className="flex justify-end space-x-2 mt-6">
               <button
-                onClick={handleCloseForm}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Cancel button clicked');
+                  handleCloseForm();
+                }}
                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                style={{ pointerEvents: 'auto' }}
               >
                 Cancel
               </button>
               <button
-                onClick={handleSubmitTransaction}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Submit button clicked');
+                  handleSubmitTransaction();
+                }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                style={{ pointerEvents: 'auto' }}
               >
                 Submit for Approval
               </button>
