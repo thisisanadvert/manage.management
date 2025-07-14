@@ -125,17 +125,17 @@ class FinancialDataService {
     try {
       console.log('financialDataService.createTransaction called with:', transaction);
 
-      // Create a minimal transaction object with only essential fields
+      // Create a minimal transaction object with ONLY the original table columns
+      // Based on migration 20250429214729_quiet_dream.sql
       const minimalTransaction = {
         building_id: transaction.building_id,
-        description: transaction.description,
         amount: transaction.amount,
-        type: transaction.type,
+        description: transaction.description,
         category: transaction.category,
         transaction_date: transaction.transaction_date,
-        status: transaction.status || 'pending',
-        notes: transaction.notes || '',
         created_by: transaction.created_by
+        // Only using columns that exist in the original migration:
+        // id, building_id, amount, description, category, transaction_date, created_by, created_at
       };
 
       console.log('Minimal transaction object:', minimalTransaction);
