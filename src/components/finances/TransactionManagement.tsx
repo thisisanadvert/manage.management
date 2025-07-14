@@ -244,9 +244,8 @@ const TransactionManagement: React.FC<TransactionManagementProps> = ({
         transaction_date: transactionForm.date,
         status: 'pending',
         notes: transactionForm.notes,
-        created_by: user?.id || '',
-        ai_category: transactionForm.category,
-        ai_confidence: 0.85
+        created_by: user?.id || ''
+        // Removed ai_category and ai_confidence as they don't exist in current table
       };
       console.log('Transaction object:', newTransaction);
 

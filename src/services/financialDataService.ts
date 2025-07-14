@@ -14,7 +14,7 @@ export interface Transaction {
   category: string;
   subcategory?: string;
   transaction_date: string;
-  status: 'pending' | 'approved' | 'rejected' | 'completed';
+  status?: 'pending' | 'approved' | 'rejected' | 'completed';
   payment_method?: string;
   reference_number?: string;
   bank_account?: string;
@@ -125,9 +125,24 @@ class FinancialDataService {
     try {
       console.log('financialDataService.createTransaction called with:', transaction);
 
+      // Create a minimal transaction object with only essential fields
+      const minimalTransaction = {
+        building_id: transaction.building_id,
+        description: transaction.description,
+        amount: transaction.amount,
+        type: transaction.type,
+        category: transaction.category,
+        transaction_date: transaction.transaction_date,
+        status: transaction.status || 'pending',
+        notes: transaction.notes || '',
+        created_by: transaction.created_by
+      };
+
+      console.log('Minimal transaction object:', minimalTransaction);
+
       const { data, error } = await supabase
         .from('transactions')
-        .insert([transaction])
+        .insert([minimalTransaction])
         .select()
         .single();
 
