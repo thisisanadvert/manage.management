@@ -127,9 +127,12 @@ class FinancialDataService {
 
       // Create a minimal transaction object with ONLY the original table columns
       // Based on migration 20250429214729_quiet_dream.sql
+      // Original table uses negative amounts for expenses, positive for income
+      const adjustedAmount = transaction.type === 'expense' ? -Math.abs(transaction.amount) : Math.abs(transaction.amount);
+
       const minimalTransaction = {
         building_id: transaction.building_id,
-        amount: transaction.amount,
+        amount: adjustedAmount,
         description: transaction.description,
         category: transaction.category,
         transaction_date: transaction.transaction_date,
