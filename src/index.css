@@ -85,6 +85,21 @@
   color: rgb(55 65 81) !important; /* gray-700 */
 }
 
+/* Modal Fixes - Ensure modals are clickable and properly layered */
+#portal-root {
+  position: relative;
+  z-index: 10000;
+}
+
+[role="dialog"] {
+  z-index: 10000 !important;
+  pointer-events: auto !important;
+}
+
+[role="dialog"] * {
+  pointer-events: auto !important;
+}
+
 /* Additional tooltip visibility fixes */
 /* Ensure all absolute positioned tooltips are visible */
 .absolute.bottom-full.left-0.mb-2.z-\[1000\] {
