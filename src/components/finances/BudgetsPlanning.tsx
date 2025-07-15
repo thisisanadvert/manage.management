@@ -17,31 +17,8 @@ import Badge from '../ui/Badge';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { getUserBuildingId } from '../../utils/buildingUtils';
-
-interface BudgetItem {
-  id: string;
-  category: string;
-  description: string;
-  quarterlyEstimate: number;
-  annualEstimate: number;
-  actualSpent: number;
-  variance: number;
-  type: 'income' | 'expense';
-  notes: string;
-  lastUpdated: string;
-}
-
-interface BudgetPeriod {
-  id: string;
-  year: number;
-  quarter?: number;
-  totalIncome: number;
-  totalExpenses: number;
-  netPosition: number;
-  status: 'draft' | 'approved' | 'active';
-  createdBy: string;
-  createdAt: string;
-}
+import BudgetItemModal from './BudgetItemModal';
+import { BudgetItem, BudgetPeriod } from '../../types/finances';
 
 const BudgetsPlanning: React.FC = () => {
   const { user } = useAuth();
@@ -461,173 +438,34 @@ const BudgetsPlanning: React.FC = () => {
       </Card>
 
       {/* Add/Edit Budget Item Modal */}
-      {showAddForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">
-                {editingItem ? 'Edit Budget Item' : 'Add Budget Item'}
-              </h3>
-              <button
-                onClick={() => {
-                  setShowAddForm(false);
-                  setEditingItem(null);
-                  setNewBudgetItem({
-                    category: '',
-                    description: '',
-                    quarterlyEstimate: 0,
-                    annualEstimate: 0,
-                    type: 'expense',
-                    notes: ''
-                  });
-                }}
-                className="text-gray-400 hover:text-gray-600 text-xl font-bold"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Type *
-                  </label>
-                  <select
-                    value={newBudgetItem.type}
-                    onChange={(e) => setNewBudgetItem(prev => ({
-                      ...prev,
-                      type: e.target.value as 'income' | 'expense',
-                      category: ''
-                    }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="expense">Expense</option>
-                    <option value="income">Income</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category *
-                  </label>
-                  <select
-                    value={newBudgetItem.category}
-                    onChange={(e) => setNewBudgetItem(prev => ({
-                      ...prev,
-                      category: e.target.value
-                    }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select category</option>
-                    {categories[newBudgetItem.type].map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description *
-                </label>
-                <input
-                  type="text"
-                  value={newBudgetItem.description}
-                  onChange={(e) => {
-                    console.log('Budget description changed:', e.target.value);
-                    setNewBudgetItem(prev => ({
-                      ...prev,
-                      description: e.target.value
-                    }));
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter description"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Quarterly Estimate (£)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={newBudgetItem.quarterlyEstimate === 0 ? '' : newBudgetItem.quarterlyEstimate}
-                    onChange={(e) => setNewBudgetItem(prev => ({
-                      ...prev,
-                      quarterlyEstimate: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
-                    }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Annual Estimate (£)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={newBudgetItem.annualEstimate === 0 ? '' : newBudgetItem.annualEstimate}
-                    onChange={(e) => setNewBudgetItem(prev => ({
-                      ...prev,
-                      annualEstimate: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
-                    }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notes
-                </label>
-                <textarea
-                  value={newBudgetItem.notes}
-                  onChange={(e) => setNewBudgetItem(prev => ({
-                    ...prev,
-                    notes: e.target.value
-                  }))}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Additional notes or details"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end space-x-2 mt-6">
-              <button
-                onClick={() => {
-                  setShowAddForm(false);
-                  setEditingItem(null);
-                  setNewBudgetItem({
-                    category: '',
-                    description: '',
-                    quarterlyEstimate: 0,
-                    annualEstimate: 0,
-                    type: 'expense',
-                    notes: ''
-                  });
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={saveBudgetItem}
-                disabled={!newBudgetItem.category || !newBudgetItem.description}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {editingItem ? 'Update' : 'Add'} Budget Item
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <BudgetItemModal
+        isOpen={showAddForm}
+        onClose={() => {
+          setShowAddForm(false);
+          setEditingItem(null);
+          setNewBudgetItem({
+            category: '',
+            description: '',
+            quarterlyEstimate: 0,
+            annualEstimate: 0,
+            type: 'expense',
+            notes: ''
+          });
+        }}
+        onSave={(item) => {
+          setNewBudgetItem({
+            category: item.category,
+            description: item.description,
+            quarterlyEstimate: item.quarterlyEstimate,
+            annualEstimate: item.annualEstimate,
+            type: item.type as 'income' | 'expense',
+            notes: item.notes || ''
+          });
+          saveBudgetItem();
+        }}
+        editingItem={editingItem}
+        categories={categories}
+      />
     </div>
   );
 };
