@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { BudgetItem } from '../../types/finances';
-import Portal from '../ui/Portal';
 
 interface BudgetItemModalProps {
   isOpen: boolean;
@@ -83,156 +82,154 @@ const BudgetItemModal: React.FC<BudgetItemModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <Portal>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      style={{ pointerEvents: 'auto' }}
+    >
       <div
-        className="fixed inset-0 z-50 overflow-y-auto"
-        aria-labelledby="modal-title"
-        role="dialog"
-        aria-modal="true"
-        style={{ zIndex: 10000, pointerEvents: 'auto' }}
+        className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+        style={{ pointerEvents: 'auto' }}
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-          {/* Background overlay */}
-          <div
-            className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-            aria-hidden="true"
-            onClick={onClose}
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">
+            {editingItem ? 'Edit Budget Item' : 'Add Budget Item'}
+          </h3>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
+            className="text-gray-400 hover:text-gray-600 text-xl font-bold"
             style={{ pointerEvents: 'auto' }}
-          ></div>
+          >
+            ×
+          </button>
+        </div>
 
-        {/* Modal panel */}
-        <div
-          className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
-          style={{ position: 'relative', zIndex: 10001, pointerEvents: 'auto' }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <form onSubmit={handleSubmit} onClick={(e) => e.stopPropagation()}>
-            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <div className="sm:flex sm:items-start">
-                <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                    {editingItem ? 'Edit Budget Item' : 'Add Budget Item'}
-                  </h3>
-                  
-                  <div className="mt-4 space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="type" className="block text-sm font-medium text-gray-700">Type *</label>
-                        <select
-                          id="type"
-                          name="type"
-                          value={formData.type}
-                          onChange={handleChange}
-                          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                          required
-                        >
-                          <option value="expense">Expense</option>
-                          <option value="income">Income</option>
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category *</label>
-                        <select
-                          id="category"
-                          name="category"
-                          value={formData.category}
-                          onChange={handleChange}
-                          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                          required
-                        >
-                          <option value="">Select category</option>
-                          {categories[formData.type].map(category => (
-                            <option key={category} value={category}>{category}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description *</label>
-                      <input
-                        type="text"
-                        name="description"
-                        id="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                        placeholder="Enter description"
-                        required
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="quarterlyEstimate" className="block text-sm font-medium text-gray-700">Quarterly Estimate (£)</label>
-                        <input
-                          type="number"
-                          name="quarterlyEstimate"
-                          id="quarterlyEstimate"
-                          value={formData.quarterlyEstimate === 0 ? '' : formData.quarterlyEstimate}
-                          onChange={handleChange}
-                          className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                          placeholder="0.00"
-                          min="0"
-                          step="0.01"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="annualEstimate" className="block text-sm font-medium text-gray-700">Annual Estimate (£)</label>
-                        <input
-                          type="number"
-                          name="annualEstimate"
-                          id="annualEstimate"
-                          value={formData.annualEstimate === 0 ? '' : formData.annualEstimate}
-                          onChange={handleChange}
-                          className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                          placeholder="0.00"
-                          min="0"
-                          step="0.01"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="notes" className="block text-sm font-medium text-gray-700">Notes</label>
-                      <textarea
-                        id="notes"
-                        name="notes"
-                        rows={3}
-                        value={formData.notes}
-                        onChange={handleChange}
-                        className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                        placeholder="Additional notes or details"
-                      />
-                    </div>
-                  </div>
-                </div>
+        <form onSubmit={handleSubmit} onClick={(e) => e.stopPropagation()}>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="type" className="block text-sm font-medium text-gray-700">Type *</label>
+                <select
+                  id="type"
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                  required
+                >
+                  <option value="expense">Expense</option>
+                  <option value="income">Income</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category *</label>
+                <select
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                  required
+                >
+                  <option value="">Select category</option>
+                  {categories[formData.type].map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
               </div>
             </div>
-            
-            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-              <button
-                type="submit"
-                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-                disabled={!formData.category || !formData.description}
-              >
-                {editingItem ? 'Update' : 'Add'} Budget Item
-              </button>
+
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description *</label>
+              <input
+                type="text"
+                name="description"
+                id="description"
+                value={formData.description}
+                onChange={handleChange}
+                className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                placeholder="Enter description"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="quarterlyEstimate" className="block text-sm font-medium text-gray-700">Quarterly Estimate (£)</label>
+                <input
+                  type="number"
+                  name="quarterlyEstimate"
+                  id="quarterlyEstimate"
+                  value={formData.quarterlyEstimate === 0 ? '' : formData.quarterlyEstimate}
+                  onChange={handleChange}
+                  className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="annualEstimate" className="block text-sm font-medium text-gray-700">Annual Estimate (£)</label>
+                <input
+                  type="number"
+                  name="annualEstimate"
+                  id="annualEstimate"
+                  value={formData.annualEstimate === 0 ? '' : formData.annualEstimate}
+                  onChange={handleChange}
+                  className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="notes" className="block text-sm font-medium text-gray-700">Notes</label>
+              <textarea
+                id="notes"
+                name="notes"
+                rows={3}
+                value={formData.notes}
+                onChange={handleChange}
+                className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                placeholder="Additional notes or details"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-4">
               <button
                 type="button"
-                className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                onClick={onClose}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClose();
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                style={{ pointerEvents: 'auto' }}
               >
                 Cancel
               </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                disabled={!formData.category || !formData.description}
+                style={{ pointerEvents: 'auto' }}
+              >
+                {editingItem ? 'Update' : 'Add'} Budget Item
+              </button>
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
-    </Portal>
   );
 };
 
