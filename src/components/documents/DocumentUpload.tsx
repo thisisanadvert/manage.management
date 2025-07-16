@@ -110,15 +110,24 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
 
         if (uploadError) throw uploadError;
 
-        // Create document record
+        // Create document record using new document_repository table
+        const documentRecord = {
+          building_id: buildingId,
+          title: file.name,
+          description: `Uploaded document`,
+          file_name: file.name,
+          file_path: filePath,
+          file_size: file.size,
+          mime_type: file.type,
+          category: 'admin', // Default category for general uploads
+          tags: ['upload'],
+          uploaded_by: user.id,
+          access_level: 'building'
+        };
+
         const { error: dbError } = await supabase
-          .from('onboarding_documents')
-          .insert([{
-            building_id: buildingId,
-            document_type: file.name.split('.').pop()?.toLowerCase() || 'unknown',
-            storage_path: filePath,
-            uploaded_by: user.id
-          }]);
+          .from('document_repository')
+          .insert([documentRecord]);
 
         if (dbError) throw dbError;
       }

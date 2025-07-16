@@ -276,18 +276,22 @@ class GlobalSearchService {
     offset: number
   ): Promise<SearchResult[]> {
     let queryBuilder = supabase
-      .from('onboarding_documents')
+      .from('document_repository')
       .select(`
         id,
-        document_type,
-        storage_path,
+        title,
+        description,
+        file_name,
+        file_path,
+        category,
+        tags,
         created_at,
         uploaded_by,
         building_id
       `);
 
     if (query) {
-      queryBuilder = queryBuilder.ilike('storage_path', `%${query}%`);
+      queryBuilder = queryBuilder.or(`title.ilike.%${query}%,description.ilike.%${query}%,file_name.ilike.%${query}%`);
     }
 
     if (filters.buildingId) {
@@ -295,6 +299,7 @@ class GlobalSearchService {
     }
 
     const { data, error } = await queryBuilder
+      .eq('is_archived', false)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -306,12 +311,12 @@ class GlobalSearchService {
     return (data || []).map(doc => ({
       id: doc.id,
       type: 'documents' as SearchContentType,
-      title: this.extractFilename(doc.storage_path),
-      description: `${doc.document_type} document`,
+      title: doc.title || doc.file_name,
+      description: doc.description || `${doc.category} document`,
       url: generateSearchResultUrl({ id: doc.id, type: 'documents' } as SearchResult),
       metadata: {
         createdAt: doc.created_at,
-        category: doc.document_type,
+        category: doc.category,
         buildingId: doc.building_id
       } as SearchResultMetadata
     }));

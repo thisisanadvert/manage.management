@@ -155,7 +155,7 @@ const Documents = () => {
     try {
       const { data, error } = await supabase.storage
         .from('documents')
-        .download(doc.storage_path);
+        .download(doc.file_path);
 
       if (error) throw error;
 
@@ -171,24 +171,20 @@ const Documents = () => {
   // Rename functionality
   const handleStartRename = (doc: any) => {
     setEditingDocumentId(doc.id);
-    setEditingName(doc.storage_path.split('/').pop()?.replace(/^\d+-/, '') || '');
+    setEditingName(doc.title || doc.file_name || '');
   };
 
   const handleSaveRename = async (doc: any) => {
     if (!editingName.trim()) return;
 
     try {
-      // Create new file path with timestamp prefix
-      const pathParts = doc.storage_path.split('/');
-      const oldFileName = pathParts.pop();
-      const timestamp = oldFileName?.split('-')[0] || new Date().getTime();
-      const newFileName = `${timestamp}-${editingName.trim()}`;
-      const newPath = [...pathParts, newFileName].join('/');
-
-      // Update database record
+      // Update document title and file_name in the new table structure
       const { error } = await supabase
-        .from('onboarding_documents')
-        .update({ storage_path: newPath })
+        .from('document_repository')
+        .update({
+          title: editingName.trim(),
+          file_name: editingName.trim()
+        })
         .eq('id', doc.id);
 
       if (error) throw error;
@@ -207,29 +203,15 @@ const Documents = () => {
     setEditingName('');
   };
 
-  // Load document metadata and tags
-  const loadDocumentMetadata = async (documentId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('document_metadata')
-        .select('*')
-        .eq('document_id', documentId)
-        .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      return data;
-    } catch (error) {
-      console.error('Error loading document metadata:', error);
-      return null;
-    }
-  };
 
   // Load all unique tags
   const loadAllTags = async () => {
     try {
       const { data, error } = await supabase
-        .from('document_metadata')
-        .select('tags');
+        .from('document_repository')
+        .select('tags')
+        .eq('building_id', user?.metadata?.buildingId);
 
       if (error) throw error;
 
@@ -249,8 +231,7 @@ const Documents = () => {
   // Tagging functionality
   const handleOpenTagModal = async (doc: any) => {
     setTagDocument(doc);
-    const metadata = await loadDocumentMetadata(doc.id);
-    const currentTags = metadata?.tags || [];
+    const currentTags = doc.tags || [];
     setSelectedTags(currentTags);
     setDocumentTags(currentTags.join(', '));
     setShowTagModal(true);
@@ -265,29 +246,13 @@ const Documents = () => {
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0);
 
-      // Check if metadata exists
-      const existingMetadata = await loadDocumentMetadata(tagDocument.id);
+      // Update tags directly in the document_repository table
+      const { error } = await supabase
+        .from('document_repository')
+        .update({ tags: tagsArray })
+        .eq('id', tagDocument.id);
 
-      if (existingMetadata) {
-        // Update existing metadata
-        const { error } = await supabase
-          .from('document_metadata')
-          .update({ tags: tagsArray })
-          .eq('document_id', tagDocument.id);
-
-        if (error) throw error;
-      } else {
-        // Create new metadata
-        const { error } = await supabase
-          .from('document_metadata')
-          .insert([{
-            document_id: tagDocument.id,
-            tags: tagsArray,
-            category: tagDocument.document_type
-          }]);
-
-        if (error) throw error;
-      }
+      if (error) throw error;
 
       await loadAllTags();
       await fetchDocuments();
@@ -313,21 +278,10 @@ const Documents = () => {
       setIsDeleting(true);
       console.log('🗑️ Starting deletion for document:', deleteDocument.id);
 
-      // Delete metadata first (if exists)
-      console.log('🗑️ Deleting metadata...');
-      const { error: metadataError } = await supabase
-        .from('document_metadata')
-        .delete()
-        .eq('document_id', deleteDocument.id);
-
-      if (metadataError) {
-        console.log('⚠️ Metadata deletion error (might not exist):', metadataError);
-      }
-
-      // Delete document record from database
+      // Delete document record from database (new table structure)
       console.log('🗑️ Deleting database record...');
       const { error: dbError } = await supabase
-        .from('onboarding_documents')
+        .from('document_repository')
         .delete()
         .eq('id', deleteDocument.id);
 
@@ -340,7 +294,7 @@ const Documents = () => {
       console.log('🗑️ Deleting from storage...');
       const { error: storageError } = await supabase.storage
         .from('documents')
-        .remove([deleteDocument.storage_path]);
+        .remove([deleteDocument.file_path]);
 
       if (storageError) {
         console.error('❌ Storage deletion error:', storageError);
@@ -405,31 +359,25 @@ const Documents = () => {
     setIsLoading(true);
     try {
       let query = supabase
-        .from('onboarding_documents')
-        .select(`
-          *,
-          document_metadata (
-            tags,
-            description,
-            category
-          )
-        `)
-        .eq('building_id', user.metadata.buildingId);
+        .from('document_repository')
+        .select('*')
+        .eq('building_id', user.metadata.buildingId)
+        .eq('is_archived', false);
 
       if (selectedCategory !== 'all') {
-        query = query.eq('document_type', selectedCategory);
+        query = query.eq('category', selectedCategory);
       }
 
       if (searchQuery) {
-        query = query.ilike('storage_path', `%${searchQuery}%`);
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,file_name.ilike.%${searchQuery}%`);
       }
 
       // Filter by selected tags if any
       if (selectedTags.length > 0) {
-        query = query.overlaps('document_metadata.tags', selectedTags);
+        query = query.overlaps('tags', selectedTags);
       }
 
-      const { data, error } = await query;
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
 
@@ -502,24 +450,26 @@ const Documents = () => {
 
         console.log('✅ File uploaded successfully to storage');
 
-        // Create document record in the database
-        console.log('🔍 Inserting document record:', {
+        // Create document record in the database using new document_repository table
+        const documentRecord = {
           building_id: user?.metadata?.buildingId,
-          document_type: uploadCategory,
-          storage_path: filePath,
-          uploaded_by: user?.id
-        });
+          title: file.name,
+          description: `${uploadCategory} document`,
+          file_name: file.name,
+          file_path: filePath,
+          file_size: file.size,
+          mime_type: file.type,
+          category: uploadCategory.toLowerCase(),
+          tags: [uploadCategory],
+          uploaded_by: user?.id,
+          access_level: 'building'
+        };
+
+        console.log('🔍 Inserting document record:', documentRecord);
 
         const { error: dbError } = await supabase
-          .from('onboarding_documents')
-          .insert([
-            {
-              building_id: user?.metadata?.buildingId,
-              document_type: uploadCategory,
-              storage_path: filePath,
-              uploaded_by: user?.id
-            }
-          ]);
+          .from('document_repository')
+          .insert([documentRecord]);
 
         if (dbError) {
           console.error('❌ Database error:', dbError);
@@ -546,7 +496,7 @@ const Documents = () => {
   const PreviewModal = () => {
     if (!showPreviewModal || !previewDocument || !previewUrl) return null;
 
-    const fileName = previewDocument.storage_path.split('/').pop();
+    const fileName = previewDocument.file_name || previewDocument.file_path.split('/').pop();
     const fileExtension = fileName?.split('.').pop()?.toLowerCase();
 
     const renderPreview = () => {
@@ -599,7 +549,7 @@ const Documents = () => {
                   try {
                     const { data, error } = await supabase.storage
                       .from('documents')
-                      .download(previewDocument.storage_path);
+                      .download(previewDocument.file_path);
 
                     if (error) throw error;
 
@@ -921,7 +871,7 @@ const Documents = () => {
                     </div>
                   ) : (
                     <h3 className="text-lg font-medium">
-                      {doc.storage_path.split('/').pop()?.replace(/^\d+-/, '') || doc.storage_path.split('/').pop()}
+                      {doc.title || doc.file_name}
                     </h3>
                   )}
                   <div className="mt-2 flex items-center gap-4 text-sm text-gray-500">
@@ -931,16 +881,16 @@ const Documents = () => {
                     </div>
                     <div className="flex items-center gap-1">
                       <FileText size={14} />
-                      <span>{doc.document_type}</span>
+                      <span>{doc.category}</span>
                     </div>
                   </div>
 
                   {/* Tags Display */}
-                  {doc.document_metadata?.[0]?.tags && doc.document_metadata[0].tags.length > 0 && (
+                  {doc.tags && doc.tags.length > 0 && (
                     <div className="mt-2 flex items-center gap-2">
                       <Tag size={14} className="text-gray-400" />
                       <div className="flex flex-wrap gap-1">
-                        {doc.document_metadata[0].tags.map((tag: string, index: number) => (
+                        {doc.tags.map((tag: string, index: number) => (
                           <Badge key={index} variant="gray" size="sm">
                             {tag}
                           </Badge>
@@ -980,7 +930,7 @@ const Documents = () => {
                       try {
                         const { data, error } = await supabase.storage
                           .from('documents')
-                          .download(doc.storage_path);
+                          .download(doc.file_path);
 
                         if (error) throw error;
 
@@ -988,7 +938,7 @@ const Documents = () => {
                         const url = URL.createObjectURL(data);
                         const a = document.createElement('a');
                         a.href = url;
-                        a.download = doc.storage_path.split('/').pop()?.replace(/^\d+-/, '') || doc.storage_path.split('/').pop();
+                        a.download = doc.file_name || doc.title;
                         document.body.appendChild(a);
                         a.click();
                         URL.revokeObjectURL(url);
@@ -1049,7 +999,7 @@ const Documents = () => {
           <div className="space-y-3">
             <div>
               <p className="text-sm text-gray-600 mb-3">
-                <strong>{tagDocument?.storage_path.split('/').pop()?.replace(/^\d+-/, '')}</strong>
+                <strong>{tagDocument?.title || tagDocument?.file_name}</strong>
               </p>
             </div>
 
@@ -1148,10 +1098,10 @@ const Documents = () => {
 
             <div className="text-sm">
               <p className="font-medium text-gray-900 mb-1">
-                {deleteDocument?.storage_path.split('/').pop()?.replace(/^\d+-/, '')}
+                {deleteDocument?.title || deleteDocument?.file_name}
               </p>
               <p className="text-gray-600">
-                {deleteDocument?.document_type} • {deleteDocument && new Date(deleteDocument.created_at).toLocaleDateString()}
+                {deleteDocument?.category} • {deleteDocument && new Date(deleteDocument.created_at).toLocaleDateString()}
               </p>
             </div>
           </div>
