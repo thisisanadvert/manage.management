@@ -188,15 +188,31 @@ const BudgetsPlanning: React.FC = () => {
         notes: ''
       });
 
-      // Only reload if no database error
-      if (!error || !error.message?.includes('does not exist')) {
-        await loadBudgetData();
-      }
+      // Reload budget data (the error handling above will show appropriate messages)
+      await loadBudgetData();
 
       console.log('Budget item saved successfully');
     } catch (error: any) {
       console.error('Error saving budget item:', error);
-      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      console.error('Error type:', typeof error);
+      console.error('Error keys:', Object.keys(error || {}));
+      console.error('Error message:', error?.message);
+      console.error('Error toString:', error?.toString?.());
+
+      let errorMessage = 'Unknown error occurred';
+
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.toString && typeof error.toString === 'function') {
+        errorMessage = error.toString();
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error?.code) {
+        errorMessage = `Database error: ${error.code}`;
+      } else {
+        errorMessage = JSON.stringify(error, null, 2);
+      }
+
       alert(`Error saving budget item: ${errorMessage}`);
     }
   };
