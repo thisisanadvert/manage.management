@@ -194,9 +194,10 @@ const BudgetsPlanning: React.FC = () => {
       }
 
       console.log('Budget item saved successfully');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving budget item:', error);
-      alert(`Error saving budget item: ${error.message || error}`);
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      alert(`Error saving budget item: ${errorMessage}`);
     }
   };
 
