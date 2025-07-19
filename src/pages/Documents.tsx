@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   FolderPlus,
   Search,
@@ -134,15 +135,21 @@ const Documents = () => {
   ];
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('File input changed:', e.target.files);
     if (e.target.files) {
-      setUploadingFiles(Array.from(e.target.files));
+      const files = Array.from(e.target.files);
+      console.log('Selected files:', files);
+      setUploadingFiles(files);
     }
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    console.log('Files dropped:', e.dataTransfer.files);
     if (e.dataTransfer.files) {
-      setUploadingFiles(Array.from(e.dataTransfer.files));
+      const files = Array.from(e.dataTransfer.files);
+      console.log('Dropped files:', files);
+      setUploadingFiles(files);
     }
   }, []);
 
@@ -315,6 +322,7 @@ const Documents = () => {
   };
 
   const handleCloseUploadModal = () => {
+    console.log('Closing upload modal');
     setShowUploadModal(false);
     setUploadingFiles([]);
     setUploadCategory('legal');
@@ -591,12 +599,39 @@ const Documents = () => {
     );
   };
 
-  const UploadModal = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-lg w-full m-4">
+  const UploadModal = () => {
+    console.log('UploadModal rendering, showUploadModal:', showUploadModal);
+    console.log('Current uploadingFiles:', uploadingFiles);
+    return (
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]"
+      style={{ pointerEvents: 'auto' }}
+      onClick={(e) => {
+        console.log('Modal backdrop clicked');
+        if (e.target === e.currentTarget) {
+          handleCloseUploadModal();
+        }
+      }}
+    >
+      <div
+        className="bg-white rounded-lg p-6 max-w-lg w-full m-4"
+        style={{ pointerEvents: 'auto' }}
+        onClick={(e) => {
+          console.log('Modal content clicked');
+          e.stopPropagation();
+        }}
+      >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Upload Documents</h2>
-          <button onClick={handleCloseUploadModal}>
+          <button
+            onClick={(e) => {
+              console.log('Close button clicked');
+              e.stopPropagation();
+              handleCloseUploadModal();
+            }}
+            className="p-1 hover:bg-gray-100 rounded"
+            style={{ pointerEvents: 'auto' }}
+          >
             <X size={20} className="text-gray-500" />
           </button>
         </div>
@@ -608,19 +643,25 @@ const Documents = () => {
         )}
 
         {/* Category Selection */}
-        <div className="mb-6">
+        <div className="mb-6 pointer-events-auto">
           <label className="block text-sm font-medium text-gray-900 mb-3">
             Document Category
           </label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 pointer-events-auto">
             {categories.map(category => {
               const Icon = category.icon;
               const isSelected = uploadCategory === category.id;
               return (
                 <button
                   key={category.id}
-                  onClick={() => setUploadCategory(category.id)}
-                  className={`flex items-center p-3 rounded-lg border-2 transition-all text-left ${
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Category clicked:', category.id);
+                    setUploadCategory(category.id);
+                  }}
+                  className={`flex items-center p-3 rounded-lg border-2 transition-all text-left pointer-events-auto ${
                     isSelected
                       ? 'border-primary-500 bg-primary-50 text-primary-700'
                       : 'border-gray-200 hover:border-gray-300 text-gray-600'
@@ -635,9 +676,10 @@ const Documents = () => {
         </div>
 
         <div
-          className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
+          className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center pointer-events-auto"
           onDrop={handleDrop}
           onDragOver={handleDragOver}
+          onClick={(e) => e.stopPropagation()}
         >
           <Upload size={32} className="mx-auto text-gray-400 mb-2" />
           <p className="text-gray-600 mb-2">Drag and drop your files here</p>
@@ -651,7 +693,13 @@ const Documents = () => {
           />
           <label
             htmlFor="file-upload"
-            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 cursor-pointer"
+            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 cursor-pointer pointer-events-auto"
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log('Browse Files label clicked');
+              // Trigger the file input click
+              document.getElementById('file-upload')?.click();
+            }}
           >
             Browse Files
           </label>
@@ -670,7 +718,7 @@ const Documents = () => {
           )}
         </div>
 
-        <div className="mt-6 flex justify-end space-x-2">
+        <div className="mt-6 flex justify-end space-x-2 pointer-events-auto">
           <Button
             variant="outline"
             onClick={handleCloseUploadModal}
@@ -688,7 +736,8 @@ const Documents = () => {
         </div>
       </div>
     </div>
-  );
+    );
+  };
 
   return (
     <div className="space-y-6 pb-16 lg:pb-0">
@@ -697,10 +746,13 @@ const Documents = () => {
           <h1 className="text-2xl font-bold text-gray-900">Document Repository</h1>
           <p className="text-gray-600 mt-1">Access and manage all building related documents</p>
         </div>
-        <Button 
+        <Button
           leftIcon={<FolderPlus size={16} />}
           variant="primary"
-          onClick={() => setShowUploadModal(true)}
+          onClick={() => {
+            console.log('Upload Documents button clicked');
+            setShowUploadModal(true);
+          }}
         >
           Upload Documents
         </Button>
@@ -967,10 +1019,11 @@ const Documents = () => {
         )}
       </div>
 
-      {showUploadModal && <UploadModal />}
-      {showPreviewModal && <PreviewModal />}
-      {showTagModal && <TagModal />}
-      {showDeleteModal && <DeleteModal />}
+      {/* Modals rendered via portals */}
+      {showUploadModal && createPortal(<UploadModal />, document.body)}
+      {showPreviewModal && createPortal(<PreviewModal />, document.body)}
+      {showTagModal && createPortal(<TagModal />, document.body)}
+      {showDeleteModal && createPortal(<DeleteModal />, document.body)}
     </div>
   );
 
