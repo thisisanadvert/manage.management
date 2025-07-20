@@ -45,7 +45,9 @@ const BuildingSetup = () => {
     buildingAge: 0,
     buildingType: '',
     serviceChargeFrequency: 'Quarterly',
-    managementStructure: user?.role?.includes('rtm') ? 'rtm' : 'share-of-freehold'
+    managementStructure: user?.role === 'management-company'
+      ? '' // Management companies should select the structure
+      : user?.role?.includes('rtm') ? 'rtm' : 'share-of-freehold'
   };
 
   const {
@@ -348,9 +350,16 @@ const BuildingSetup = () => {
     <div className="max-w-4xl mx-auto space-y-6 pb-16 lg:pb-0">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Building Setup</h1>
-          <p className="text-gray-600 mt-1">Configure your building information</p>
-          {hasLoadedFromDatabase && (
+          <h1 className="text-2xl font-bold text-gray-900">
+            {user?.role === 'management-company' ? 'Add a New Building' : 'Building Setup'}
+          </h1>
+          <p className="text-gray-600 mt-1">
+            {user?.role === 'management-company'
+              ? 'Add a new building to your management portfolio'
+              : 'Configure your building information'
+            }
+          </p>
+          {hasLoadedFromDatabase && user?.role !== 'management-company' && (
             <p className="text-sm text-green-600 mt-1 flex items-center">
               <CheckCircle2 className="h-4 w-4 mr-1" />
               Data loaded from database
@@ -387,19 +396,24 @@ const BuildingSetup = () => {
             <div className="mb-4 rounded-full bg-success-100 p-6">
               <CheckCircle2 className="h-8 w-8 text-success-600" />
             </div>
-            <h3 className="mb-2 text-xl font-semibold text-gray-900">Building Setup Complete!</h3>
+            <h3 className="mb-2 text-xl font-semibold text-gray-900">
+              {user?.role === 'management-company' ? 'Building Added Successfully!' : 'Building Setup Complete!'}
+            </h3>
             <p className="text-center text-gray-600">
-              Your building information has been saved successfully to the database. This data will be used to customise your dashboard and provide relevant features. You can return to this page anytime to update your building details.
+              {user?.role === 'management-company'
+                ? 'The new building has been added to your management portfolio. You can now manage this property alongside your other buildings from your portfolio dashboard.'
+                : 'Your building information has been saved successfully to the database. This data will be used to customise your dashboard and provide relevant features. You can return to this page anytime to update your building details.'
+              }
             </p>
-            <Button 
-              variant="primary" 
+            <Button
+              variant="primary"
               className="mt-6"
               onClick={() => {
                 const basePath = user?.role?.split('-')[0];
                 navigate(`/${basePath || ''}`);
               }}
             >
-              Return to Dashboard
+              {user?.role === 'management-company' ? 'Return to Portfolio' : 'Return to Dashboard'}
             </Button>
           </div>
         ) : (
@@ -415,9 +429,14 @@ const BuildingSetup = () => {
               <div className="flex items-start">
                 <Info className="h-5 w-5 text-primary-600 mr-2 mt-0.5" />
                 <div>
-                  <h3 className="text-primary-800 font-medium">Building Information</h3>
+                  <h3 className="text-primary-800 font-medium">
+                    {user?.role === 'management-company' ? 'New Building Details' : 'Building Information'}
+                  </h3>
                   <p className="text-primary-700 text-sm mt-1">
-                    This information will be used to set up your building profile and customise your experience. You can update these details later if needed.
+                    {user?.role === 'management-company'
+                      ? 'Enter the details for the new building you want to add to your management portfolio. This building will appear in your portfolio dashboard once added.'
+                      : 'This information will be used to set up your building profile and customise your experience. You can update these details later if needed.'
+                    }
                   </p>
                 </div>
               </div>
@@ -587,15 +606,20 @@ const BuildingSetup = () => {
                     value={buildingData.managementStructure}
                     onChange={handleChange}
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                    disabled={true} // Disabled because it's determined by user role
+                    disabled={user?.role !== 'management-company'} // Management companies can choose, others determined by role
+                    required
                   >
+                    <option value="">Select management structure...</option>
                     <option value="rtm">Right to Manage (RTM) Company</option>
                     <option value="share-of-freehold">Share of Freehold Company</option>
                     <option value="landlord-managed">Landlord Managed Property</option>
                   </select>
                 </div>
                 <p className="mt-1 text-xs text-gray-500">
-                  Management structure is determined by your account role
+                  {user?.role === 'management-company'
+                    ? 'Select the management structure for this building'
+                    : 'Management structure is determined by your account role'
+                  }
                 </p>
               </div>
             </div>
@@ -613,7 +637,7 @@ const BuildingSetup = () => {
                 leftIcon={<Save size={16} />}
                 isLoading={isSaving}
               >
-                Save Building Information
+                {user?.role === 'management-company' ? 'Add Building to Portfolio' : 'Save Building Information'}
               </Button>
             </div>
           </form>
@@ -624,27 +648,50 @@ const BuildingSetup = () => {
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mt-6">
           <h3 className="text-gray-700 font-medium mb-2 flex items-center">
             <Info size={16} className="mr-2 text-primary-600" />
-            Why is this information important?
+            {user?.role === 'management-company' ? 'Building Portfolio Benefits' : 'Why is this information important?'}
           </h3>
           <p className="text-sm text-gray-600 mb-3">
-            Providing accurate building information helps us:
+            {user?.role === 'management-company'
+              ? 'Adding buildings to your portfolio enables you to:'
+              : 'Providing accurate building information helps us:'
+            }
           </p>
           <ul className="text-sm text-gray-600 space-y-1">
             <li className="flex items-start">
               <CheckCircle2 size={16} className="text-success-500 mr-2 mt-0.5" />
-              <span>Customize your dashboard with relevant features for your building type</span>
+              <span>
+                {user?.role === 'management-company'
+                  ? 'Manage multiple properties from a single, centralised dashboard'
+                  : 'Customize your dashboard with relevant features for your building type'
+                }
+              </span>
             </li>
             <li className="flex items-start">
               <CheckCircle2 size={16} className="text-success-500 mr-2 mt-0.5" />
-              <span>Generate appropriate financial reports and service charge schedules</span>
+              <span>
+                {user?.role === 'management-company'
+                  ? 'Track financial performance and service charges across your portfolio'
+                  : 'Generate appropriate financial reports and service charge schedules'
+                }
+              </span>
             </li>
             <li className="flex items-start">
               <CheckCircle2 size={16} className="text-success-500 mr-2 mt-0.5" />
-              <span>Provide tailored compliance recommendations for your building type</span>
+              <span>
+                {user?.role === 'management-company'
+                  ? 'Monitor compliance and maintenance requirements for each building'
+                  : 'Provide tailored compliance recommendations for your building type'
+                }
+              </span>
             </li>
             <li className="flex items-start">
               <CheckCircle2 size={16} className="text-success-500 mr-2 mt-0.5" />
-              <span>Help you manage your building more effectively with the right tools</span>
+              <span>
+                {user?.role === 'management-company'
+                  ? 'Streamline communication with residents and building directors'
+                  : 'Help you manage your building more effectively with the right tools'
+                }
+              </span>
             </li>
           </ul>
         </div>
