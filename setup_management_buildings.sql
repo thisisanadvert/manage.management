@@ -3,9 +3,9 @@
 
 -- Create the 3 buildings that match the management dashboard
 INSERT INTO buildings (id, name, address, total_units, building_age, building_type, service_charge_frequency, management_structure, created_at)
-VALUES 
+VALUES
   (
-    '11111111-1111-1111-1111-111111111111',
+    '11111111-1111-1111-1111-111111111111'::uuid,
     'Riverside Apartments',
     '123 Thames Street, London SE1 9RT',
     24,
@@ -16,7 +16,7 @@ VALUES
     NOW()
   ),
   (
-    '22222222-2222-2222-2222-222222222222',
+    '22222222-2222-2222-2222-222222222222'::uuid,
     'Victoria Court',
     '45 Victoria Road, Manchester M1 4BT',
     18,
@@ -27,7 +27,7 @@ VALUES
     NOW()
   ),
   (
-    '33333333-3333-3333-3333-333333333333',
+    '33333333-3333-3333-3333-333333333333'::uuid,
     'Garden View Flats',
     '78 Garden Lane, Birmingham B2 5HG',
     12,
@@ -48,8 +48,8 @@ ON CONFLICT (id) DO UPDATE SET
 
 -- Associate the management company user with these buildings
 INSERT INTO building_users (building_id, user_id, role, created_at)
-SELECT 
-  building_id,
+SELECT
+  building_id::uuid,
   u.id,
   'management-company',
   NOW()
@@ -64,8 +64,8 @@ ON CONFLICT (building_id, user_id) DO NOTHING;
 
 -- Create some demo issues for these buildings to test the selector
 INSERT INTO issues (building_id, title, description, category, priority, status, reported_by, created_at)
-SELECT 
-  building_id,
+SELECT
+  building_id::uuid,
   title,
   description,
   category,
