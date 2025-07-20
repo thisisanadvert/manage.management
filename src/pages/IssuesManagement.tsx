@@ -48,24 +48,85 @@ const IssuesManagement = () => {
     scheduled: 0,
     completed: 0
   });
+
+  // Building selector for management companies
+  const [buildings, setBuildings] = useState<any[]>([]);
+  const [selectedBuildingId, setSelectedBuildingId] = useState<string>('');
+  const [isBuildingsLoading, setIsBuildingsLoading] = useState(false);
+
   const { user } = useAuth();
   const { isDevelopmentEnvironment } = useFeatures();
   const navigate = useNavigate();
 
+  // Fetch buildings for management companies
+  const fetchBuildings = async () => {
+    if (user?.role !== 'management-company') return;
+
+    setIsBuildingsLoading(true);
+    try {
+      // Get buildings where the user is a management company
+      const { data: buildingUsers, error: buildingUsersError } = await supabase
+        .from('building_users')
+        .select('building_id')
+        .eq('user_id', user.id)
+        .eq('role', 'management-company');
+
+      if (buildingUsersError) throw buildingUsersError;
+
+      if (buildingUsers && buildingUsers.length > 0) {
+        const buildingIds = buildingUsers.map(bu => bu.building_id);
+
+        const { data: buildingsData, error: buildingsError } = await supabase
+          .from('buildings')
+          .select('id, name, address')
+          .in('id', buildingIds)
+          .order('name');
+
+        if (buildingsError) throw buildingsError;
+
+        setBuildings(buildingsData || []);
+
+        // Auto-select first building if none selected
+        if (buildingsData && buildingsData.length > 0 && !selectedBuildingId) {
+          setSelectedBuildingId(buildingsData[0].id);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching buildings:', error);
+    } finally {
+      setIsBuildingsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (user?.metadata?.buildingId) {
+    if (user?.role === 'management-company') {
+      fetchBuildings();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const buildingId = user?.role === 'management-company' ? selectedBuildingId : user?.metadata?.buildingId;
+    if (buildingId) {
       fetchIssues();
     }
-  }, [user?.metadata?.buildingId, selectedFilter, searchQuery]);
+  }, [user?.metadata?.buildingId, selectedBuildingId, selectedFilter, searchQuery]);
 
   const fetchIssues = async () => {
     setIsLoading(true);
     try {
+      // Determine which building ID to use
+      const buildingId = user?.role === 'management-company' ? selectedBuildingId : user?.metadata?.buildingId;
+
+      if (!buildingId) {
+        setIsLoading(false);
+        return;
+      }
+
       // First, fetch issues without user relationships to avoid foreign key error
       let query = supabase
         .from('issues')
         .select('*')
-        .eq('building_id', user?.metadata?.buildingId);
+        .eq('building_id', buildingId);
       
       // Apply filters
       if (selectedFilter !== 'all') {
@@ -174,18 +235,68 @@ const IssuesManagement = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Issues & Safety Management</h1>
-          <p className="text-gray-600 mt-1">Track building maintenance issues and safety compliance</p>
+          <p className="text-gray-600 mt-1">
+            {user?.role === 'management-company'
+              ? 'Track maintenance issues and safety compliance across your portfolio'
+              : 'Track building maintenance issues and safety compliance'
+            }
+          </p>
         </div>
         <div className="flex gap-2">
-          <Button 
+          <Button
             leftIcon={<Plus size={16} />}
             variant="primary"
             onClick={() => setIsCreateIssueModalOpen(true)}
+            disabled={user?.role === 'management-company' && !selectedBuildingId}
           >
             Report New Issue
           </Button>
         </div>
       </div>
+
+      {/* Building Selector for Management Companies */}
+      {user?.role === 'management-company' && (
+        <Card className="p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Building2 size={20} className="text-primary-600" />
+              <label className="text-sm font-medium text-gray-700">
+                Select Building:
+              </label>
+            </div>
+            <div className="flex-1 max-w-md">
+              {isBuildingsLoading ? (
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
+                  Loading buildings...
+                </div>
+              ) : buildings.length === 0 ? (
+                <div className="text-sm text-gray-500">
+                  No buildings found. <a href="/management/building-setup" className="text-primary-600 hover:underline">Add a building</a> to get started.
+                </div>
+              ) : (
+                <select
+                  value={selectedBuildingId}
+                  onChange={(e) => setSelectedBuildingId(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-200"
+                >
+                  <option value="">Select a building...</option>
+                  {buildings.map((building) => (
+                    <option key={building.id} value={building.id}>
+                      {building.name} - {building.address}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+            {selectedBuildingId && (
+              <div className="text-sm text-gray-500">
+                Viewing issues for selected building
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
 
       {/* Tabs */}
       <div className="border-b border-gray-200">
@@ -302,13 +413,21 @@ const IssuesManagement = () => {
           <div className="flex justify-center items-center h-40">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
           </div>
+        ) : user?.role === 'management-company' && !selectedBuildingId ? (
+          <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+            <Building2 className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-lg font-medium text-gray-900">Select a Building</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Choose a building from your portfolio to view and manage its issues
+            </p>
+          </div>
         ) : issues.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
             <AlertTriangle className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-lg font-medium text-gray-900">No issues found</h3>
             <p className="mt-1 text-sm text-gray-500">
-              {searchQuery || selectedFilter !== 'all' 
-                ? 'Try changing your search or filter criteria' 
+              {searchQuery || selectedFilter !== 'all'
+                ? 'Try changing your search or filter criteria'
                 : 'Get started by reporting your first issue'}
             </p>
             <div className="mt-6">
@@ -316,6 +435,7 @@ const IssuesManagement = () => {
                 variant="primary"
                 leftIcon={<Plus size={16} />}
                 onClick={() => setIsCreateIssueModalOpen(true)}
+                disabled={user?.role === 'management-company' && !selectedBuildingId}
               >
                 Report New Issue
               </Button>
@@ -420,7 +540,7 @@ const IssuesManagement = () => {
           <CreateIssueModal
             isOpen={isCreateIssueModalOpen}
             onClose={() => setIsCreateIssueModalOpen(false)}
-            buildingId={user?.metadata?.buildingId || ''}
+            buildingId={user?.role === 'management-company' ? selectedBuildingId : (user?.metadata?.buildingId || '')}
             onIssueCreated={handleIssueCreated}
           />
 
