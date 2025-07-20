@@ -1,21 +1,33 @@
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  AlertTriangle, 
-  Wallet, 
-  FileText, 
+import {
+  LayoutDashboard,
+  AlertTriangle,
+  Wallet,
+  FileText,
   BellRing
 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const MobileNav = () => {
   const location = useLocation();
-  
+  const { user } = useAuth();
+
+  const baseRoute = user?.role
+    ? user.role === 'super-admin'
+      ? '/rtm'  // Super-admin users default to RTM dashboard
+      : `/${user.role.split('-')[0]}`
+    : '';
+
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { name: 'Issues', href: '/issues', icon: AlertTriangle },
-    { name: 'Finances', href: '/finances', icon: Wallet },
-    { name: 'Documents', href: '/documents', icon: FileText },
-    { name: 'Updates', href: '/announcements', icon: BellRing },
+    {
+      name: user?.role === 'management-company' ? 'Portfolio' : 'Dashboard',
+      href: baseRoute,
+      icon: LayoutDashboard
+    },
+    { name: 'Issues', href: `${baseRoute}/issues`, icon: AlertTriangle },
+    { name: 'Finances', href: `${baseRoute}/finances`, icon: Wallet },
+    { name: 'Documents', href: `${baseRoute}/documents`, icon: FileText },
+    { name: 'Updates', href: `${baseRoute}/announcements`, icon: BellRing },
   ];
 
   return (

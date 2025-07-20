@@ -53,13 +53,13 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
   
   const navigation = [
     {
-      name: 'Dashboard',
+      name: user?.role === 'management-company' ? 'Portfolio' : 'Dashboard',
       href: baseRoute,
       icon: LayoutDashboard,
       roles: ['rtm-director', 'rmc-director', 'leaseholder', 'shareholder', 'management-company', 'super-admin']
     },
     {
-      name: 'Building Setup',
+      name: user?.role === 'management-company' ? 'Add a building' : 'Building Setup',
       href: `${baseRoute}/building-setup`,
       icon: Building2,
       roles: ['rtm-director', 'rmc-director', 'leaseholder', 'shareholder', 'management-company', 'super-admin']
@@ -116,7 +116,7 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
       name: 'Legal Templates',
       href: `${baseRoute}/legal-templates`,
       icon: FileText,
-      roles: ['rtm-director', 'rmc-director', 'management-company', 'super-admin']
+      roles: ['rtm-director', 'rmc-director', 'super-admin']
     },
     {
       name: 'Director Support',
@@ -128,7 +128,7 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
       name: 'Legal Resources',
       href: `${baseRoute}/legal-resources`,
       icon: BookOpen,
-      roles: ['rtm-director', 'rmc-director', 'management-company', 'homeowner', 'super-admin']
+      roles: ['rtm-director', 'rmc-director', 'homeowner', 'super-admin']
     },
     {
       name: 'User Impersonation',
