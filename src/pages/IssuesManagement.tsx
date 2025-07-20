@@ -64,6 +64,8 @@ const IssuesManagement = () => {
 
     setIsBuildingsLoading(true);
     try {
+      console.log('🏢 Fetching buildings for management user:', user.id, user.email);
+
       // Get buildings where the user is a management company
       const { data: buildingUsers, error: buildingUsersError } = await supabase
         .from('building_users')
@@ -71,16 +73,21 @@ const IssuesManagement = () => {
         .eq('user_id', user.id)
         .eq('role', 'management-company');
 
+      console.log('🏢 Building users query result:', { buildingUsers, buildingUsersError });
+
       if (buildingUsersError) throw buildingUsersError;
 
       if (buildingUsers && buildingUsers.length > 0) {
         const buildingIds = buildingUsers.map(bu => bu.building_id);
+        console.log('🏢 Found building IDs:', buildingIds);
 
         const { data: buildingsData, error: buildingsError } = await supabase
           .from('buildings')
           .select('id, name, address')
           .in('id', buildingIds)
           .order('name');
+
+        console.log('🏢 Buildings data query result:', { buildingsData, buildingsError });
 
         if (buildingsError) throw buildingsError;
 
@@ -90,6 +97,8 @@ const IssuesManagement = () => {
         if (buildingsData && buildingsData.length > 0 && !selectedBuildingId) {
           setSelectedBuildingId(buildingsData[0].id);
         }
+      } else {
+        console.log('🏢 No building users found for management company');
       }
     } catch (error) {
       console.error('Error fetching buildings:', error);
