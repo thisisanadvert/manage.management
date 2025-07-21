@@ -46,7 +46,14 @@ export function BuildingProvider({ children }: { children: React.ReactNode }) {
 
   // Fetch buildings for management companies
   const fetchBuildings = async () => {
+    console.log('🏢 BuildingContext: fetchBuildings called', {
+      isManagementCompany,
+      userId: user?.id,
+      userEmail: user?.email
+    });
+
     if (!isManagementCompany || !user?.id) {
+      console.log('🏢 BuildingContext: Early return - not management company or no user ID');
       setBuildings([]);
       return;
     }
@@ -134,10 +141,17 @@ export function BuildingProvider({ children }: { children: React.ReactNode }) {
 
   // Fetch buildings when user changes or component mounts
   useEffect(() => {
+    console.log('🏢 BuildingContext: useEffect triggered', {
+      isManagementCompany,
+      userId: user?.id,
+      userRole: user?.role
+    });
+
     if (isManagementCompany) {
       fetchBuildings();
     } else {
       // For non-management users, clear buildings and use their default building
+      console.log('🏢 BuildingContext: Non-management user, setting default building');
       setBuildings([]);
       setSelectedBuildingId(user?.metadata?.buildingId || null);
     }
