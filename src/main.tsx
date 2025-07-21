@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './contexts/AuthContext';
+import { BuildingProvider } from './contexts/BuildingContext';
 import { OnboardingProvider } from './contexts/OnboardingContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { SearchProvider } from './contexts/SearchContext';
@@ -16,13 +17,15 @@ createRoot(document.getElementById('root')!).render(
       <HelmetProvider>
         <BrowserRouter>
           <AuthProvider>
-            <OnboardingProvider>
-              <NotificationProvider>
-                <SearchProvider>
-                  <App />
-                </SearchProvider>
-              </NotificationProvider>
-            </OnboardingProvider>
+            <BuildingProvider>
+              <OnboardingProvider>
+                <NotificationProvider>
+                  <SearchProvider>
+                    <App />
+                  </SearchProvider>
+                </NotificationProvider>
+              </OnboardingProvider>
+            </BuildingProvider>
           </AuthProvider>
         </BrowserRouter>
       </HelmetProvider>

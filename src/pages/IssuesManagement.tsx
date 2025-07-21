@@ -29,9 +29,11 @@ import CreateIssueModal from '../components/modals/CreateIssueModal';
 import IssueDetail from '../components/issue/IssueDetail';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useBuilding, useEffectiveBuildingId } from '../contexts/BuildingContext';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import BuildingSafetyCompliance from '../components/building-safety/BuildingSafetyCompliance';
+import BuildingSelector from '../components/management/BuildingSelector';
 import { useFeatures } from '../hooks/useFeatures';
 
 const IssuesManagement = () => {
@@ -49,118 +51,24 @@ const IssuesManagement = () => {
     completed: 0
   });
 
-  // Building selector for management companies
-  const [buildings, setBuildings] = useState<any[]>([]);
-  const [selectedBuildingId, setSelectedBuildingId] = useState<string>('');
-  const [isBuildingsLoading, setIsBuildingsLoading] = useState(false);
-
   const { user } = useAuth();
+  const { isManagementCompany } = useBuilding();
+  const effectiveBuildingId = useEffectiveBuildingId();
   const { isDevelopmentEnvironment } = useFeatures();
   const navigate = useNavigate();
 
-  // Fetch buildings for management companies
-  const fetchBuildings = async () => {
-    if (user?.role !== 'management-company') return;
 
-    setIsBuildingsLoading(true);
-    try {
-      console.log('🔍 DEBUG: Fetching buildings for user:', {
-        userId: user.id,
-        userEmail: user.email,
-        userRole: user.role
-      });
-
-      // Get buildings where the user is a management company
-      const { data: buildingUsers, error: buildingUsersError } = await supabase
-        .from('building_users')
-        .select('building_id, role, user_id')
-        .eq('user_id', user.id)
-        .eq('role', 'management-company');
-
-      console.log('🔍 DEBUG: Building users query result:', {
-        buildingUsers,
-        buildingUsersError,
-        queryUserId: user.id
-      });
-
-      if (buildingUsersError) throw buildingUsersError;
-
-      // Also check what building_users exist for this email
-      const { data: allUserBuildings, error: allUserError } = await supabase
-        .from('building_users')
-        .select('building_id, role, user_id, buildings(name)')
-        .eq('user_id', user.id);
-
-      console.log('🔍 DEBUG: All buildings for this user:', {
-        allUserBuildings,
-        allUserError
-      });
-
-      // Check if management@demo.com user exists in auth.users and get their ID
-      const { data: authUsers, error: authError } = await supabase
-        .from('auth.users')
-        .select('id, email')
-        .eq('email', 'management@demo.com');
-
-      console.log('🔍 DEBUG: Auth users check:', {
-        authUsers,
-        authError,
-        currentUserMatches: authUsers?.some(u => u.id === user.id)
-      });
-
-      if (buildingUsers && buildingUsers.length > 0) {
-        const buildingIds = buildingUsers.map(bu => bu.building_id);
-        console.log('🔍 DEBUG: Building IDs found:', buildingIds);
-
-        const { data: buildingsData, error: buildingsError } = await supabase
-          .from('buildings')
-          .select('id, name, address')
-          .in('id', buildingIds)
-          .order('name');
-
-        console.log('🔍 DEBUG: Buildings data result:', {
-          buildingsData,
-          buildingsError
-        });
-
-        if (buildingsError) throw buildingsError;
-
-        setBuildings(buildingsData || []);
-
-        // Auto-select first building if none selected
-        if (buildingsData && buildingsData.length > 0 && !selectedBuildingId) {
-          setSelectedBuildingId(buildingsData[0].id);
-        }
-      } else {
-        console.log('🔍 DEBUG: No building_users found with management-company role');
-      }
-    } catch (error) {
-      console.error('🔍 DEBUG: Error fetching buildings:', error);
-    } finally {
-      setIsBuildingsLoading(false);
-    }
-  };
 
   useEffect(() => {
-    if (user?.role === 'management-company') {
-      fetchBuildings();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    const buildingId = user?.role === 'management-company' ? selectedBuildingId : user?.metadata?.buildingId;
-    if (buildingId) {
+    if (effectiveBuildingId) {
       fetchIssues();
     }
-  }, [user?.metadata?.buildingId, selectedBuildingId, selectedFilter, searchQuery]);
+  }, [effectiveBuildingId, selectedFilter, searchQuery]);
 
   const fetchIssues = async () => {
     setIsLoading(true);
     try {
-      // Determine which building ID to use
-      const buildingId = user?.role === 'management-company' ? selectedBuildingId : user?.metadata?.buildingId;
-
-      if (!buildingId) {
+      if (!effectiveBuildingId) {
         setIsLoading(false);
         return;
       }
@@ -169,7 +77,7 @@ const IssuesManagement = () => {
       let query = supabase
         .from('issues')
         .select('*')
-        .eq('building_id', buildingId);
+        .eq('building_id', effectiveBuildingId);
       
       // Apply filters
       if (selectedFilter !== 'all') {
@@ -290,7 +198,7 @@ const IssuesManagement = () => {
             leftIcon={<Plus size={16} />}
             variant="primary"
             onClick={() => setIsCreateIssueModalOpen(true)}
-            disabled={user?.role === 'management-company' && !selectedBuildingId}
+            disabled={isManagementCompany && !effectiveBuildingId}
           >
             Report New Issue
           </Button>
@@ -298,48 +206,7 @@ const IssuesManagement = () => {
       </div>
 
       {/* Building Selector for Management Companies */}
-      {user?.role === 'management-company' && (
-        <Card className="p-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Building2 size={20} className="text-primary-600" />
-              <label className="text-sm font-medium text-gray-700">
-                Select Building:
-              </label>
-            </div>
-            <div className="flex-1 max-w-md">
-              {isBuildingsLoading ? (
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
-                  Loading buildings...
-                </div>
-              ) : buildings.length === 0 ? (
-                <div className="text-sm text-gray-500">
-                  No buildings found. <a href="/management/building-setup" className="text-primary-600 hover:underline">Add a building</a> to get started.
-                </div>
-              ) : (
-                <select
-                  value={selectedBuildingId}
-                  onChange={(e) => setSelectedBuildingId(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-200"
-                >
-                  <option value="">Select a building...</option>
-                  {buildings.map((building) => (
-                    <option key={building.id} value={building.id}>
-                      {building.name} - {building.address}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-            {selectedBuildingId && (
-              <div className="text-sm text-gray-500">
-                Viewing issues for selected building
-              </div>
-            )}
-          </div>
-        </Card>
-      )}
+      <BuildingSelector />
 
       {/* Tabs */}
       <div className="border-b border-gray-200">
@@ -456,7 +323,7 @@ const IssuesManagement = () => {
           <div className="flex justify-center items-center h-40">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
           </div>
-        ) : user?.role === 'management-company' && !selectedBuildingId ? (
+        ) : isManagementCompany && !effectiveBuildingId ? (
           <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
             <Building2 className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-lg font-medium text-gray-900">Select a Building</h3>
@@ -478,7 +345,7 @@ const IssuesManagement = () => {
                 variant="primary"
                 leftIcon={<Plus size={16} />}
                 onClick={() => setIsCreateIssueModalOpen(true)}
-                disabled={user?.role === 'management-company' && !selectedBuildingId}
+                disabled={isManagementCompany && !effectiveBuildingId}
               >
                 Report New Issue
               </Button>
@@ -583,7 +450,7 @@ const IssuesManagement = () => {
           <CreateIssueModal
             isOpen={isCreateIssueModalOpen}
             onClose={() => setIsCreateIssueModalOpen(false)}
-            buildingId={user?.role === 'management-company' ? selectedBuildingId : (user?.metadata?.buildingId || '')}
+            buildingId={effectiveBuildingId || ''}
             onIssueCreated={handleIssueCreated}
           />
 
