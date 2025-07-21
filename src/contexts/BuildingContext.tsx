@@ -60,14 +60,20 @@ export function BuildingProvider({ children }: { children: React.ReactNode }) {
         isManagementCompany
       });
 
-      // First, let's check if the user exists in auth.users
-      const { data: authUser, error: authError } = await supabase
-        .from('auth.users')
-        .select('id, email')
-        .eq('email', user.email)
-        .single();
+      // Skip auth.users check as it might have RLS issues
+      console.log('🏢 BuildingContext: Current user details:', {
+        id: user.id,
+        email: user.email,
+        role: user.role
+      });
 
-      console.log('🏢 BuildingContext: Auth user check:', { authUser, authError });
+      // First, let's test if we can query buildings at all
+      const { data: allBuildings, error: allBuildingsError } = await supabase
+        .from('buildings')
+        .select('id, name')
+        .limit(5);
+
+      console.log('🏢 BuildingContext: All buildings test:', { allBuildings, allBuildingsError });
 
       // Check all building_users for this user (any role)
       const { data: allBuildingUsers, error: allBuildingUsersError } = await supabase
