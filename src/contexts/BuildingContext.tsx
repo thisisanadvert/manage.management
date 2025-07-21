@@ -53,7 +53,29 @@ export function BuildingProvider({ children }: { children: React.ReactNode }) {
 
     setIsLoadingBuildings(true);
     try {
-      console.log('🏢 BuildingContext: Fetching buildings for user:', user.id);
+      console.log('🏢 BuildingContext: Fetching buildings for user:', {
+        userId: user.id,
+        userEmail: user.email,
+        userRole: user.role,
+        isManagementCompany
+      });
+
+      // First, let's check if the user exists in auth.users
+      const { data: authUser, error: authError } = await supabase
+        .from('auth.users')
+        .select('id, email')
+        .eq('email', user.email)
+        .single();
+
+      console.log('🏢 BuildingContext: Auth user check:', { authUser, authError });
+
+      // Check all building_users for this user (any role)
+      const { data: allBuildingUsers, error: allBuildingUsersError } = await supabase
+        .from('building_users')
+        .select('building_id, role, user_id')
+        .eq('user_id', user.id);
+
+      console.log('🏢 BuildingContext: All building users for this user:', { allBuildingUsers, allBuildingUsersError });
 
       // Get buildings where the user is a management company
       const { data: buildingUsers, error: buildingUsersError } = await supabase
@@ -62,7 +84,7 @@ export function BuildingProvider({ children }: { children: React.ReactNode }) {
         .eq('user_id', user.id)
         .eq('role', 'management-company');
 
-      console.log('🏢 BuildingContext: Building users result:', { buildingUsers, buildingUsersError });
+      console.log('🏢 BuildingContext: Management company building users:', { buildingUsers, buildingUsersError });
 
       if (buildingUsersError) {
         console.error('Error fetching building users:', buildingUsersError);
@@ -71,7 +93,8 @@ export function BuildingProvider({ children }: { children: React.ReactNode }) {
 
       if (buildingUsers && buildingUsers.length > 0) {
         const buildingIds = buildingUsers.map(bu => bu.building_id);
-        
+        console.log('🏢 BuildingContext: Building IDs to fetch:', buildingIds);
+
         const { data: buildingsData, error: buildingsError } = await supabase
           .from('buildings')
           .select('id, name, address, total_units, building_type, management_structure')
@@ -86,7 +109,7 @@ export function BuildingProvider({ children }: { children: React.ReactNode }) {
         }
 
         setBuildings(buildingsData || []);
-        
+
         // Auto-select first building if none selected and buildings exist
         if (buildingsData && buildingsData.length > 0 && !selectedBuildingId) {
           setSelectedBuildingId(buildingsData[0].id);
