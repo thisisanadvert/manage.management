@@ -64,23 +64,64 @@ const IssuesManagement = () => {
 
     setIsBuildingsLoading(true);
     try {
+      console.log('🔍 DEBUG: Fetching buildings for user:', {
+        userId: user.id,
+        userEmail: user.email,
+        userRole: user.role
+      });
+
       // Get buildings where the user is a management company
       const { data: buildingUsers, error: buildingUsersError } = await supabase
         .from('building_users')
-        .select('building_id')
+        .select('building_id, role, user_id')
         .eq('user_id', user.id)
         .eq('role', 'management-company');
 
+      console.log('🔍 DEBUG: Building users query result:', {
+        buildingUsers,
+        buildingUsersError,
+        queryUserId: user.id
+      });
+
       if (buildingUsersError) throw buildingUsersError;
+
+      // Also check what building_users exist for this email
+      const { data: allUserBuildings, error: allUserError } = await supabase
+        .from('building_users')
+        .select('building_id, role, user_id, buildings(name)')
+        .eq('user_id', user.id);
+
+      console.log('🔍 DEBUG: All buildings for this user:', {
+        allUserBuildings,
+        allUserError
+      });
+
+      // Check if management@demo.com user exists in auth.users and get their ID
+      const { data: authUsers, error: authError } = await supabase
+        .from('auth.users')
+        .select('id, email')
+        .eq('email', 'management@demo.com');
+
+      console.log('🔍 DEBUG: Auth users check:', {
+        authUsers,
+        authError,
+        currentUserMatches: authUsers?.some(u => u.id === user.id)
+      });
 
       if (buildingUsers && buildingUsers.length > 0) {
         const buildingIds = buildingUsers.map(bu => bu.building_id);
+        console.log('🔍 DEBUG: Building IDs found:', buildingIds);
 
         const { data: buildingsData, error: buildingsError } = await supabase
           .from('buildings')
           .select('id, name, address')
           .in('id', buildingIds)
           .order('name');
+
+        console.log('🔍 DEBUG: Buildings data result:', {
+          buildingsData,
+          buildingsError
+        });
 
         if (buildingsError) throw buildingsError;
 
@@ -90,9 +131,11 @@ const IssuesManagement = () => {
         if (buildingsData && buildingsData.length > 0 && !selectedBuildingId) {
           setSelectedBuildingId(buildingsData[0].id);
         }
+      } else {
+        console.log('🔍 DEBUG: No building_users found with management-company role');
       }
     } catch (error) {
-      console.error('Error fetching buildings:', error);
+      console.error('🔍 DEBUG: Error fetching buildings:', error);
     } finally {
       setIsBuildingsLoading(false);
     }
