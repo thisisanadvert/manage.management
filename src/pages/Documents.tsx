@@ -329,6 +329,19 @@ const Documents = () => {
     setUploadError(null);
   };
 
+  // Debug function for console access
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).forceCloseUploadModal = () => {
+        console.log('Force closing upload modal from console');
+        setShowUploadModal(false);
+        setUploadingFiles([]);
+        setUploadCategory('legal');
+        setUploadError(null);
+      };
+    }
+  }, []);
+
   // Check if the documents bucket exists on component mount
   useEffect(() => {
     const checkBucketExists = async () => {
@@ -602,6 +615,28 @@ const Documents = () => {
   const UploadModal = () => {
     console.log('UploadModal rendering, showUploadModal:', showUploadModal);
     console.log('Current uploadingFiles:', uploadingFiles);
+
+    // Add escape key handler
+    useEffect(() => {
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          console.log('Escape key pressed, closing modal');
+          handleCloseUploadModal();
+        }
+      };
+
+      if (showUploadModal) {
+        document.addEventListener('keydown', handleEscape);
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+      }
+
+      return () => {
+        document.removeEventListener('keydown', handleEscape);
+        document.body.style.overflow = 'unset';
+      };
+    }, [showUploadModal]);
+
     return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]"
@@ -626,11 +661,18 @@ const Documents = () => {
           <button
             onClick={(e) => {
               console.log('Close button clicked');
+              e.preventDefault();
               e.stopPropagation();
-              handleCloseUploadModal();
+              // Force close the modal
+              setShowUploadModal(false);
+              setUploadingFiles([]);
+              setUploadCategory('legal');
+              setUploadError(null);
             }}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="p-1 hover:bg-gray-100 rounded transition-colors"
             style={{ pointerEvents: 'auto' }}
+            type="button"
+            aria-label="Close modal"
           >
             <X size={20} className="text-gray-500" />
           </button>
@@ -721,7 +763,16 @@ const Documents = () => {
         <div className="mt-6 flex justify-end space-x-2 pointer-events-auto">
           <Button
             variant="outline"
-            onClick={handleCloseUploadModal}
+            onClick={(e) => {
+              console.log('Cancel button clicked');
+              e.preventDefault();
+              e.stopPropagation();
+              // Force close the modal
+              setShowUploadModal(false);
+              setUploadingFiles([]);
+              setUploadCategory('legal');
+              setUploadError(null);
+            }}
           >
             Cancel
           </Button>

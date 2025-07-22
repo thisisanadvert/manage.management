@@ -117,7 +117,13 @@ export function BuildingProvider({ children }: { children: React.ReactNode }) {
         console.log('🏢 BuildingContext: Buildings data result:', { buildingsData, buildingsError });
 
         if (buildingsError) {
-          console.error('Error fetching buildings:', buildingsError);
+          console.error('🏢 BuildingContext: Error fetching buildings:', {
+            error: buildingsError,
+            message: buildingsError.message,
+            details: buildingsError.details,
+            hint: buildingsError.hint,
+            code: buildingsError.code
+          });
           return;
         }
 
