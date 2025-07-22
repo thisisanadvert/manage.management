@@ -82,6 +82,15 @@ export function BuildingProvider({ children }: { children: React.ReactNode }) {
 
       console.log('🏢 BuildingContext: All buildings test:', { allBuildings, allBuildingsError });
 
+      // Test direct building query with specific IDs
+      const knownBuildingIds = ['b0a3f3f0-0b1a-4e1a-9f1a-0e1b2c3d4e5f'];
+      const { data: directBuildingTest, error: directBuildingError } = await supabase
+        .from('buildings')
+        .select('id, name, address')
+        .in('id', knownBuildingIds);
+
+      console.log('🏢 BuildingContext: Direct building test:', { directBuildingTest, directBuildingError });
+
       // Check all building_users for this user (any role)
       const { data: allBuildingUsers, error: allBuildingUsersError } = await supabase
         .from('building_users')
