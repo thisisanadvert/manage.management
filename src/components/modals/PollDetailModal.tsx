@@ -32,25 +32,7 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
     }
   }, [isOpen, pollId]);
 
-  // Handle escape key
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      // Prevent body scroll when modal is open
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen, onClose]);
 
   const fetchPollDetails = async () => {
     try {
@@ -172,20 +154,10 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
     new Date(poll.end_date) >= new Date();
 
   return (
-    <div className="fixed inset-0 z-[9999] overflow-y-auto">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Modal container */}
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div
-          className="relative w-full max-w-4xl rounded-lg bg-white shadow-xl z-[10000]"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="relative w-full max-w-4xl rounded-lg bg-white shadow-xl z-10">
           <div className="flex items-center justify-between border-b border-gray-200 p-6">
             <div className="flex items-center gap-3">
               <Users className="h-6 w-6 text-primary-600" />
