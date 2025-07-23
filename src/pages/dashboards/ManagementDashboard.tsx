@@ -26,6 +26,7 @@ import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import { useAuth } from '../../contexts/AuthContext';
+import { useBuilding } from '../../contexts/BuildingContext';
 import OnboardingWizard from '../../components/onboarding/OnboardingWizard';
 import { useNavigate } from 'react-router-dom';
 
@@ -45,54 +46,27 @@ interface Building {
 
 const ManagementDashboard = () => {
   const { user } = useAuth();
+  const { buildings, isLoadingBuildings } = useBuilding();
   const navigate = useNavigate();
   const [isOnboarded, setIsOnboarded] = useState(!!user?.metadata?.onboardingComplete);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'active' | 'pending' | 'maintenance'>('all');
   const [showAddBuildingModal, setShowAddBuildingModal] = useState(false);
 
-  // Demo buildings data - in real app this would come from API
-  const [buildings] = useState<Building[]>([
-    {
-      id: '1',
-      name: 'Riverside Apartments',
-      address: '123 Thames Street, London SE1 9RT',
-      units: 24,
-      occupancy: 22,
-      openIssues: 3,
-      urgentIssues: 1,
-      monthlyRevenue: 12500,
-      collectionRate: 95,
-      lastInspection: new Date('2024-01-15'),
-      status: 'active'
-    },
-    {
-      id: '2',
-      name: 'Victoria Court',
-      address: '45 Victoria Road, Manchester M1 4BT',
-      units: 18,
-      occupancy: 18,
-      openIssues: 1,
-      urgentIssues: 0,
-      monthlyRevenue: 9800,
-      collectionRate: 100,
-      lastInspection: new Date('2024-01-20'),
-      status: 'active'
-    },
-    {
-      id: '3',
-      name: 'Garden View Flats',
-      address: '78 Garden Lane, Birmingham B2 5HG',
-      units: 12,
-      occupancy: 10,
-      openIssues: 5,
-      urgentIssues: 2,
-      monthlyRevenue: 6200,
-      collectionRate: 83,
-      lastInspection: new Date('2024-01-10'),
-      status: 'maintenance'
-    }
-  ]);
+  // Transform real buildings data to match dashboard format
+  const dashboardBuildings: Building[] = buildings.map(building => ({
+    id: building.id,
+    name: building.name,
+    address: building.address,
+    units: building.total_units || 0,
+    occupancy: Math.floor((building.total_units || 0) * 0.9), // Demo: 90% occupancy
+    openIssues: Math.floor(Math.random() * 5) + 1, // Demo: 1-5 issues
+    urgentIssues: Math.floor(Math.random() * 2), // Demo: 0-1 urgent issues
+    monthlyRevenue: (building.total_units || 0) * 500, // Demo: £500 per unit
+    collectionRate: 85 + Math.floor(Math.random() * 15), // Demo: 85-100%
+    lastInspection: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000), // Demo: within last 30 days
+    status: Math.random() > 0.8 ? 'maintenance' : 'active' as 'active' | 'pending' | 'maintenance'
+  }));
 
   // If user hasn't completed onboarding, show the onboarding wizard
   if (!isOnboarded) {
@@ -111,7 +85,7 @@ const ManagementDashboard = () => {
   }
 
   // Calculate portfolio totals
-  const portfolioStats = buildings.reduce((acc, building) => ({
+  const portfolioStats = dashboardBuildings.reduce((acc, building) => ({
     totalUnits: acc.totalUnits + building.units,
     totalOccupied: acc.totalOccupied + building.occupancy,
     totalIssues: acc.totalIssues + building.openIssues,
@@ -120,10 +94,10 @@ const ManagementDashboard = () => {
     avgCollectionRate: acc.avgCollectionRate + building.collectionRate
   }), { totalUnits: 0, totalOccupied: 0, totalIssues: 0, totalUrgent: 0, totalRevenue: 0, avgCollectionRate: 0 });
 
-  portfolioStats.avgCollectionRate = buildings.length > 0 ? portfolioStats.avgCollectionRate / buildings.length : 0;
+  portfolioStats.avgCollectionRate = dashboardBuildings.length > 0 ? portfolioStats.avgCollectionRate / dashboardBuildings.length : 0;
 
   // Filter buildings
-  const filteredBuildings = buildings.filter(building => {
+  const filteredBuildings = dashboardBuildings.filter(building => {
     const matchesSearch = building.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          building.address.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = selectedFilter === 'all' || building.status === selectedFilter;
@@ -166,7 +140,7 @@ const ManagementDashboard = () => {
                     Management Company
                   </span>
                   <span className="text-xs px-3 py-1 bg-blue-500/30 rounded-full backdrop-blur-sm">
-                    {buildings.length} Properties
+                    {dashboardBuildings.length} Properties
                   </span>
                 </div>
               </div>
@@ -510,11 +484,11 @@ const ManagementDashboard = () => {
             <div className="p-3 bg-gray-50 rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Buildings</span>
-                <span className="text-lg font-bold text-gray-900">{buildings.length}</span>
+                <span className="text-lg font-bold text-gray-900">{dashboardBuildings.length}</span>
               </div>
               <div className="text-xs text-gray-600">
-                {buildings.filter(b => b.status === 'active').length} active, {' '}
-                {buildings.filter(b => b.status === 'maintenance').length} in maintenance
+                {dashboardBuildings.filter(b => b.status === 'active').length} active, {' '}
+                {dashboardBuildings.filter(b => b.status === 'maintenance').length} in maintenance
               </div>
             </div>
 
