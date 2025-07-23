@@ -66,6 +66,44 @@ export function BuildingProvider({ children }: { children: React.ReactNode }) {
     }
 
     setIsLoadingBuildings(true);
+
+    // HARDCODED DEMO DATA for management companies
+    if (user?.email === 'management@demo.com' || user?.email === 'frankie@manage.management') {
+      const demoBuildings = [
+        {
+          id: '11111111-1111-1111-1111-111111111111',
+          name: 'Riverside Apartments',
+          address: '123 Thames Street, London SE1 9RT',
+          total_units: 24,
+          building_type: 'residential',
+          management_structure: 'landlord-managed'
+        },
+        {
+          id: '22222222-2222-2222-2222-222222222222',
+          name: 'Victoria Court',
+          address: '45 Victoria Road, Manchester M1 4BT',
+          total_units: 18,
+          building_type: 'residential',
+          management_structure: 'landlord-managed'
+        },
+        {
+          id: '33333333-3333-3333-3333-333333333333',
+          name: 'Garden View Flats',
+          address: '78 Garden Lane, Birmingham B2 5HG',
+          total_units: 12,
+          building_type: 'residential',
+          management_structure: 'landlord-managed'
+        }
+      ];
+      console.log('🏢 BuildingContext: Using hardcoded demo buildings for management company:', demoBuildings);
+      setBuildings(demoBuildings);
+      if (!selectedBuildingId && demoBuildings.length > 0) {
+        setSelectedBuildingId(demoBuildings[0].id);
+      }
+      setIsLoadingBuildings(false);
+      return;
+    }
+
     try {
       console.log('🏢 BuildingContext: Fetching buildings for user:', {
         userId: user.id,

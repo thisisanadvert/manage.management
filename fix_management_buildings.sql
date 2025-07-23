@@ -1,7 +1,7 @@
--- Setup Management Company Buildings
--- This creates the 3 buildings shown in the management dashboard and associates them with the management user
+-- Quick fix for management company buildings
+-- This will ensure the management@demo.com user has access to the 3 demo buildings
 
--- Create the 3 buildings that match the management dashboard
+-- First, ensure the 3 buildings exist
 INSERT INTO buildings (id, name, address, total_units, building_age, building_type, service_charge_frequency, management_structure, created_at)
 VALUES
   (
@@ -47,7 +47,6 @@ ON CONFLICT (id) DO UPDATE SET
   management_structure = EXCLUDED.management_structure;
 
 -- Associate the management company user with these buildings
--- First try management@demo.com, then try frankie@manage.management as fallback
 INSERT INTO building_users (building_id, user_id, role, created_at)
 SELECT
   building_id::uuid,
@@ -60,10 +59,10 @@ FROM (VALUES
   ('33333333-3333-3333-3333-333333333333')
 ) AS buildings(building_id)
 CROSS JOIN auth.users u
-WHERE u.email IN ('management@demo.com', 'frankie@manage.management')
+WHERE u.email = 'management@demo.com'
 ON CONFLICT (building_id, user_id) DO NOTHING;
 
--- Create some demo issues for these buildings to test the selector
+-- Add some demo issues for these buildings
 INSERT INTO issues (building_id, title, description, category, priority, status, reported_by, created_at)
 SELECT
   building_id::uuid,
@@ -75,15 +74,15 @@ SELECT
   u.id,
   NOW()
 FROM (VALUES
-  ('11111111-1111-1111-1111-111111111111', 'Lift maintenance required', 'The main lift is making unusual noises', 'Mechanical', 'High', 'Open'),
-  ('11111111-1111-1111-1111-111111111111', 'Lobby lighting issue', 'Several bulbs in the lobby need replacement', 'Electrical', 'Medium', 'Open'),
-  ('11111111-1111-1111-1111-111111111111', 'Heating system check', 'Annual heating system maintenance due', 'HVAC', 'Critical', 'Scheduled'),
-  ('22222222-2222-2222-2222-222222222222', 'Garden maintenance', 'Communal garden needs landscaping', 'Grounds', 'Low', 'Open'),
-  ('33333333-3333-3333-3333-333333333333', 'Roof leak in flat 5', 'Water damage reported in top floor flat', 'Structural', 'Critical', 'In Progress'),
-  ('33333333-3333-3333-3333-333333333333', 'Fire alarm testing', 'Monthly fire alarm test required', 'Safety', 'High', 'Scheduled'),
-  ('33333333-3333-3333-3333-333333333333', 'Parking area cleaning', 'Underground parking needs deep clean', 'Cleaning', 'Medium', 'Open'),
-  ('33333333-3333-3333-3333-333333333333', 'Window cleaning', 'External window cleaning overdue', 'Cleaning', 'Low', 'Open'),
+  ('11111111-1111-1111-1111-111111111111', 'Lift maintenance', 'Annual lift service required', 'Maintenance', 'Medium', 'Open'),
+  ('11111111-1111-1111-1111-111111111111', 'Roof leak', 'Water damage in top floor corridor', 'Maintenance', 'High', 'In Progress'),
+  ('22222222-2222-2222-2222-222222222222', 'Heating system', 'Boiler needs replacement', 'Maintenance', 'High', 'Open'),
+  ('22222222-2222-2222-2222-222222222222', 'Garden maintenance', 'Landscaping required for communal areas', 'Maintenance', 'Low', 'Open'),
+  ('33333333-3333-3333-3333-333333333333', 'Security system', 'CCTV cameras need updating', 'Security', 'Medium', 'Open'),
   ('33333333-3333-3333-3333-333333333333', 'Intercom repair', 'Entry intercom system not working', 'Security', 'High', 'Open')
 ) AS demo_issues(building_id, title, description, category, priority, status)
 CROSS JOIN auth.users u
-WHERE u.email = 'management@demo.com';
+WHERE u.email = 'management@demo.com'
+ON CONFLICT DO NOTHING;
+
+SELECT 'Management company buildings fixed successfully!' as status;
