@@ -49,11 +49,18 @@ export function BuildingProvider({ children }: { children: React.ReactNode }) {
     console.log('🏢 BuildingContext: fetchBuildings called', {
       isManagementCompany,
       userId: user?.id,
-      userEmail: user?.email
+      userEmail: user?.email,
+      userRole: user?.role,
+      userMetadata: user?.metadata,
+      fullUser: user
     });
 
     if (!isManagementCompany || !user?.id) {
-      console.log('🏢 BuildingContext: Early return - not management company or no user ID');
+      console.log('🏢 BuildingContext: Early return - not management company or no user ID', {
+        isManagementCompany,
+        hasUserId: !!user?.id,
+        userRole: user?.role
+      });
       setBuildings([]);
       return;
     }
