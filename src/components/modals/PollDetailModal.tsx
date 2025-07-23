@@ -195,8 +195,42 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
               {/* Poll Description */}
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Description</h3>
-                <p className="text-gray-600">{poll.description}</p>
+                <p className="text-gray-600 whitespace-pre-wrap">{poll.description}</p>
               </div>
+
+              {/* Additional Context */}
+              {poll.category === 'Supplier Selection' && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="font-medium text-blue-900 mb-2">Supplier Selection Details</h4>
+                  <div className="text-sm text-blue-800 space-y-1">
+                    <p>• Please review all supplier quotes and specifications before voting</p>
+                    <p>• Consider factors such as price, quality, timeline, and previous reviews</p>
+                    <p>• This decision will be binding once the poll closes</p>
+                  </div>
+                </div>
+              )}
+
+              {poll.category === 'Building Improvement' && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <h4 className="font-medium text-green-900 mb-2">Building Improvement Information</h4>
+                  <div className="text-sm text-green-800 space-y-1">
+                    <p>• This improvement may affect service charges</p>
+                    <p>• Work schedule and resident impact will be communicated separately</p>
+                    <p>• All necessary permits and approvals will be obtained before work begins</p>
+                  </div>
+                </div>
+              )}
+
+              {poll.category === 'Budget Approval' && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <h4 className="font-medium text-yellow-900 mb-2">Budget Approval Notice</h4>
+                  <div className="text-sm text-yellow-800 space-y-1">
+                    <p>• Detailed budget breakdown available in the documents section</p>
+                    <p>• This budget will determine service charge levels for the coming year</p>
+                    <p>• Questions about specific budget items can be raised in comments</p>
+                  </div>
+                </div>
+              )}
 
               {/* Poll Details */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">

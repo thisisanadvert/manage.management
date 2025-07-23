@@ -19,6 +19,7 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import CreatePollModal from '../components/modals/CreatePollModal';
+import PollDetailModal from '../components/modals/PollDetailModal';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import LegalGuidanceTooltip from '../components/legal/LegalGuidanceTooltip';
@@ -28,6 +29,8 @@ const Voting = () => {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedPollId, setSelectedPollId] = useState<string | null>(null);
   const [polls, setPolls] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -84,6 +87,15 @@ const Voting = () => {
 
   const handlePollCreated = () => {
     fetchPolls();
+  };
+
+  const handleViewDetails = (pollId: string) => {
+    setSelectedPollId(pollId);
+    setShowDetailModal(true);
+  };
+
+  const handleVoteSubmitted = () => {
+    fetchPolls(); // Refresh polls after voting
   };
 
   // Sample data for fallback (keeping original structure)
@@ -438,10 +450,11 @@ const Voting = () => {
                 </div>
               </div>
 
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 rightIcon={<ChevronRight size={16} />}
+                onClick={() => handleViewDetails(poll.id.toString())}
               >
                 View Details
               </Button>
@@ -456,6 +469,19 @@ const Voting = () => {
         onClose={() => setShowCreateModal(false)}
         onPollCreated={handlePollCreated}
       />
+
+      {/* Poll Detail Modal */}
+      {selectedPollId && (
+        <PollDetailModal
+          isOpen={showDetailModal}
+          onClose={() => {
+            setShowDetailModal(false);
+            setSelectedPollId(null);
+          }}
+          pollId={selectedPollId}
+          onVoteSubmitted={handleVoteSubmitted}
+        />
+      )}
     </div>
   );
 };
