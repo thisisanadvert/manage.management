@@ -42,20 +42,26 @@ const Voting = () => {
 
   // Fetch polls from database
   const fetchPolls = async () => {
-    if (!user?.metadata?.buildingId) return;
+    // Allow frankie@manage.management to access all polls, others need buildingId
+    if (!user?.metadata?.buildingId && user?.email !== 'frankie@manage.management') return;
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('polls')
         .select(`
           *,
           poll_options(*),
           poll_votes(count),
           poll_comments(count)
-        `)
-        .eq('building_id', user.metadata.buildingId)
-        .order('created_at', { ascending: false });
+        `);
+
+      // If not frankie@manage.management, filter by building
+      if (user?.email !== 'frankie@manage.management') {
+        query = query.eq('building_id', user.metadata.buildingId);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
 
