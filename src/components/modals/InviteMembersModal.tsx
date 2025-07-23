@@ -163,10 +163,10 @@ const InviteMembersModal = ({ isOpen, onClose, onComplete }: InviteMembersModalP
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
       <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg bg-white shadow-xl z-10">
+        <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg bg-white shadow-xl" style={{ zIndex: 10000 }}>
         <div className="flex items-center justify-between border-b border-gray-200 p-6">
           <div className="flex items-center">
             <Users className="mr-3 h-6 w-6 text-primary-500" />
