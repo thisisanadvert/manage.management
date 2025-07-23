@@ -156,8 +156,12 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
   return (
     <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
       <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="relative w-full max-w-4xl rounded-lg bg-white shadow-xl" style={{ zIndex: 10000 }}>
+      <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
+        <div
+          className="relative w-full max-w-4xl rounded-lg bg-white shadow-xl"
+          style={{ zIndex: 10000 }}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex items-center justify-between border-b border-gray-200 p-6">
             <div className="flex items-center gap-3">
               <Users className="h-6 w-6 text-primary-600" />

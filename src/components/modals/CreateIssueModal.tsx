@@ -201,8 +201,12 @@ const CreateIssueModal = ({ isOpen, onClose, buildingId, onIssueCreated }: Creat
   return (
     <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
       <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="relative w-full max-w-2xl rounded-lg bg-white shadow-xl" style={{ zIndex: 10000 }}>
+      <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
+        <div
+          className="relative w-full max-w-2xl rounded-lg bg-white shadow-xl"
+          style={{ zIndex: 10000 }}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex items-center justify-between border-b border-gray-200 p-4">
             <div className="flex items-center">
               <AlertTriangle className="mr-2 h-5 w-5 text-warning-500" />
