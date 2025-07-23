@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Users, MessageSquare, FileText, CheckCircle2 } from 'lucide-react';
+import { X, Calendar, Users, MessageSquare, FileText, CheckCircle2, AlertTriangle } from 'lucide-react';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
 import { supabase } from '../../lib/supabase';
@@ -35,6 +35,10 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
 
 
   const fetchPollDetails = async () => {
+    console.log('Fetching poll details for pollId:', pollId);
+    setIsLoading(true);
+    setError(null);
+
     try {
       // Fetch poll details
       const { data: pollData, error: pollError } = await supabase
@@ -42,6 +46,8 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
         .select('*')
         .eq('id', pollId)
         .single();
+
+      console.log('Poll fetch result:', { pollData, pollError });
 
       if (pollError) throw pollError;
       setPoll(pollData);
@@ -71,6 +77,8 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
     } catch (error) {
       console.error('Error fetching poll details:', error);
       setError('Failed to load poll details');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -147,10 +155,64 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
     setSelectedOptions([vote]);
   };
 
-  if (!isOpen || !poll) return null;
+  // Debug logging
+  console.log('PollDetailModal render:', { isOpen, poll, pollId, isLoading, error });
 
-  const canVote = poll.status === 'active' && !userVote && 
-    new Date(poll.start_date) <= new Date() && 
+  if (!isOpen) return null;
+
+  // Show loading state while fetching poll data
+  if (isLoading || !poll) {
+    return (
+      <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
+        <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
+          <div
+            className="relative w-full max-w-4xl rounded-lg bg-white shadow-xl p-8"
+            style={{ zIndex: 10000 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading poll details...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
+        <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
+          <div
+            className="relative w-full max-w-4xl rounded-lg bg-white shadow-xl p-8"
+            style={{ zIndex: 10000 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center">
+              <div className="text-red-600 mb-4">
+                <AlertTriangle className="h-8 w-8 mx-auto mb-2" />
+                <p className="font-medium">Error Loading Poll</p>
+                <p className="text-sm text-gray-600 mt-1">{error}</p>
+              </div>
+              <button
+                onClick={onClose}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const canVote = poll.status === 'active' && !userVote &&
+    new Date(poll.start_date) <= new Date() &&
     new Date(poll.end_date) >= new Date();
 
   return (
