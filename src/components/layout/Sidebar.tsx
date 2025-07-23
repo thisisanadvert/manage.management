@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFeatures } from '../../hooks/useFeatures';
-import { 
-  LayoutDashboard, 
-  AlertTriangle, 
-  Wallet, 
-  FileText, 
-  BellRing, 
-  Vote, 
-  Building2, 
+import {
+  LayoutDashboard,
+  AlertTriangle,
+  Wallet,
+  FileText,
+  BellRing,
+  Vote,
+  Building2,
   UserCheck,
   HelpCircle,
   Users,
@@ -20,7 +20,8 @@ import {
   X,
   Settings,
   Shield,
-  BookOpen
+  BookOpen,
+  BarChart3
 } from 'lucide-react';
 import Button from '../ui/Button';
 
@@ -75,6 +76,12 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
       href: `${baseRoute}/finances`,
       icon: Wallet,
       roles: ['rtm-director', 'rmc-director', 'leaseholder', 'shareholder', 'management-company', 'super-admin']
+    },
+    {
+      name: 'Reports',
+      href: `${baseRoute}/reports`,
+      icon: BarChart3,
+      roles: ['management-company', 'super-admin']
     },
     {
       name: 'Documents',
