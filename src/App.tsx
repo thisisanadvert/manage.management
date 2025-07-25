@@ -101,8 +101,19 @@ function RoleBasedRoute({ children, allowedRoles }: { children: React.ReactNode;
     allowedRoles,
     hasRole: !!user?.role,
     isAllowed: user?.role && allowedRoles.includes(user.role),
-    isSuperAdmin: user?.email === 'frankie@manage.management'
+    isSuperAdmin: user?.email === 'frankie@manage.management',
+    userMetadata: user?.metadata
   });
+
+  // Alert for frankie@manage.management to see what's happening
+  if (user?.email === 'frankie@manage.management') {
+    console.log('🔍 FRANKIE DEBUG - RoleBasedRoute:', {
+      path: location.pathname,
+      role: user.role,
+      allowedRoles,
+      willBypass: true
+    });
+  }
 
   // Special handling for frankie@manage.management - always allow access
   if (user?.email === 'frankie@manage.management') {
@@ -147,6 +158,7 @@ function App() {
   }
 
   // Prevent landing page access for logged-in users
+  // Only redirect from landing pages, not from other routes
   if (user && (location.pathname === '/' || location.pathname === '/pricing')) {
     let basePath: string;
 
@@ -408,8 +420,49 @@ function App() {
       {/* Catch-all route for auth redirects */}
       <Route path="*" element={
         user ? (
-          // If user is logged in but on unknown route, redirect to their dashboard
-          <Navigate to={getRoleBasePath(user.role)} replace />
+          // If user is logged in but on unknown route, show debug info instead of redirecting
+          (() => {
+            console.log('🚨 Catch-all route triggered!', {
+              pathname: location.pathname,
+              userRole: user.role,
+              userEmail: user.email,
+              wouldRedirectTo: getRoleBasePath(user.role)
+            });
+
+            // For frankie@manage.management, show debug info instead of redirecting
+            if (user.email === 'frankie@manage.management') {
+              return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+                  <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+                    <h2 className="text-xl font-bold text-red-600 mb-4">🚨 Catch-All Route Triggered</h2>
+                    <div className="space-y-2 text-sm">
+                      <p><strong>Path:</strong> {location.pathname}</p>
+                      <p><strong>User:</strong> {user.email}</p>
+                      <p><strong>Role:</strong> {user.role}</p>
+                      <p><strong>Would redirect to:</strong> {getRoleBasePath(user.role)}</p>
+                    </div>
+                    <div className="mt-4 space-y-2">
+                      <button
+                        onClick={() => window.location.href = '/settings/mri-integration-debug'}
+                        className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                      >
+                        Go to MRI Debug
+                      </button>
+                      <button
+                        onClick={() => window.location.href = getRoleBasePath(user.role)}
+                        className="w-full bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+                      >
+                        Go to Dashboard
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            // For other users, redirect normally
+            return <Navigate to={getRoleBasePath(user.role)} replace />;
+          })()
         ) : (
           // If not logged in, show 404 with auth redirect handler
           <>
