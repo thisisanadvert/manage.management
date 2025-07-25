@@ -29,6 +29,8 @@ import MRISyncDashboard from '../components/mri/MRISyncDashboard';
 import MRIConfigurationModal from '../components/mri/MRIConfigurationModal';
 import MRICredentialManager from '../components/mri/MRICredentialManager';
 import RouteDebugger from '../components/debug/RouteDebugger';
+import UserDebugger from '../components/debug/UserDebugger';
+import ButtonDebugger from '../components/debug/ButtonDebugger';
 import { mriQubeService } from '../services/mriQubeService';
 import { mriSyncService } from '../services/mriSyncService';
 
@@ -153,6 +155,8 @@ const MRIIntegrationSettings: React.FC = () => {
         </div>
 
         {/* Debug Info - Remove this after troubleshooting */}
+        <UserDebugger />
+        <ButtonDebugger />
         <RouteDebugger />
 
         {/* Tab Content */}

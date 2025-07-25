@@ -100,9 +100,17 @@ function RoleBasedRoute({ children, allowedRoles }: { children: React.ReactNode;
     userEmail: user?.email,
     allowedRoles,
     hasRole: !!user?.role,
-    isAllowed: user?.role && allowedRoles.includes(user.role)
+    isAllowed: user?.role && allowedRoles.includes(user.role),
+    isSuperAdmin: user?.email === 'frankie@manage.management'
   });
 
+  // Special handling for frankie@manage.management - always allow access
+  if (user?.email === 'frankie@manage.management') {
+    console.log('✅ RoleBasedRoute - Super admin access granted for frankie@manage.management');
+    return <>{children}</>;
+  }
+
+  // Check if user has required role
   if (!user?.role || !allowedRoles.includes(user.role)) {
     console.log('❌ RoleBasedRoute - Access denied. User role:', user?.role, 'Allowed roles:', allowedRoles);
 
@@ -255,12 +263,12 @@ function App() {
         }
       >
         <Route index element={<Settings />} />
-        <Route path="mri-integration" element={<MRIIntegrationSettings />} />
-        <Route path="mri-integration-protected" element={
+        <Route path="mri-integration" element={
           <RoleBasedRoute allowedRoles={['rtm-director', 'rmc-director', 'super-admin']}>
             <MRIIntegrationSettings />
           </RoleBasedRoute>
         } />
+        <Route path="mri-integration-debug" element={<MRIIntegrationSettings />} />
       </Route>
       
       {/* RTM Director Routes */}
