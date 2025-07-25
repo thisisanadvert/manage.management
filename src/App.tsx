@@ -27,6 +27,7 @@ import BuildingDetails from './pages/BuildingDetails';
 import Reports from './pages/Reports';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import MRIIntegrationSettings from './pages/MRIIntegrationSettings';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import ForgotPassword from './pages/auth/ForgotPassword';
@@ -254,6 +255,11 @@ function App() {
         }
       >
         <Route index element={<Settings />} />
+        <Route path="mri-integration" element={
+          <RoleBasedRoute allowedRoles={['rtm-director', 'rmc-director', 'super-admin']}>
+            <MRIIntegrationSettings />
+          </RoleBasedRoute>
+        } />
       </Route>
       
       {/* RTM Director Routes */}

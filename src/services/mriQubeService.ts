@@ -29,12 +29,15 @@ class MRIQubeService {
 
   constructor() {
     this.config = {
-      baseUrl: import.meta.env.VITE_MRI_API_BASE_URL || 'https://api.vaultre.com.au',
-      clientId: import.meta.env.VITE_MRI_CLIENT_ID || '',
-      clientSecret: import.meta.env.VITE_MRI_CLIENT_SECRET || '',
+      baseUrl: 'https://api.vaultre.com.au',
+      clientId: '',
+      clientSecret: '',
       scope: 'read write',
-      environment: (import.meta.env.VITE_MRI_ENVIRONMENT as 'sandbox' | 'production') || 'sandbox'
+      environment: 'sandbox'
     };
+
+    // Initialize with environment variables as fallback
+    this.loadConfigFromEnvironment();
 
     this.serviceConfig = {
       rateLimiting: {
@@ -65,6 +68,44 @@ class MRIQubeService {
   // ============================================================================
   // Configuration & Validation
   // ============================================================================
+
+  private loadConfigFromEnvironment(): void {
+    // Load from environment variables as fallback
+    this.config.baseUrl = import.meta.env.VITE_MRI_API_BASE_URL || this.config.baseUrl;
+    this.config.clientId = import.meta.env.VITE_MRI_CLIENT_ID || this.config.clientId;
+    this.config.clientSecret = import.meta.env.VITE_MRI_CLIENT_SECRET || this.config.clientSecret;
+    this.config.environment = (import.meta.env.VITE_MRI_ENVIRONMENT as 'sandbox' | 'production') || this.config.environment;
+  }
+
+  public async loadConfigFromDatabase(buildingId: string): Promise<void> {
+    try {
+      const { data, error } = await supabase
+        .from('mri_credentials')
+        .select('client_id, client_secret, api_base_url, environment')
+        .eq('building_id', buildingId)
+        .eq('is_active', true)
+        .single();
+
+      if (data && !error) {
+        this.config.clientId = data.client_id || '';
+        this.config.clientSecret = data.client_secret || '';
+        this.config.baseUrl = data.api_base_url || 'https://api.vaultre.com.au';
+        this.config.environment = data.environment || 'sandbox';
+
+        this.log('info', 'MRI configuration loaded from database');
+      } else {
+        this.log('warn', 'No MRI credentials found in database, using environment variables');
+      }
+    } catch (error) {
+      this.log('error', 'Failed to load MRI credentials from database', error);
+    }
+  }
+
+  public updateConfig(config: Partial<MRIConfig>): void {
+    this.config = { ...this.config, ...config };
+    this.token = null; // Clear existing token when config changes
+    this.log('info', 'MRI configuration updated');
+  }
 
   private validateConfig(): void {
     if (!this.config.clientId || !this.config.clientSecret) {

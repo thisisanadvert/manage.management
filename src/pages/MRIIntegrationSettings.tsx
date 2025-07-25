@@ -27,6 +27,7 @@ import { getUserBuildingId } from '../utils/buildingUtils';
 import MRIConnectionStatus from '../components/mri/MRIConnectionStatus';
 import MRISyncDashboard from '../components/mri/MRISyncDashboard';
 import MRIConfigurationModal from '../components/mri/MRIConfigurationModal';
+import MRICredentialManager from '../components/mri/MRICredentialManager';
 import { mriQubeService } from '../services/mriQubeService';
 import { mriSyncService } from '../services/mriSyncService';
 
@@ -66,6 +67,13 @@ const MRIIntegrationSettings: React.FC = () => {
 
   const handleConfigurationSaved = () => {
     // Refresh the page data after configuration is saved
+    window.location.reload();
+  };
+
+  const handleCredentialsUpdated = async () => {
+    // Reload MRI service configuration from database
+    await mriQubeService.loadConfigFromDatabase(buildingId);
+    // Refresh the page data
     window.location.reload();
   };
 
@@ -147,6 +155,12 @@ const MRIIntegrationSettings: React.FC = () => {
         <div className="space-y-6">
           {activeTab === 'overview' && (
             <>
+              {/* API Credentials */}
+              <MRICredentialManager
+                buildingId={buildingId}
+                onCredentialsUpdated={handleCredentialsUpdated}
+              />
+
               {/* Connection Status */}
               <MRIConnectionStatus
                 showDetails={true}
