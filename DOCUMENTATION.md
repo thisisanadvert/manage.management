@@ -263,3 +263,162 @@ The application supports two deployment environments:
    - Two-factor authentication
    - Audit logging
    - Enhanced access controls
+
+## MRI Qube Integration
+
+### Overview
+The MRI Qube integration provides seamless synchronisation between our platform and the MRI Qube property management system via the Vaultre API. This integration enables automatic data flow for properties, financial transactions, budgets, invoices, maintenance work orders, and compliance documents.
+
+### Key Features
+- **OAuth 2.0 Authentication**: Secure token-based authentication with automatic refresh
+- **Real-time Synchronisation**: Configurable sync frequencies from real-time to manual
+- **Comprehensive Data Coverage**: Properties, units, tenancies, transactions, budgets, invoices, maintenance, and documents
+- **Conflict Resolution**: Intelligent handling of data discrepancies between systems
+- **Audit Logging**: Complete audit trail of all sync operations and data changes
+- **Error Handling**: Robust error tracking and retry mechanisms
+
+### Architecture
+
+#### Services
+- **`mriQubeService.ts`**: Core API integration service with OAuth 2.0 authentication
+- **`mriSyncService.ts`**: Synchronisation engine with configurable intervals and conflict resolution
+
+#### Database Schema
+The integration uses 13 dedicated tables with proper relationships and RLS policies:
+
+**Core Tables:**
+- `mri_properties`: Building/property data from MRI
+- `mri_units`: Individual unit information
+- `mri_tenancies`: Leaseholder and tenancy data
+- `mri_contacts`: Contact information for tenants, owners, directors
+- `mri_transactions`: Financial transactions and payments
+- `mri_budgets`: Service charge budgets and forecasts
+- `mri_invoices`: Supplier invoices and approvals
+- `mri_maintenance`: Work orders and maintenance requests
+- `mri_documents`: Compliance and legal documents
+
+**Management Tables:**
+- `mri_auth_tokens`: Secure OAuth token storage
+- `mri_sync_configs`: Per-building sync configuration
+- `mri_sync_status`: Sync operation tracking
+- `mri_sync_errors`: Error logging and resolution
+- `mri_audit_log`: Complete audit trail
+
+#### Security
+- **Row Level Security (RLS)**: Building-based access control for all MRI tables
+- **Role-based Permissions**: RTM/RMC directors, management companies, and homeowners have appropriate access levels
+- **Encrypted Storage**: API credentials stored securely with encryption at rest
+- **Audit Logging**: All MRI data changes tracked with user attribution
+
+### Configuration
+
+#### Environment Variables
+```bash
+# MRI Qube Integration via Vaultre API
+VITE_MRI_API_BASE_URL=https://api.vaultre.com.au
+VITE_MRI_CLIENT_ID=your_mri_client_id_here
+VITE_MRI_CLIENT_SECRET=your_mri_client_secret_here
+VITE_MRI_ENVIRONMENT=sandbox
+```
+
+#### Sync Frequencies
+- **Real-time**: Every 15 minutes (for critical data like transactions)
+- **Hourly**: Every hour (for frequently changing data)
+- **Daily**: Once per day (for regular updates)
+- **Weekly**: Once per week (for less critical data)
+- **Monthly**: Once per month (for static data)
+- **Manual**: Only when triggered manually
+
+### Components
+
+#### Frontend Components
+- **`MRIConnectionStatus`**: Displays API connection status and health
+- **`MRISyncDashboard`**: Comprehensive sync status and control dashboard
+- **`MRIConfigurationModal`**: Settings and configuration interface
+- **`MRIDataSourceIndicator`**: Shows when data originates from MRI Qube
+- **`MRIFinancialDashboard`**: Enhanced financial dashboard with MRI data integration
+- **`MRISection20Tracker`**: Section 20 compliance tracking with MRI diary integration
+
+#### Settings Page
+- **`MRIIntegrationSettings`**: Complete settings page with tabs for overview, sync settings, security, and advanced configuration
+
+### Usage
+
+#### Initial Setup
+1. Configure API credentials in environment variables
+2. Run database migrations to create MRI tables
+3. Configure sync settings per building via the settings page
+4. Test connection and perform initial sync
+
+#### Daily Operations
+- Automatic synchronisation based on configured frequencies
+- Real-time status monitoring via the sync dashboard
+- Error tracking and resolution through the admin interface
+- Data source indicators show which data comes from MRI vs local sources
+
+#### Financial Integration
+- Combined financial dashboard showing both local and MRI data
+- Budget vs actual reporting with MRI budget integration
+- Section 20 compliance tracking using MRI work orders and diary
+- Service charge management with MRI transaction data
+
+### API Rate Limiting
+- **Requests per minute**: 60
+- **Requests per hour**: 1,000
+- **Burst limit**: 10 concurrent requests
+- **Retry logic**: Exponential backoff with maximum 3 retries
+- **Timeout handling**: 30-second request timeout with connection pooling
+
+### Error Handling
+- **Validation Errors**: Data format and structure validation
+- **API Errors**: Network and authentication error handling
+- **Database Errors**: Transaction rollback and data integrity protection
+- **Mapping Errors**: Field mapping and transformation error tracking
+
+### Monitoring & Troubleshooting
+- **Connection Status**: Real-time API connection monitoring
+- **Sync Status**: Per-entity sync status tracking
+- **Error Logs**: Detailed error logging with retry counts
+- **Performance Metrics**: Sync duration and throughput monitoring
+- **Audit Trail**: Complete history of all sync operations
+
+### Testing
+Comprehensive test suite covering:
+- **Unit Tests**: Individual service method testing
+- **Integration Tests**: End-to-end sync workflow testing
+- **Error Scenarios**: Network failures, authentication errors, data conflicts
+- **Performance Tests**: Rate limiting and timeout handling
+
+### Troubleshooting Guide
+
+#### Common Issues
+
+**Connection Failures**
+- Verify API credentials are correctly configured
+- Check network connectivity to Vaultre API
+- Ensure environment variables are properly set
+- Test connection using the built-in connection test
+
+**Sync Errors**
+- Review sync error logs in the admin dashboard
+- Check data format compatibility between systems
+- Verify building and property ID mappings
+- Ensure sufficient API rate limit headroom
+
+**Authentication Issues**
+- Refresh OAuth tokens manually if needed
+- Verify client credentials with MRI support
+- Check token expiry and refresh logic
+- Review audit logs for authentication failures
+
+**Data Discrepancies**
+- Compare data between MRI and local systems
+- Check sync timestamps and frequencies
+- Review conflict resolution settings
+- Manually trigger sync for specific entities
+
+#### Support Resources
+- MRI Qube API documentation
+- Vaultre API support portal
+- Internal troubleshooting guides
+- Error code reference documentation
