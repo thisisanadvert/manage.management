@@ -329,6 +329,7 @@ const InviteMembersModal = ({ isOpen, onClose, onComplete }: InviteMembersModalP
             </Button>
           </div>
         </div>
+        </div>
       </div>
     </div>
   );
