@@ -24,6 +24,7 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
   const [userVote, setUserVote] = useState<any>(null);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
