@@ -8,6 +8,7 @@ import { X } from 'lucide-react';
 import { useSearch } from '../../contexts/SearchContext';
 import GlobalSearchBar from './GlobalSearchBar';
 import SearchResults from './SearchResults';
+import Portal from '../ui/Portal';
 
 interface GlobalSearchModalProps {
   isOpen: boolean;
@@ -50,9 +51,10 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[1200] bg-black bg-opacity-50 flex items-start justify-center pt-16">
-      {/* Modal Container */}
-      <div className="w-full max-w-4xl mx-4 bg-white rounded-lg shadow-2xl max-h-[80vh] flex flex-col">
+    <Portal>
+      <div className="fixed inset-0 z-[1200] bg-black bg-opacity-50 flex items-start justify-center pt-16">
+        {/* Modal Container */}
+        <div className="w-full max-w-4xl mx-4 bg-white rounded-lg shadow-2xl max-h-[80vh] flex flex-col" role="dialog" aria-modal="true">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Search</h2>
@@ -83,7 +85,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           />
         </div>
       </div>
-    </div>
+    </Portal>
   );
 };
 
