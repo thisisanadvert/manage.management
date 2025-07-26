@@ -57,6 +57,7 @@ import DocumentManagement from './pages/features/DocumentManagement';
 import VotingSystem from './pages/features/VotingSystem';
 import CommunicationHub from './pages/features/CommunicationHub';
 import PageLoader from './components/ui/PageLoader';
+import RedirectInterceptor from './components/debug/RedirectInterceptor';
 
 // Helper function to get the correct base path for a user role
 function getRoleBasePath(role?: string): string {
@@ -72,7 +73,7 @@ function getRoleBasePath(role?: string): string {
     case 'management-company':
       return '/management';
     case 'super-admin':
-      return '/rtm';
+      return '/dashboard';
     default:
       console.warn('Unknown or missing role:', role, 'redirecting to building setup');
       return '/building-setup';
@@ -181,7 +182,8 @@ function App() {
         basePath = '/management';
         break;
       case 'super-admin':
-        basePath = '/rtm';
+        // Super admin should go to dashboard, not RTM
+        basePath = '/dashboard';
         break;
       default:
         console.warn('Unknown or missing role in App.tsx:', user.role, 'redirecting to building setup');
