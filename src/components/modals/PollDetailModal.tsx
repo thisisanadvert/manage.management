@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Calendar, Users, MessageSquare, FileText, CheckCircle2, AlertTriangle } from 'lucide-react';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
+import Portal from '../ui/Portal';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -164,35 +165,41 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
   // Show loading state while fetching poll data
   if (isLoading || !poll) {
     return (
-      <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
-        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-        <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
-          <div
-            className="relative w-full max-w-4xl rounded-lg bg-white shadow-xl p-8"
-            style={{ zIndex: 10000 }}
-            onClick={(e) => e.stopPropagation()}
-          >
+      <Portal>
+        <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
+          <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
+          <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
+            <div
+              className="relative w-full max-w-4xl rounded-lg bg-white shadow-xl p-8"
+              style={{ zIndex: 10000 }}
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+            >
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
               <p className="text-gray-600">Loading poll details...</p>
             </div>
           </div>
         </div>
-      </div>
+      </Portal>
     );
   }
 
   // Show error state if there's an error
   if (error) {
     return (
-      <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
-        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-        <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
-          <div
-            className="relative w-full max-w-4xl rounded-lg bg-white shadow-xl p-8"
-            style={{ zIndex: 10000 }}
-            onClick={(e) => e.stopPropagation()}
-          >
+      <Portal>
+        <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
+          <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
+          <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
+            <div
+              className="relative w-full max-w-4xl rounded-lg bg-white shadow-xl p-8"
+              style={{ zIndex: 10000 }}
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+            >
             <div className="text-center">
               <div className="text-red-600 mb-4">
                 <AlertTriangle className="h-8 w-8 mx-auto mb-2" />
@@ -208,7 +215,7 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
             </div>
           </div>
         </div>
-      </div>
+      </Portal>
     );
   }
 
@@ -217,19 +224,23 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
     new Date(poll.end_date) >= new Date();
 
   return (
-    <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
-      <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-      <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
-        <div
-          className="relative w-full max-w-4xl rounded-lg bg-white shadow-xl"
-          style={{ zIndex: 10000 }}
-          onClick={(e) => e.stopPropagation()}
-        >
+    <Portal>
+      <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
+        <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
+          <div
+            className="relative w-full max-w-4xl rounded-lg bg-white shadow-xl"
+            style={{ zIndex: 10000 }}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+          >
           <div className="flex items-center justify-between border-b border-gray-200 p-6">
             <div className="flex items-center gap-3">
               <Users className="h-6 w-6 text-primary-600" />
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">{poll.title}</h2>
+                <h2 id="modal-title" className="text-xl font-semibold text-gray-900">{poll.title}</h2>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant="primary" size="sm">{poll.category}</Badge>
                   <Badge variant={poll.status === 'active' ? 'success' : 'gray'} size="sm">
@@ -399,7 +410,7 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </Portal>
   );
 };
 

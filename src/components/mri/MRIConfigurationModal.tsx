@@ -15,6 +15,7 @@ import {
   TestTube
 } from 'lucide-react';
 import Button from '../ui/Button';
+import Portal from '../ui/Portal';
 import { useAuth } from '../../contexts/AuthContext';
 import { mriSyncService } from '../../services/mriSyncService';
 import { mriQubeService } from '../../services/mriQubeService';
@@ -51,6 +52,26 @@ const MRIConfigurationModal: React.FC<MRIConfigurationModalProps> = ({
       documents: 'weekly'
     }
   });
+
+  // Handle escape key and body scroll
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
 
   const frequencyOptions = [
     { value: 'realtime', label: 'Real-time (15 minutes)', description: 'For critical data like transactions' },
@@ -135,14 +156,18 @@ const MRIConfigurationModal: React.FC<MRIConfigurationModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
-      <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-      <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
-        <div 
-          className="relative w-full max-w-4xl rounded-lg bg-white shadow-xl" 
-          style={{ zIndex: 10000 }}
-          onClick={(e) => e.stopPropagation()}
-        >
+    <Portal>
+      <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
+        <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
+          <div
+            className="relative w-full max-w-4xl rounded-lg bg-white shadow-xl"
+            style={{ zIndex: 10000 }}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+          >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-200 p-6">
             <div className="flex items-center gap-3">
@@ -150,7 +175,7 @@ const MRIConfigurationModal: React.FC<MRIConfigurationModalProps> = ({
                 <Settings className="h-6 w-6 text-primary-600" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">MRI Qube Configuration</h2>
+                <h2 id="modal-title" className="text-xl font-semibold text-gray-900">MRI Qube Configuration</h2>
                 <p className="text-sm text-gray-600">Configure integration settings and sync frequencies</p>
               </div>
             </div>
@@ -302,7 +327,7 @@ const MRIConfigurationModal: React.FC<MRIConfigurationModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </Portal>
   );
 };
 

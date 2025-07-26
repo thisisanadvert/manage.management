@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  X, 
-  Users, 
-  Mail, 
-  Plus, 
-  Trash2, 
-  CheckCircle2, 
-  AlertTriangle, 
+import {
+  X,
+  Users,
+  Mail,
+  Plus,
+  Trash2,
+  CheckCircle2,
+  AlertTriangle,
   Info,
   UserPlus,
   Send
 } from 'lucide-react';
 import Button from '../ui/Button';
+import Portal from '../ui/Portal';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 
@@ -163,19 +164,23 @@ const InviteMembersModal = ({ isOpen, onClose, onComplete }: InviteMembersModalP
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
-      <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-      <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
-        <div
-          className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg bg-white shadow-xl"
-          style={{ zIndex: 10000 }}
-          onClick={(e) => e.stopPropagation()}
-        >
+    <Portal>
+      <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
+        <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
+          <div
+            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg bg-white shadow-xl"
+            style={{ zIndex: 10000 }}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+          >
         <div className="flex items-center justify-between border-b border-gray-200 p-6">
           <div className="flex items-center">
             <Users className="mr-3 h-6 w-6 text-primary-500" />
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Invite Members</h2>
+              <h2 id="modal-title" className="text-xl font-semibold text-gray-900">Invite Members</h2>
               <p className="text-sm text-gray-600">Add other residents to your building</p>
             </div>
           </div>
@@ -331,7 +336,7 @@ const InviteMembersModal = ({ isOpen, onClose, onComplete }: InviteMembersModalP
         </div>
         </div>
       </div>
-    </div>
+    </Portal>
   );
 };
 

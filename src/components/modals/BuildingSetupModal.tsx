@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  X, 
-  Building2, 
-  Calendar, 
-  Home, 
-  MapPin, 
-  CheckCircle2, 
+import {
+  X,
+  Building2,
+  Calendar,
+  Home,
+  MapPin,
+  CheckCircle2,
   AlertTriangle,
   Info
 } from 'lucide-react';
 import Button from '../ui/Button';
+import Portal from '../ui/Portal';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 
@@ -221,18 +222,22 @@ const BuildingSetupModal = ({ isOpen, onClose, onSetupComplete }: BuildingSetupM
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
-      <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-      <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
-        <div
-          className="relative w-full max-w-2xl rounded-lg bg-white shadow-xl"
-          style={{ zIndex: 10000 }}
-          onClick={(e) => e.stopPropagation()}
-        >
+    <Portal>
+      <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
+        <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
+          <div
+            className="relative w-full max-w-2xl rounded-lg bg-white shadow-xl"
+            style={{ zIndex: 10000 }}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+          >
           <div className="flex items-center justify-between border-b border-gray-200 p-4">
             <div className="flex items-center">
               <Building2 className="mr-2 h-5 w-5 text-primary-500" />
-              <h2 className="text-lg font-semibold text-gray-900">Building Setup</h2>
+              <h2 id="modal-title" className="text-lg font-semibold text-gray-900">Building Setup</h2>
             </div>
             <button
               onClick={onClose}
@@ -453,7 +458,7 @@ const BuildingSetupModal = ({ isOpen, onClose, onSetupComplete }: BuildingSetupM
           </div>
         </div>
       </div>
-    </div>
+    </Portal>
   );
 };
 

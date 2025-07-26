@@ -100,6 +100,22 @@
   pointer-events: auto !important;
 }
 
+/* Ensure modal backdrops are properly handled */
+.fixed.inset-0.bg-black.bg-opacity-50 {
+  pointer-events: auto !important;
+  z-index: 9999 !important;
+}
+
+/* Prevent modal backdrop persistence */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Force remove any lingering modal backdrops */
+.fixed.inset-0[style*="z-index: 9999"] {
+  pointer-events: auto !important;
+}
+
 /* Additional tooltip visibility fixes */
 /* Ensure all absolute positioned tooltips are visible */
 .absolute.bottom-full.left-0.mb-2.z-\[1000\] {

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Upload, AlertTriangle, PenTool as Tool, Building2, MapPin, FileText } from 'lucide-react';
 import Button from '../ui/Button';
+import Portal from '../ui/Portal';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { validateUUIDSafe } from '../../utils/uuid';
@@ -29,6 +30,26 @@ const CreateIssueModal = ({ isOpen, onClose, buildingId, onIssueCreated }: Creat
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Handle escape key and body scroll
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -199,18 +220,22 @@ const CreateIssueModal = ({ isOpen, onClose, buildingId, onIssueCreated }: Creat
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
-      <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-      <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
-        <div
-          className="relative w-full max-w-2xl rounded-lg bg-white shadow-xl"
-          style={{ zIndex: 10000 }}
-          onClick={(e) => e.stopPropagation()}
-        >
+    <Portal>
+      <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
+        <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
+          <div
+            className="relative w-full max-w-2xl rounded-lg bg-white shadow-xl"
+            style={{ zIndex: 10000 }}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+          >
           <div className="flex items-center justify-between border-b border-gray-200 p-4">
             <div className="flex items-center">
               <AlertTriangle className="mr-2 h-5 w-5 text-warning-500" />
-              <h2 className="text-lg font-semibold text-gray-900">Report New Issue</h2>
+              <h2 id="modal-title" className="text-lg font-semibold text-gray-900">Report New Issue</h2>
             </div>
             <button
               onClick={onClose}
@@ -477,7 +502,7 @@ const CreateIssueModal = ({ isOpen, onClose, buildingId, onIssueCreated }: Creat
           </form>
         </div>
       </div>
-    </div>
+    </Portal>
   );
 };
 
