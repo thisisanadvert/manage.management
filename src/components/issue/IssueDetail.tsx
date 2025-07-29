@@ -55,6 +55,15 @@ const IssueDetail = ({ issueId, onClose, onStatusChange }: IssueDetailProps) => 
     const fetchIssueDetails = async () => {
       setIsLoading(true);
       console.log('Fetching issue details for ID:', actualIssueId);
+
+      // Validate UUID format
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(actualIssueId)) {
+        console.error('Invalid UUID format:', actualIssueId);
+        setIsLoading(false);
+        return;
+      }
+
       try {
         // Fetch issue details without user relationships to avoid foreign key error
         const { data: issueData, error: issueError } = await supabase
@@ -65,7 +74,10 @@ const IssueDetail = ({ issueId, onClose, onStatusChange }: IssueDetailProps) => 
 
         console.log('Supabase response:', { data: issueData, error: issueError });
 
-        if (issueError) throw issueError;
+        if (issueError) {
+          console.error('Supabase error details:', issueError);
+          throw issueError;
+        }
         
         // Format the issue data (simplified to avoid user relationship errors)
         const formattedIssue = {

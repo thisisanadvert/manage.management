@@ -69,16 +69,19 @@ const IssuesManagement = () => {
     setIsLoading(true);
     try {
       if (!effectiveBuildingId) {
+        console.log('No effective building ID, skipping fetch');
         setIsLoading(false);
         return;
       }
+
+      console.log('Fetching issues for building ID:', effectiveBuildingId);
 
       // First, fetch issues without user relationships to avoid foreign key error
       let query = supabase
         .from('issues')
         .select('*')
         .eq('building_id', effectiveBuildingId);
-      
+
       // Apply filters
       if (selectedFilter !== 'all') {
         if (selectedFilter === 'critical') {
@@ -91,32 +94,50 @@ const IssuesManagement = () => {
           query = query.eq('status', 'Scheduled');
         }
       }
-      
+
       // Apply search
       if (searchQuery) {
         query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
       }
-      
+
       const { data, error } = await query.order('created_at', { ascending: false });
 
-      if (error) throw error;
+      console.log('Issues fetch result:', { data, error, count: data?.length });
+
+      if (error) {
+        console.error('Error fetching issues:', error);
+        throw error;
+      }
 
       if (data) {
+        console.log('Sample issue data:', data[0]);
+
+        // Validate that we have proper UUIDs
+        const validIssues = data.filter(issue => {
+          const isValidUUID = issue.id && typeof issue.id === 'string' && issue.id.length === 36;
+          if (!isValidUUID) {
+            console.error('Invalid issue ID found:', issue.id, issue);
+          }
+          return isValidUUID;
+        });
+
+        console.log('Valid issues count:', validIssues.length, 'out of', data.length);
+
         // For now, just show issues without user details to avoid the foreign key error
-        setIssues(data.map(issue => ({
+        setIssues(validIssues.map(issue => ({
           ...issue,
           id: `ISS-${issue.id.substring(0, 4)}`,
           fullId: issue.id, // Store the full UUID for detail view
           reportedBy: 'User', // Simplified for now
           reportedAt: new Date(issue.created_at).toLocaleDateString()
         })));
-        
+
         // Calculate stats
-        const criticalCount = data.filter(i => i.priority === 'Critical').length;
-        const inProgressCount = data.filter(i => i.status === 'In Progress').length;
-        const scheduledCount = data.filter(i => i.status === 'Scheduled').length;
-        const completedCount = data.filter(i => i.status === 'Completed').length;
-        
+        const criticalCount = validIssues.filter(i => i.priority === 'Critical').length;
+        const inProgressCount = validIssues.filter(i => i.status === 'In Progress').length;
+        const scheduledCount = validIssues.filter(i => i.status === 'Scheduled').length;
+        const completedCount = validIssues.filter(i => i.status === 'Completed').length;
+
         setStats({ critical: criticalCount, inProgress: inProgressCount, scheduled: scheduledCount, completed: completedCount });
       }
     } catch (error) {
