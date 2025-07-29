@@ -224,7 +224,7 @@ const CreateIssueModal = ({ isOpen, onClose, buildingId, onIssueCreated }: Creat
         className="fixed inset-0 overflow-y-auto"
         style={{
           zIndex: 99999,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backgroundColor: 'transparent',
           pointerEvents: 'auto'
         }}
         onClick={handleBackdropClick}

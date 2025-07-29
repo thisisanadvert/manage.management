@@ -52,7 +52,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
   return (
     <Portal>
-      <div className="fixed inset-0 z-[1200] bg-black bg-opacity-50 flex items-start justify-center pt-16">
+      <div className="fixed inset-0 z-[1200] bg-transparent flex items-start justify-center pt-16">
         {/* Modal Container */}
         <div className="w-full max-w-4xl mx-4 bg-white rounded-lg shadow-2xl max-h-[80vh] flex flex-col" role="dialog" aria-modal="true">
         {/* Header */}
