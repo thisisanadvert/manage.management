@@ -54,6 +54,7 @@ const IssueDetail = ({ issueId, onClose, onStatusChange }: IssueDetailProps) => 
   useEffect(() => {
     const fetchIssueDetails = async () => {
       setIsLoading(true);
+      console.log('Fetching issue details for ID:', actualIssueId);
       try {
         // Fetch issue details without user relationships to avoid foreign key error
         const { data: issueData, error: issueError } = await supabase
@@ -61,22 +62,18 @@ const IssueDetail = ({ issueId, onClose, onStatusChange }: IssueDetailProps) => 
           .select('*')
           .eq('id', actualIssueId)
           .single();
-          
+
+        console.log('Supabase response:', { data: issueData, error: issueError });
+
         if (issueError) throw issueError;
         
-        // Format the issue data
+        // Format the issue data (simplified to avoid user relationship errors)
         const formattedIssue = {
           ...issueData,
           id: `ISS-${issueData.id.substring(0, 4)}`,
-          reportedBy: issueData.reported_by ? {
-            name: `${issueData.reported_by.raw_user_meta_data.firstName || ''} ${issueData.reported_by.raw_user_meta_data.lastName || ''}`.trim() || issueData.reported_by.email,
-            role: issueData.reported_by.raw_user_meta_data.role
-          } : 'Unknown',
+          reportedBy: 'User', // Simplified for now
           reportedAt: new Date(issueData.created_at).toLocaleDateString(),
-          assignedTo: issueData.assigned_to ? {
-            name: `${issueData.assigned_to.raw_user_meta_data.firstName || ''} ${issueData.assigned_to.raw_user_meta_data.lastName || ''}`.trim() || issueData.assigned_to.email,
-            role: issueData.assigned_to.raw_user_meta_data.role
-          } : null
+          assignedTo: null // Simplified for now
         };
         
         setIssue(formattedIssue);
