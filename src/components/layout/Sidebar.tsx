@@ -210,7 +210,7 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleContactSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Name
@@ -266,27 +266,10 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
             </Button>
           </div>
         </form>
+        </div>
       </div>
     </Portal>
   );
-
-  // Add comprehensive debugging
-  console.log('🔍 Sidebar Debug - Current User:', {
-    user: user,
-    role: user?.role,
-    email: user?.email,
-    isSuperAdmin: user?.email === 'frankie@manage.management'
-  });
-
-  console.log('🔍 Sidebar Debug - Navigation Setup:', {
-    baseRoute,
-    currentLocation: location.pathname,
-    navigationItems: navigation.map(item => ({
-      name: item.name,
-      href: item.href,
-      roles: item.roles
-    }))
-  });
 
   const filteredNavigation = navigation.filter(item => {
     const hasRole = item.roles.includes(user?.role || '');
@@ -380,7 +363,7 @@ const Sidebar = ({ onItemClick }: SidebarProps) => {
         </div>
       </div>
 
-      {showContactModal && <ContactModal />}
+      {showContactModal && ContactModal()}
     </div>
   );
 };

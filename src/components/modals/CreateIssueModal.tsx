@@ -515,6 +515,7 @@ const CreateIssueModal = ({ isOpen, onClose, buildingId, onIssueCreated }: Creat
           </form>
         </div>
       </div>
+      </div>
     </Portal>
   );
 };

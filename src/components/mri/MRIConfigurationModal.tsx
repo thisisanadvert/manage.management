@@ -325,6 +325,7 @@ const MRIConfigurationModal: React.FC<MRIConfigurationModalProps> = ({
               {isSaving ? 'Saving...' : 'Save Configuration'}
             </Button>
           </div>
+          </div>
         </div>
       </div>
     </Portal>

@@ -737,6 +737,7 @@ const FinancialSetupModal = ({ isOpen, onClose, onSetupComplete }: FinancialSetu
               </form>
             )}
           </div>
+          </div>
         </div>
       </div>
     </Portal>

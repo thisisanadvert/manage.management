@@ -663,6 +663,7 @@ const IssueDetail = ({ issueId, onClose, onStatusChange }: IssueDetailProps) => 
               </div>
             </div>
           </div>
+          </div>
         </div>
       </div>
     </Portal>

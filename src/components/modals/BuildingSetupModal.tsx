@@ -456,6 +456,7 @@ const BuildingSetupModal = ({ isOpen, onClose, onSetupComplete }: BuildingSetupM
               </form>
             )}
           </div>
+          </div>
         </div>
       </div>
     </Portal>

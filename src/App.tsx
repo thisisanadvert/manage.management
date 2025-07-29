@@ -21,7 +21,7 @@ import LegalAccuracyDashboard from './components/legal/LegalAccuracyDashboard';
 import UserImpersonationDashboard from './components/admin/UserImpersonationDashboard';
 import { useAuth } from './contexts/AuthContext';
 import FormPersistenceService from './services/formPersistenceService';
-import { setupEmergencyFix, startModalOverlayAutoFix } from './utils/modalOverlayFix';
+import { setupEmergencyFix, startModalOverlayAutoFix, disableModalOverlayInteraction } from './utils/modalOverlayFix';
 
 
 import BuildingDetails from './pages/BuildingDetails';
@@ -161,7 +161,6 @@ function App() {
 
     // Immediate fix for any existing stuck overlays
     setTimeout(() => {
-      const { disableModalOverlayInteraction } = require('./utils/modalOverlayFix');
       disableModalOverlayInteraction();
     }, 1000);
 

@@ -180,6 +180,7 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
               <p className="text-gray-600">Loading poll details...</p>
             </div>
+            </div>
           </div>
         </div>
       </Portal>
@@ -212,6 +213,7 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
               >
                 Close
               </button>
+            </div>
             </div>
           </div>
         </div>
@@ -407,6 +409,7 @@ const PollDetailModal: React.FC<PollDetailModalProps> = ({
                 </div>
               )}
             </div>
+          </div>
           </div>
         </div>
       </div>
