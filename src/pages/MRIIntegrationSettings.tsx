@@ -24,6 +24,8 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserBuildingId } from '../utils/buildingUtils';
+import { useBuilding, useEffectiveBuildingId } from '../contexts/BuildingContext';
+import BuildingSelector from '../components/management/BuildingSelector';
 import MRIConnectionStatus from '../components/mri/MRIConnectionStatus';
 import MRISyncDashboard from '../components/mri/MRISyncDashboard';
 import MRIConfigurationModal from '../components/mri/MRIConfigurationModal';
@@ -36,6 +38,8 @@ import { mriSyncService } from '../services/mriSyncService';
 
 const MRIIntegrationSettings: React.FC = () => {
   const { user } = useAuth();
+  const { isManagementCompany } = useBuilding();
+  const effectiveBuildingId = useEffectiveBuildingId();
   const [buildingId, setBuildingId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [showConfigModal, setShowConfigModal] = useState(false);
@@ -51,12 +55,21 @@ const MRIIntegrationSettings: React.FC = () => {
 
   useEffect(() => {
     loadBuildingId();
-  }, [user]);
+  }, [user, effectiveBuildingId]);
 
   const loadBuildingId = async () => {
     if (user) {
       try {
-        const id = await getUserBuildingId(user);
+        let id: string | null = null;
+
+        if (isManagementCompany) {
+          // For management company users, use the selected building from context
+          id = effectiveBuildingId;
+        } else {
+          // For other users, get their building ID
+          id = await getUserBuildingId(user);
+        }
+
         if (id) {
           setBuildingId(id);
         }
@@ -93,14 +106,44 @@ const MRIIntegrationSettings: React.FC = () => {
 
   if (!buildingId) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="p-8 text-center max-w-md">
-          <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Building Access</h2>
-          <p className="text-gray-600">
-            You need to be associated with a building to configure MRI integration settings.
-          </p>
-        </Card>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-primary-50 rounded-lg">
+                <Database className="h-6 w-6 text-primary-600" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">MRI Qube Integration</h1>
+                <p className="text-gray-600">Configure and manage your property management system integration</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Building Selector for Management Company */}
+          {isManagementCompany && (
+            <div className="mb-8">
+              <BuildingSelector />
+            </div>
+          )}
+
+          {/* No Building Selected Message */}
+          <div className="flex items-center justify-center py-12">
+            <Card className="p-8 text-center max-w-md">
+              <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                {isManagementCompany ? 'Select a Building' : 'No Building Access'}
+              </h2>
+              <p className="text-gray-600">
+                {isManagementCompany
+                  ? 'Please select a building from the dropdown above to configure MRI integration settings.'
+                  : 'You need to be associated with a building to configure MRI integration settings.'
+                }
+              </p>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }
@@ -119,7 +162,14 @@ const MRIIntegrationSettings: React.FC = () => {
               <p className="text-gray-600">Configure and manage your property management system integration</p>
             </div>
           </div>
-          
+
+          {/* Building Selector for Management Company */}
+          {isManagementCompany && (
+            <div className="mb-6">
+              <BuildingSelector />
+            </div>
+          )}
+
           {/* Quick Status */}
           <div className="flex items-center gap-4 mt-4">
             <MRIConnectionStatus showDetails={false} />

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Bell, Lock, Mail, Shield, Smartphone, ToggleLeft as Toggle, CheckCircle2, XCircle, Database } from 'lucide-react';
+import { Bell, Lock, Mail, Shield, Smartphone, ToggleLeft as Toggle, CheckCircle2, XCircle, Database, Settings as SettingsIcon } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import GDPRCompliance from '../components/gdpr/GDPRCompliance';
+import { useAuth } from '../contexts/AuthContext';
 
 const Settings = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('account');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
@@ -62,11 +64,20 @@ const Settings = () => {
     </div>
   );
 
-  const tabs = [
+  // Build tabs array based on user role
+  const baseTabs = [
     { id: 'account', label: 'Account & Security', icon: <Lock className="h-4 w-4" /> },
     { id: 'notifications', label: 'Notifications', icon: <Bell className="h-4 w-4" /> },
     { id: 'privacy', label: 'Privacy & Data', icon: <Database className="h-4 w-4" /> }
   ];
+
+  // Add integrations tab for management company users
+  const tabs = user?.role === 'management-company'
+    ? [
+        ...baseTabs,
+        { id: 'integrations', label: 'Integrations', icon: <SettingsIcon className="h-4 w-4" /> }
+      ]
+    : baseTabs;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-16 lg:pb-0">
@@ -229,6 +240,50 @@ const Settings = () => {
       {/* Privacy & Data Tab */}
       {activeTab === 'privacy' && (
         <GDPRCompliance />
+      )}
+
+      {/* Integrations Tab - Only for Management Company users */}
+      {activeTab === 'integrations' && user?.role === 'management-company' && (
+        <div className="space-y-6">
+          <Card>
+            <h2 className="text-lg font-semibold mb-4 flex items-center">
+              <SettingsIcon className="mr-2 text-primary-600" size={20} />
+              Integrations
+            </h2>
+
+            <div className="space-y-4">
+              {/* MRI Integration */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center">
+                  <Database className="h-5 w-5 text-gray-400" />
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-gray-900">MRI Integration</p>
+                    <p className="text-xs text-gray-500">Connect with MRI property management system</p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.href = '/settings/mri-integration'}
+                >
+                  Configure
+                </Button>
+              </div>
+
+              {/* Future integrations placeholder */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg opacity-50">
+                <div className="flex items-center">
+                  <Database className="h-5 w-5 text-gray-400" />
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-gray-900">Additional Integrations</p>
+                    <p className="text-xs text-gray-500">More integrations coming soon</p>
+                  </div>
+                </div>
+                <Badge variant="secondary" size="sm">Coming Soon</Badge>
+              </div>
+            </div>
+          </Card>
+        </div>
       )}
 
       {showPasswordModal && <PasswordModal />}

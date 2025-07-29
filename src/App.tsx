@@ -298,7 +298,7 @@ function App() {
       >
         <Route index element={<Settings />} />
         <Route path="mri-integration" element={
-          <RoleBasedRoute allowedRoles={['rtm-director', 'rmc-director', 'super-admin']}>
+          <RoleBasedRoute allowedRoles={['rtm-director', 'rmc-director', 'management-company', 'super-admin']}>
             <MRIIntegrationSettings />
           </RoleBasedRoute>
         } />
