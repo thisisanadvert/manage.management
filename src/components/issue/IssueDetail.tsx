@@ -341,7 +341,7 @@ const IssueDetail = ({ issueId, onClose, onStatusChange }: IssueDetailProps) => 
   if (isLoading) {
     return (
       <Portal>
-        <div className="fixed inset-0 z-[1100] overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-[1100] overflow-y-auto bg-transparent flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full m-4" role="dialog" aria-modal="true">
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
@@ -355,7 +355,7 @@ const IssueDetail = ({ issueId, onClose, onStatusChange }: IssueDetailProps) => 
   if (!issue) {
     return (
       <Portal>
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-transparent flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full m-4" role="dialog" aria-modal="true">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Issue Details</h2>
@@ -379,7 +379,7 @@ const IssueDetail = ({ issueId, onClose, onStatusChange }: IssueDetailProps) => 
 
   return (
     <Portal>
-      <div className="fixed inset-0 z-[1100] overflow-y-auto bg-black bg-opacity-50">
+      <div className="fixed inset-0 z-[1100] overflow-y-auto bg-transparent">
         <div className="flex min-h-screen items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full" role="dialog" aria-modal="true">
           {/* Header */}

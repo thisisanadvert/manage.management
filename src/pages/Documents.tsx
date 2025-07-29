@@ -639,7 +639,7 @@ const Documents = () => {
 
     return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]"
+      className="fixed inset-0 bg-transparent flex items-center justify-center z-[10000]"
       style={{ pointerEvents: 'auto' }}
       onClick={(e) => {
         console.log('Modal backdrop clicked');
@@ -1082,7 +1082,7 @@ const Documents = () => {
   function TagModal() {
     return (
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        className="fixed inset-0 bg-transparent flex items-center justify-center z-50"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             setShowTagModal(false);
@@ -1171,7 +1171,7 @@ const Documents = () => {
   function DeleteModal() {
     return (
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        className="fixed inset-0 bg-transparent flex items-center justify-center z-50"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             setShowDeleteModal(false);

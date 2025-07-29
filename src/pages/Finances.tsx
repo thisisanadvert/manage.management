@@ -160,7 +160,7 @@ const Finances = () => {
   const ImportDataModal = () => (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setShowImportModal(false)} />
+        <div className="fixed inset-0 bg-transparent" onClick={() => setShowImportModal(false)} />
         <div className="relative w-full max-w-2xl rounded-lg bg-white shadow-xl">
           <div className="p-6">
             <h2 className="text-xl font-semibold mb-4">Import Historical Data</h2>

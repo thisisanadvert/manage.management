@@ -232,7 +232,7 @@ const CreatePollModal: React.FC<CreatePollModalProps> = ({ isOpen, onClose, onPo
 
   return (
     <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
-      <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
+      <div className="fixed inset-0 bg-transparent transition-opacity" onClick={onClose} />
       <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
         <div
           className="relative w-full max-w-4xl rounded-lg bg-white shadow-xl"

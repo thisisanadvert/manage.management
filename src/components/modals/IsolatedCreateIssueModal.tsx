@@ -49,7 +49,7 @@ const IsolatedCreateIssueModal = ({ isOpen, onClose, buildingId, onIssueCreated 
         bottom: 0 !important;
         z-index: 999999 !important;
         pointer-events: auto !important;
-        background-color: rgba(0, 0, 0, 0.5) !important;
+        background-color: transparent !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -158,7 +158,7 @@ const IsolatedCreateIssueModal = ({ isOpen, onClose, buildingId, onIssueCreated 
         bottom: '0',
         zIndex: '999999',
         pointerEvents: 'auto',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'transparent',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
