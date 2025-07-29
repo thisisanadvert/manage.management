@@ -221,12 +221,25 @@ const CreateIssueModal = ({ isOpen, onClose, buildingId, onIssueCreated }: Creat
 
   return (
     <Portal>
-      <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 9999 }}>
-        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-        <div className="flex min-h-screen items-center justify-center p-4" onClick={onClose}>
+      <div
+        className="fixed inset-0 overflow-y-auto"
+        style={{
+          zIndex: 99999,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          pointerEvents: 'auto'
+        }}
+        onClick={onClose}
+      >
+        <div
+          className="flex min-h-screen items-center justify-center p-4"
+          style={{ pointerEvents: 'auto' }}
+        >
           <div
             className="relative w-full max-w-2xl rounded-lg bg-white shadow-xl"
-            style={{ zIndex: 10000 }}
+            style={{
+              zIndex: 100000,
+              pointerEvents: 'auto'
+            }}
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"

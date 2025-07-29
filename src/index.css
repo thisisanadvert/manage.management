@@ -88,7 +88,7 @@
 /* Modal Fixes - Ensure modals are clickable and properly layered */
 #portal-root {
   position: relative;
-  z-index: 10000;
+  z-index: auto;
 }
 
 [role="dialog"] {
@@ -132,6 +132,17 @@ body.modal-open {
 }
 
 #portal-root [role="dialog"] {
+  pointer-events: auto !important;
+}
+
+/* CRITICAL FIX: Force CreateIssueModal to work regardless of other CSS */
+[aria-labelledby="modal-title"] {
+  pointer-events: auto !important;
+  z-index: 100000 !important;
+  position: relative !important;
+}
+
+[aria-labelledby="modal-title"] * {
   pointer-events: auto !important;
 }
 
