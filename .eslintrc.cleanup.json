@@ -1,0 +1,86 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "react",
+    "react-hooks",
+    "unused-imports"
+  ],
+  "rules": {
+    // Unused import detection
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "varsIgnorePattern": "^_",
+        "args": "after-used",
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    
+    // TypeScript specific unused code detection
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "vars": "all",
+        "args": "after-used",
+        "ignoreRestSiblings": true,
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    
+    // React specific unused code detection
+    "react/jsx-uses-react": "error",
+    "react/jsx-uses-vars": "error",
+    "react/no-unused-prop-types": "warn",
+    "react/no-unused-state": "warn",
+    
+    // General code quality rules that help identify dead code
+    "no-unreachable": "error",
+    "no-unused-expressions": "error",
+    "no-unused-labels": "error",
+    "no-useless-return": "error",
+    "no-useless-concat": "error",
+    "no-useless-escape": "error",
+    
+    // Import/export rules
+    "no-duplicate-imports": "error",
+    
+    // Disable rules that might conflict with cleanup
+    "react/react-in-jsx-scope": "off", // Not needed in React 17+
+    "@typescript-eslint/no-explicit-any": "warn" // Allow any during cleanup
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "env": {
+    "browser": true,
+    "es2020": true,
+    "node": true
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    "build/",
+    "archive/",
+    "*.config.js",
+    "*.config.ts"
+  ]
+}

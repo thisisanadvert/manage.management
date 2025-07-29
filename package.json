@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "analyze:unused": "node analyze_unused_code.cjs",
+    "cleanup:auto": "./enhanced_cleanup_with_analysis.sh",
+    "cleanup:migrations": "./cleanup_unused_duplicated_code.sh",
+    "lint:cleanup": "eslint . --config .eslintrc.cleanup.json --fix"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.7",

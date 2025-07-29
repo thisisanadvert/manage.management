@@ -1,0 +1,1492 @@
+{
+  "timestamp": "2025-07-29T15:54:46.284Z",
+  "summary": {
+    "totalComponents": 79,
+    "unusedComponents": 13,
+    "duplicateComponents": 79,
+    "totalImports": 409
+  },
+  "unusedComponents": [
+    {
+      "name": "PrivateRoute",
+      "files": [
+        {
+          "path": "App.tsx",
+          "line": 83,
+          "type": "component"
+        },
+        {
+          "path": "App.tsx",
+          "line": 83,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "RoleBasedRoute",
+      "files": [
+        {
+          "path": "App.tsx",
+          "line": 94,
+          "type": "component"
+        },
+        {
+          "path": "App.tsx",
+          "line": 94,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "ContactModal",
+      "files": [
+        {
+          "path": "components/layout/Sidebar.tsx",
+          "line": 196,
+          "type": "component"
+        },
+        {
+          "path": "components/layout/Sidebar.tsx",
+          "line": 196,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "IsolatedCreateIssueModal",
+      "files": [
+        {
+          "path": "components/modals/IsolatedCreateIssueModal.tsx",
+          "line": 20,
+          "type": "component"
+        },
+        {
+          "path": "components/modals/IsolatedCreateIssueModal.tsx",
+          "line": 20,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "CreateAnnouncementModal",
+      "files": [
+        {
+          "path": "pages/Announcements.tsx",
+          "line": 214,
+          "type": "component"
+        },
+        {
+          "path": "pages/Announcements.tsx",
+          "line": 214,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "CommentsSection",
+      "files": [
+        {
+          "path": "pages/Announcements.tsx",
+          "line": 318,
+          "type": "component"
+        },
+        {
+          "path": "pages/Announcements.tsx",
+          "line": 318,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "PreviewModal",
+      "files": [
+        {
+          "path": "pages/Documents.tsx",
+          "line": 517,
+          "type": "component"
+        },
+        {
+          "path": "pages/Documents.tsx",
+          "line": 517,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "UploadModal",
+      "files": [
+        {
+          "path": "pages/Documents.tsx",
+          "line": 615,
+          "type": "component"
+        },
+        {
+          "path": "pages/Documents.tsx",
+          "line": 615,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "TagModal",
+      "files": [
+        {
+          "path": "pages/Documents.tsx",
+          "line": 1082,
+          "type": "component"
+        },
+        {
+          "path": "pages/Documents.tsx",
+          "line": 1082,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "DeleteModal",
+      "files": [
+        {
+          "path": "pages/Documents.tsx",
+          "line": 1171,
+          "type": "component"
+        },
+        {
+          "path": "pages/Documents.tsx",
+          "line": 1171,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "ImportDataModal",
+      "files": [
+        {
+          "path": "pages/Finances.tsx",
+          "line": 160,
+          "type": "component"
+        },
+        {
+          "path": "pages/Finances.tsx",
+          "line": 160,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "ResourceCard",
+      "files": [
+        {
+          "path": "pages/RTMResources.tsx",
+          "line": 121,
+          "type": "component"
+        },
+        {
+          "path": "pages/RTMResources.tsx",
+          "line": 121,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "PasswordModal",
+      "files": [
+        {
+          "path": "pages/Settings.tsx",
+          "line": 12,
+          "type": "component"
+        },
+        {
+          "path": "pages/Settings.tsx",
+          "line": 12,
+          "type": "component"
+        }
+      ]
+    }
+  ],
+  "duplicateComponents": [
+    {
+      "name": "PrivateRoute",
+      "count": 2,
+      "files": [
+        {
+          "path": "App.tsx",
+          "line": 83,
+          "type": "component"
+        },
+        {
+          "path": "App.tsx",
+          "line": 83,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "RoleBasedRoute",
+      "count": 2,
+      "files": [
+        {
+          "path": "App.tsx",
+          "line": 94,
+          "type": "component"
+        },
+        {
+          "path": "App.tsx",
+          "line": 94,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "App",
+      "count": 2,
+      "files": [
+        {
+          "path": "App.tsx",
+          "line": 146,
+          "type": "component"
+        },
+        {
+          "path": "App.tsx",
+          "line": 146,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "ArcadeEmbed",
+      "count": 4,
+      "files": [
+        {
+          "path": "components/ArcadeEmbed.tsx",
+          "line": 3,
+          "type": "component"
+        },
+        {
+          "path": "components/landing/ArcadeEmbed.tsx",
+          "line": 9,
+          "type": "component"
+        },
+        {
+          "path": "components/ArcadeEmbed.tsx",
+          "line": 3,
+          "type": "component"
+        },
+        {
+          "path": "components/landing/ArcadeEmbed.tsx",
+          "line": 9,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "ErrorBoundary",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/ErrorBoundary.tsx",
+          "line": 16,
+          "type": "class-component"
+        },
+        {
+          "path": "components/ErrorBoundary.tsx",
+          "line": 16,
+          "type": "class-component"
+        }
+      ]
+    },
+    {
+      "name": "AuthRedirectHandler",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/auth/AuthRedirectHandler.tsx",
+          "line": 4,
+          "type": "component"
+        },
+        {
+          "path": "components/auth/AuthRedirectHandler.tsx",
+          "line": 4,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "IssueDetail",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/issue/IssueDetail.tsx",
+          "line": 38,
+          "type": "component"
+        },
+        {
+          "path": "components/issue/IssueDetail.tsx",
+          "line": 38,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Footer",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/layout/Footer.tsx",
+          "line": 4,
+          "type": "component"
+        },
+        {
+          "path": "components/layout/Footer.tsx",
+          "line": 4,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Header",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/layout/Header.tsx",
+          "line": 11,
+          "type": "component"
+        },
+        {
+          "path": "components/layout/Header.tsx",
+          "line": 11,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "MainLayout",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/layout/MainLayout.tsx",
+          "line": 13,
+          "type": "component"
+        },
+        {
+          "path": "components/layout/MainLayout.tsx",
+          "line": 13,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "MobileNav",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/layout/MobileNav.tsx",
+          "line": 11,
+          "type": "component"
+        },
+        {
+          "path": "components/layout/MobileNav.tsx",
+          "line": 11,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Sidebar",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/layout/Sidebar.tsx",
+          "line": 33,
+          "type": "component"
+        },
+        {
+          "path": "components/layout/Sidebar.tsx",
+          "line": 33,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "ContactModal",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/layout/Sidebar.tsx",
+          "line": 196,
+          "type": "component"
+        },
+        {
+          "path": "components/layout/Sidebar.tsx",
+          "line": 196,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "BuildingSetupModal",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/modals/BuildingSetupModal.tsx",
+          "line": 29,
+          "type": "component"
+        },
+        {
+          "path": "components/modals/BuildingSetupModal.tsx",
+          "line": 29,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "CreateIssueModal",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/modals/CreateIssueModal.tsx",
+          "line": 17,
+          "type": "component"
+        },
+        {
+          "path": "components/modals/CreateIssueModal.tsx",
+          "line": 17,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "FinancialSetupModal",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/modals/FinancialSetupModal.tsx",
+          "line": 15,
+          "type": "component"
+        },
+        {
+          "path": "components/modals/FinancialSetupModal.tsx",
+          "line": 15,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "InviteMembersModal",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/modals/InviteMembersModal.tsx",
+          "line": 34,
+          "type": "component"
+        },
+        {
+          "path": "components/modals/InviteMembersModal.tsx",
+          "line": 34,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "IsolatedCreateIssueModal",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/modals/IsolatedCreateIssueModal.tsx",
+          "line": 20,
+          "type": "component"
+        },
+        {
+          "path": "components/modals/IsolatedCreateIssueModal.tsx",
+          "line": 20,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "SimpleCreateIssueModal",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/modals/SimpleCreateIssueModal.tsx",
+          "line": 17,
+          "type": "component"
+        },
+        {
+          "path": "components/modals/SimpleCreateIssueModal.tsx",
+          "line": 17,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Badge",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/ui/Badge.tsx",
+          "line": 13,
+          "type": "component"
+        },
+        {
+          "path": "components/ui/Badge.tsx",
+          "line": 13,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Button",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/ui/Button.tsx",
+          "line": 14,
+          "type": "component"
+        },
+        {
+          "path": "components/ui/Button.tsx",
+          "line": 14,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Card",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/ui/Card.tsx",
+          "line": 17,
+          "type": "component"
+        },
+        {
+          "path": "components/ui/Card.tsx",
+          "line": 17,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "LoadingSpinner",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/ui/LoadingSpinner.tsx",
+          "line": 9,
+          "type": "component"
+        },
+        {
+          "path": "components/ui/LoadingSpinner.tsx",
+          "line": 9,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "PageLoader",
+      "count": 2,
+      "files": [
+        {
+          "path": "components/ui/PageLoader.tsx",
+          "line": 10,
+          "type": "component"
+        },
+        {
+          "path": "components/ui/PageLoader.tsx",
+          "line": 10,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "AuthProvider",
+      "count": 2,
+      "files": [
+        {
+          "path": "contexts/AuthContext.tsx",
+          "line": 52,
+          "type": "component"
+        },
+        {
+          "path": "contexts/AuthContext.tsx",
+          "line": 52,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "BuildingProvider",
+      "count": 2,
+      "files": [
+        {
+          "path": "contexts/BuildingContext.tsx",
+          "line": 34,
+          "type": "component"
+        },
+        {
+          "path": "contexts/BuildingContext.tsx",
+          "line": 34,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "AGMs",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/AGMs.tsx",
+          "line": 21,
+          "type": "component"
+        },
+        {
+          "path": "pages/AGMs.tsx",
+          "line": 21,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "About",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/About.tsx",
+          "line": 8,
+          "type": "component"
+        },
+        {
+          "path": "pages/About.tsx",
+          "line": 8,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Announcements",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Announcements.tsx",
+          "line": 31,
+          "type": "component"
+        },
+        {
+          "path": "pages/Announcements.tsx",
+          "line": 31,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "CreateAnnouncementModal",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Announcements.tsx",
+          "line": 214,
+          "type": "component"
+        },
+        {
+          "path": "pages/Announcements.tsx",
+          "line": 214,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "CommentsSection",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Announcements.tsx",
+          "line": 318,
+          "type": "component"
+        },
+        {
+          "path": "pages/Announcements.tsx",
+          "line": 318,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Blog",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Blog.tsx",
+          "line": 8,
+          "type": "component"
+        },
+        {
+          "path": "pages/Blog.tsx",
+          "line": 8,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "BuildingDetails",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/BuildingDetails.tsx",
+          "line": 24,
+          "type": "component"
+        },
+        {
+          "path": "pages/BuildingDetails.tsx",
+          "line": 24,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "BuildingSetup",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/BuildingSetup.tsx",
+          "line": 31,
+          "type": "component"
+        },
+        {
+          "path": "pages/BuildingSetup.tsx",
+          "line": 31,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Contact",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Contact.tsx",
+          "line": 6,
+          "type": "component"
+        },
+        {
+          "path": "pages/Contact.tsx",
+          "line": 6,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Documents.tsx",
+          "line": 36,
+          "type": "component"
+        },
+        {
+          "path": "pages/Documents.tsx",
+          "line": 36,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "PreviewModal",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Documents.tsx",
+          "line": 517,
+          "type": "component"
+        },
+        {
+          "path": "pages/Documents.tsx",
+          "line": 517,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "UploadModal",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Documents.tsx",
+          "line": 615,
+          "type": "component"
+        },
+        {
+          "path": "pages/Documents.tsx",
+          "line": 615,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "TagModal",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Documents.tsx",
+          "line": 1082,
+          "type": "component"
+        },
+        {
+          "path": "pages/Documents.tsx",
+          "line": 1082,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "DeleteModal",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Documents.tsx",
+          "line": 1171,
+          "type": "component"
+        },
+        {
+          "path": "pages/Documents.tsx",
+          "line": 1171,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Finances",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Finances.tsx",
+          "line": 47,
+          "type": "component"
+        },
+        {
+          "path": "pages/Finances.tsx",
+          "line": 47,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "ImportDataModal",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Finances.tsx",
+          "line": 160,
+          "type": "component"
+        },
+        {
+          "path": "pages/Finances.tsx",
+          "line": 160,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Help",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Help.tsx",
+          "line": 8,
+          "type": "component"
+        },
+        {
+          "path": "pages/Help.tsx",
+          "line": 8,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "IssuesManagement",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/IssuesManagement.tsx",
+          "line": 39,
+          "type": "component"
+        },
+        {
+          "path": "pages/IssuesManagement.tsx",
+          "line": 39,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Landing",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Landing.tsx",
+          "line": 37,
+          "type": "component"
+        },
+        {
+          "path": "pages/Landing.tsx",
+          "line": 37,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "LeaseholderRights",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/LeaseholderRights.tsx",
+          "line": 7,
+          "type": "component"
+        },
+        {
+          "path": "pages/LeaseholderRights.tsx",
+          "line": 7,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "NotFound",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/NotFound.tsx",
+          "line": 6,
+          "type": "component"
+        },
+        {
+          "path": "pages/NotFound.tsx",
+          "line": 6,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Pricing",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Pricing.tsx",
+          "line": 19,
+          "type": "component"
+        },
+        {
+          "path": "pages/Pricing.tsx",
+          "line": 19,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Profile.tsx",
+          "line": 22,
+          "type": "component"
+        },
+        {
+          "path": "pages/Profile.tsx",
+          "line": 22,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "RTMManagement",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/RTMManagement.tsx",
+          "line": 35,
+          "type": "component"
+        },
+        {
+          "path": "pages/RTMManagement.tsx",
+          "line": 35,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "RTMQualify",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/RTMQualify.tsx",
+          "line": 34,
+          "type": "component"
+        },
+        {
+          "path": "pages/RTMQualify.tsx",
+          "line": 34,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "RTMResources",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/RTMResources.tsx",
+          "line": 8,
+          "type": "component"
+        },
+        {
+          "path": "pages/RTMResources.tsx",
+          "line": 8,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "ResourceCard",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/RTMResources.tsx",
+          "line": 121,
+          "type": "component"
+        },
+        {
+          "path": "pages/RTMResources.tsx",
+          "line": 121,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Reports.tsx",
+          "line": 18,
+          "type": "component"
+        },
+        {
+          "path": "pages/Reports.tsx",
+          "line": 18,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Settings.tsx",
+          "line": 8,
+          "type": "component"
+        },
+        {
+          "path": "pages/Settings.tsx",
+          "line": 8,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "PasswordModal",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Settings.tsx",
+          "line": 12,
+          "type": "component"
+        },
+        {
+          "path": "pages/Settings.tsx",
+          "line": 12,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "ShareCertificates",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/ShareCertificates.tsx",
+          "line": 22,
+          "type": "component"
+        },
+        {
+          "path": "pages/ShareCertificates.tsx",
+          "line": 22,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Signup",
+      "count": 4,
+      "files": [
+        {
+          "path": "pages/Signup.tsx",
+          "line": 49,
+          "type": "component"
+        },
+        {
+          "path": "pages/auth/Signup.tsx",
+          "line": 66,
+          "type": "component"
+        },
+        {
+          "path": "pages/Signup.tsx",
+          "line": 49,
+          "type": "component"
+        },
+        {
+          "path": "pages/auth/Signup.tsx",
+          "line": 66,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "SupplierNetwork",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/SupplierNetwork.tsx",
+          "line": 7,
+          "type": "component"
+        },
+        {
+          "path": "pages/SupplierNetwork.tsx",
+          "line": 7,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Voting",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/Voting.tsx",
+          "line": 27,
+          "type": "component"
+        },
+        {
+          "path": "pages/Voting.tsx",
+          "line": 27,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "DebugReset",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/auth/DebugReset.tsx",
+          "line": 6,
+          "type": "component"
+        },
+        {
+          "path": "pages/auth/DebugReset.tsx",
+          "line": 6,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Demo",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/auth/Demo.tsx",
+          "line": 6,
+          "type": "component"
+        },
+        {
+          "path": "pages/auth/Demo.tsx",
+          "line": 6,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "EmailDiagnostic",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/auth/EmailDiagnostic.tsx",
+          "line": 7,
+          "type": "component"
+        },
+        {
+          "path": "pages/auth/EmailDiagnostic.tsx",
+          "line": 7,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "ForgotPassword",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/auth/ForgotPassword.tsx",
+          "line": 7,
+          "type": "component"
+        },
+        {
+          "path": "pages/auth/ForgotPassword.tsx",
+          "line": 7,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "Login",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/auth/Login.tsx",
+          "line": 7,
+          "type": "component"
+        },
+        {
+          "path": "pages/auth/Login.tsx",
+          "line": 7,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "ResetPassword",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/auth/ResetPassword.tsx",
+          "line": 7,
+          "type": "component"
+        },
+        {
+          "path": "pages/auth/ResetPassword.tsx",
+          "line": 7,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "SetupPassword",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/auth/SetupPassword.tsx",
+          "line": 14,
+          "type": "component"
+        },
+        {
+          "path": "pages/auth/SetupPassword.tsx",
+          "line": 14,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "SupabaseConfig",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/auth/SupabaseConfig.tsx",
+          "line": 7,
+          "type": "component"
+        },
+        {
+          "path": "pages/auth/SupabaseConfig.tsx",
+          "line": 7,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "VerifyReset",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/auth/VerifyReset.tsx",
+          "line": 6,
+          "type": "component"
+        },
+        {
+          "path": "pages/auth/VerifyReset.tsx",
+          "line": 6,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "LeaseholderDashboard",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/dashboards/LeaseholderDashboard.tsx",
+          "line": 22,
+          "type": "component"
+        },
+        {
+          "path": "pages/dashboards/LeaseholderDashboard.tsx",
+          "line": 22,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "ManagementDashboard",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/dashboards/ManagementDashboard.tsx",
+          "line": 47,
+          "type": "component"
+        },
+        {
+          "path": "pages/dashboards/ManagementDashboard.tsx",
+          "line": 47,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "RTMDashboard",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/dashboards/RTMDashboard.tsx",
+          "line": 33,
+          "type": "component"
+        },
+        {
+          "path": "pages/dashboards/RTMDashboard.tsx",
+          "line": 33,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "CommunicationHub",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/features/CommunicationHub.tsx",
+          "line": 8,
+          "type": "component"
+        },
+        {
+          "path": "pages/features/CommunicationHub.tsx",
+          "line": 8,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "DocumentManagement",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/features/DocumentManagement.tsx",
+          "line": 8,
+          "type": "component"
+        },
+        {
+          "path": "pages/features/DocumentManagement.tsx",
+          "line": 8,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "FinancialTracking",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/features/FinancialTracking.tsx",
+          "line": 8,
+          "type": "component"
+        },
+        {
+          "path": "pages/features/FinancialTracking.tsx",
+          "line": 8,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "IssueManagement",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/features/IssueManagement.tsx",
+          "line": 8,
+          "type": "component"
+        },
+        {
+          "path": "pages/features/IssueManagement.tsx",
+          "line": 8,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "VotingSystem",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/features/VotingSystem.tsx",
+          "line": 8,
+          "type": "component"
+        },
+        {
+          "path": "pages/features/VotingSystem.tsx",
+          "line": 8,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "PrivacyPolicy",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/legal/PrivacyPolicy.tsx",
+          "line": 6,
+          "type": "component"
+        },
+        {
+          "path": "pages/legal/PrivacyPolicy.tsx",
+          "line": 6,
+          "type": "component"
+        }
+      ]
+    },
+    {
+      "name": "TermsOfService",
+      "count": 2,
+      "files": [
+        {
+          "path": "pages/legal/TermsOfService.tsx",
+          "line": 6,
+          "type": "component"
+        },
+        {
+          "path": "pages/legal/TermsOfService.tsx",
+          "line": 6,
+          "type": "component"
+        }
+      ]
+    }
+  ]
+}
