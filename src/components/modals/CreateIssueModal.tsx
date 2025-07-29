@@ -5,6 +5,7 @@ import Portal from '../ui/Portal';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { validateUUIDSafe } from '../../utils/uuid';
+import { useModalManager } from '../../hooks/useModalManager';
 
 interface CreateIssueModalProps {
   isOpen: boolean;
@@ -31,25 +32,18 @@ const CreateIssueModal = ({ isOpen, onClose, buildingId, onIssueCreated }: Creat
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Handle escape key and body scroll
+  // Use centralized modal manager to prevent conflicts
+  useModalManager({
+    isOpen,
+    onClose,
+    enableEscapeKey: true,
+    enableBodyScrollLock: true
+  });
+
+  // Debug logging
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      // Prevent body scroll when modal is open
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen, onClose]);
+    console.log('CreateIssueModal state:', { isOpen, isSubmitting });
+  }, [isOpen, isSubmitting]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -217,6 +211,11 @@ const CreateIssueModal = ({ isOpen, onClose, buildingId, onIssueCreated }: Creat
     }
   };
 
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    console.log('Backdrop clicked');
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -228,11 +227,12 @@ const CreateIssueModal = ({ isOpen, onClose, buildingId, onIssueCreated }: Creat
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
           pointerEvents: 'auto'
         }}
-        onClick={onClose}
+        onClick={handleBackdropClick}
       >
         <div
           className="flex min-h-screen items-center justify-center p-4"
           style={{ pointerEvents: 'auto' }}
+          onClick={handleBackdropClick}
         >
           <div
             className="relative w-full max-w-2xl rounded-lg bg-white shadow-xl"
