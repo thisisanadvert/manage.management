@@ -25,7 +25,7 @@ import {
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
-import CreateIssueModal from '../components/modals/CreateIssueModal';
+import IsolatedCreateIssueModal from '../components/modals/IsolatedCreateIssueModal';
 import IssueDetail from '../components/issue/IssueDetail';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
@@ -447,7 +447,7 @@ const IssuesManagement = () => {
         ))}
       </div>
 
-          <CreateIssueModal
+          <IsolatedCreateIssueModal
             isOpen={isCreateIssueModalOpen}
             onClose={() => setIsCreateIssueModalOpen(false)}
             buildingId={effectiveBuildingId || ''}
