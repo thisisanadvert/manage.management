@@ -103,7 +103,7 @@
 /* Ensure modal backdrops are properly handled */
 .fixed.inset-0.bg-black.bg-opacity-50 {
   pointer-events: auto !important;
-  z-index: 9999 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
 }
 
 /* Prevent modal backdrop persistence */
@@ -111,8 +111,27 @@ body.modal-open {
   overflow: hidden;
 }
 
-/* Force remove any lingering modal backdrops */
-.fixed.inset-0[style*="z-index: 9999"] {
+/* Ensure modal containers work properly */
+[role="dialog"],
+.modal-container {
+  pointer-events: auto !important;
+  z-index: 10000 !important;
+}
+
+/* Modal backdrop specific rules */
+.modal-backdrop,
+[data-modal-backdrop],
+.fixed.inset-0.bg-black.bg-opacity-50 {
+  pointer-events: auto !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Ensure Portal-rendered modals work correctly */
+#portal-root .fixed.inset-0 {
+  pointer-events: auto !important;
+}
+
+#portal-root [role="dialog"] {
   pointer-events: auto !important;
 }
 
@@ -247,8 +266,8 @@ div[class*="absolute"][class*="right-full"] {
   opacity: 1 !important;
 }
 
-/* 3b. Tooltip Backdrop Fixes */
-div[class*="fixed"][class*="inset-0"] {
+/* 3b. Tooltip Backdrop Fixes - Only target tooltip backdrops, not modal backdrops */
+div[class*="fixed"][class*="inset-0"][class*="tooltip"] {
   z-index: 999 !important;
 }
 
@@ -295,9 +314,9 @@ button[aria-label*="information"],
   position: relative !important;
 }
 
-/* 8. Backdrop Fixes */
-.fixed.inset-0.z-40,
-.fixed.inset-0[class*="z-"] {
+/* 8. Backdrop Fixes - Only target specific tooltip backdrops, not modal backdrops */
+.fixed.inset-0.z-40:not([role="dialog"]):not(.modal-backdrop),
+.tooltip-backdrop {
   background-color: transparent !important;
   pointer-events: none !important;
 }

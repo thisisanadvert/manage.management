@@ -1,6 +1,7 @@
 import React from 'react';
 import LoadingSpinner from './LoadingSpinner';
 import Logo from './Logo';
+import Portal from './Portal';
 
 export interface LoadingStateProps {
   type?: 'page' | 'section' | 'inline' | 'overlay';
@@ -49,11 +50,13 @@ const LoadingState: React.FC<LoadingStateProps> = ({
 
     case 'overlay':
       return (
-        <div className={`fixed inset-0 z-[1100] bg-black bg-opacity-50 flex items-center justify-center ${className}`}>
-          <div className="bg-white rounded-lg p-8 max-w-sm mx-4">
-            {renderContent()}
+        <Portal>
+          <div className={`fixed inset-0 z-[1100] bg-black bg-opacity-50 flex items-center justify-center ${className}`} role="dialog" aria-modal="true">
+            <div className="bg-white rounded-lg p-8 max-w-sm mx-4">
+              {renderContent()}
+            </div>
           </div>
-        </div>
+        </Portal>
       );
 
     case 'inline':
