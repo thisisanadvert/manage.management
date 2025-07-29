@@ -85,7 +85,8 @@
   color: rgb(55 65 81) !important; /* gray-700 */
 }
 
-/* Modal Fixes - Ensure modals are clickable and properly layered */
+/* TEMPORARILY DISABLED - MODAL CSS CAUSING CONFLICTS */
+/*
 #portal-root {
   position: relative;
   z-index: auto;
@@ -100,25 +101,21 @@
   pointer-events: auto !important;
 }
 
-/* Ensure modal backdrops are properly handled */
 .fixed.inset-0.bg-black.bg-opacity-50 {
   pointer-events: auto !important;
   background-color: rgba(0, 0, 0, 0.5) !important;
 }
 
-/* Prevent modal backdrop persistence */
 body.modal-open {
   overflow: hidden;
 }
 
-/* Ensure modal containers work properly */
 [role="dialog"],
 .modal-container {
   pointer-events: auto !important;
   z-index: 10000 !important;
 }
 
-/* Modal backdrop specific rules */
 .modal-backdrop,
 [data-modal-backdrop],
 .fixed.inset-0.bg-black.bg-opacity-50 {
@@ -126,7 +123,6 @@ body.modal-open {
   background-color: rgba(0, 0, 0, 0.5) !important;
 }
 
-/* Ensure Portal-rendered modals work correctly */
 #portal-root .fixed.inset-0 {
   pointer-events: auto !important;
 }
@@ -135,7 +131,6 @@ body.modal-open {
   pointer-events: auto !important;
 }
 
-/* CRITICAL FIX: Force CreateIssueModal to work regardless of other CSS */
 [aria-labelledby="modal-title"] {
   pointer-events: auto !important;
   z-index: 100000 !important;
@@ -145,6 +140,7 @@ body.modal-open {
 [aria-labelledby="modal-title"] * {
   pointer-events: auto !important;
 }
+*/
 
 /* Additional tooltip visibility fixes */
 /* Ensure all absolute positioned tooltips are visible */
