@@ -48,8 +48,8 @@ const IssueDetail = ({ issueId, onClose, onStatusChange }: IssueDetailProps) => 
   const [isSubmittingStatus, setIsSubmittingStatus] = useState(false);
   const [showAllTimeline, setShowAllTimeline] = useState(false);
   
-  // Extract the UUID from the issue ID (remove the "ISS-" prefix)
-  const actualIssueId = issueId.replace('ISS-', '');
+  // Use the issueId directly as it's now the full UUID
+  const actualIssueId = issueId;
   
   useEffect(() => {
     const fetchIssueDetails = async () => {

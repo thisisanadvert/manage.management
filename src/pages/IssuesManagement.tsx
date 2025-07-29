@@ -106,6 +106,7 @@ const IssuesManagement = () => {
         setIssues(data.map(issue => ({
           ...issue,
           id: `ISS-${issue.id.substring(0, 4)}`,
+          fullId: issue.id, // Store the full UUID for detail view
           reportedBy: 'User', // Simplified for now
           reportedAt: new Date(issue.created_at).toLocaleDateString()
         })));
@@ -440,7 +441,7 @@ const IssuesManagement = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => viewIssueDetails(issue.id)}
+                onClick={() => viewIssueDetails(issue.fullId)}
               >View Details</Button>
             </div>
           </Card>
