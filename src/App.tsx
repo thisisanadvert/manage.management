@@ -21,6 +21,7 @@ import LegalAccuracyDashboard from './components/legal/LegalAccuracyDashboard';
 import UserImpersonationDashboard from './components/admin/UserImpersonationDashboard';
 import { useAuth } from './contexts/AuthContext';
 import FormPersistenceService from './services/formPersistenceService';
+import { setupEmergencyFix, startModalOverlayAutoFix } from './utils/modalOverlayFix';
 
 
 import BuildingDetails from './pages/BuildingDetails';
@@ -151,6 +152,26 @@ function App() {
   React.useEffect(() => {
     const formPersistenceService = FormPersistenceService.getInstance();
     formPersistenceService.initialize();
+  }, []);
+
+  // Initialize modal overlay fix
+  React.useEffect(() => {
+    // Setup emergency fix functions for debugging
+    setupEmergencyFix();
+
+    // Immediate fix for any existing stuck overlays
+    setTimeout(() => {
+      const { disableModalOverlayInteraction } = require('./utils/modalOverlayFix');
+      disableModalOverlayInteraction();
+    }, 1000);
+
+    // Start auto-fix that runs every 5 seconds
+    const stopAutoFix = startModalOverlayAutoFix(5000);
+
+    // Cleanup on unmount
+    return () => {
+      stopAutoFix();
+    };
   }, []);
 
   // Show loading screen while auth is initializing

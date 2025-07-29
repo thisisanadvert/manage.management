@@ -531,6 +531,53 @@ button[aria-label*="close"] {
   pointer-events: auto !important;
 }
 
+/* MODAL OVERLAY ELIMINATION - COMPREHENSIVE OVERRIDE */
+/* This section ensures NO modal overlays can appear, regardless of source */
+
+/* Override any bg-background classes (including Tailwind arbitrary values) */
+.bg-background,
+.bg-background\/80,
+.bg-background\/50,
+.bg-background\/60,
+.bg-background\/70,
+.bg-background\/90,
+[class*="bg-background/"],
+[class*="bg-background\\"] {
+  background-color: transparent !important;
+}
+
+/* Override any backdrop blur effects on modal overlays */
+.fixed.inset-0.backdrop-blur-sm,
+.fixed.inset-0.backdrop-blur,
+.fixed.inset-0.backdrop-blur-md,
+.fixed.inset-0.backdrop-blur-lg,
+[class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Comprehensive modal overlay elimination - target any fixed overlay */
+.fixed.inset-0.z-50,
+.fixed.inset-0.z-40,
+.fixed.inset-0.z-30,
+.fixed.inset-0[class*="z-"],
+div[class*="fixed"][class*="inset-0"][class*="z-"] {
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  /* CRITICAL FIX: Remove pointer events to prevent click blocking */
+  pointer-events: none !important;
+}
+
+/* Specific override for the exact classes mentioned in the issue */
+.fixed.inset-0.z-50.bg-background\/80.backdrop-blur-sm {
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  /* CRITICAL FIX: Remove pointer events to prevent click blocking */
+  pointer-events: none !important;
+}
+
 /* Hide number input spinners across all browsers */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
