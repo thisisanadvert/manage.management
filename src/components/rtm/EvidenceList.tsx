@@ -24,10 +24,10 @@ interface EvidenceListProps {
 
 const EvidenceList: React.FC<EvidenceListProps> = ({
   stepId,
-  evidence,
+  evidence: initialEvidence,
   onEvidenceUpdate
 }) => {
-  const [evidence, setEvidence] = useState<RTMEvidence[]>([]);
+  const [evidence, setEvidence] = useState<RTMEvidence[]>(initialEvidence || []);
   const [loading, setLoading] = useState(true);
   const [verifying, setVerifying] = useState<string | null>(null);
 

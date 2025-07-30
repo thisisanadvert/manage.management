@@ -811,7 +811,6 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
             The complete RTM process typically takes 6-12 months from start to finish, depending on complexity and any challenges from the current managing agent.
           </p>
         </div>
-        </div>
       </Card>
 
       {/* Evidence Upload Modal */}
