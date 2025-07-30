@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, Circle, Clock, AlertTriangle, Calendar, FileText, Users, Building2, Scale, BookOpen, Upload, Target, Shield, Eye, Edit3, Save, X, Mail } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, AlertTriangle, Calendar, FileText, Users, Building2, Scale, BookOpen, Upload, Target, Shield, Edit3, Save, X, Mail } from 'lucide-react';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import Badge from '../ui/Badge';
@@ -45,7 +45,6 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
   const [timelineData, setTimelineData] = useState<RTMTimelineOverview | null>(null);
   const [showEvidenceModal, setShowEvidenceModal] = useState(false);
   const [selectedStepForEvidence, setSelectedStepForEvidence] = useState<string | null>(null);
-  const [showDemo, setShowDemo] = useState(false);
   const [editingDateStep, setEditingDateStep] = useState<string | null>(null);
   const [tempDate, setTempDate] = useState<string>('');
   const [stepCompletionDates, setStepCompletionDates] = useState<Record<string, string>>({});
@@ -95,13 +94,19 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
     return Math.round((completedSteps / totalSteps) * 100);
   };
 
-  const handleEditDate = (stepId: string) => {
+  const handleEditDate = (stepId: string, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
     const currentDate = stepCompletionDates[stepId] || new Date().toISOString().split('T')[0];
     setTempDate(currentDate);
     setEditingDateStep(stepId);
   };
 
-  const handleSaveDate = (stepId: string) => {
+  const handleSaveDate = (stepId: string, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
     setStepCompletionDates(prev => ({
       ...prev,
       [stepId]: tempDate
@@ -110,7 +115,10 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
     setTempDate('');
   };
 
-  const handleCancelDateEdit = () => {
+  const handleCancelDateEdit = (event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
     setEditingDateStep(null);
     setTempDate('');
   };
@@ -338,6 +346,19 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return { text: 'Completed', color: 'bg-green-100 text-green-800', description: 'This step has been finished' };
+      case 'active':
+        return { text: 'In Progress', color: 'bg-blue-100 text-blue-800', description: 'Currently working on this step' };
+      case 'blocked':
+        return { text: 'Blocked', color: 'bg-red-100 text-red-800', description: 'Cannot proceed - action required' };
+      default:
+        return { text: 'Not Started', color: 'bg-gray-100 text-gray-800', description: 'Waiting to begin this step' };
+    }
+  };
+
   const toggleExpanded = (stepId: string) => {
     setExpandedStep(expandedStep === stepId ? null : stepId);
   };
@@ -394,20 +415,9 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
                 Track your progress through the Right to Manage formation process
               </p>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowDemo(!showDemo)}
-                className="flex items-center space-x-2"
-              >
-                <Eye className="h-4 w-4" />
-                <span>{showDemo ? 'Hide Demo' : 'Demo Mode'}</span>
-              </Button>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-blue-600">{calculateOverallProgress()}%</div>
-                <div className="text-sm text-gray-500">Complete</div>
-              </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-blue-600">{calculateOverallProgress()}%</div>
+              <div className="text-sm text-gray-500">Complete</div>
             </div>
           </div>
 
@@ -421,35 +431,47 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
 
           {/* Key Metrics */}
           <div className="grid grid-cols-4 gap-4">
-            <div className="text-center p-3 bg-blue-50 rounded-lg">
-              <div className="text-lg font-semibold text-blue-600">
-                {timelineSteps.filter(s => {
-                  const stepData = timelineData?.steps.find(sd => sd.stepId === s.id);
-                  return stepData?.progress === 100;
-                }).length}
+            <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200">
+              <div className="flex items-center justify-center mb-1">
+                <CheckCircle2 className="h-4 w-4 text-green-600 mr-1" />
+                <div className="text-lg font-semibold text-green-600">
+                  {timelineSteps.filter(s => {
+                    const stepData = timelineData?.steps.find(sd => sd.stepId === s.id);
+                    return stepData?.progress === 100;
+                  }).length}
+                </div>
               </div>
-              <div className="text-sm text-gray-600">Completed</div>
+              <div className="text-sm text-green-700 font-medium">Steps Completed</div>
             </div>
-            <div className="text-center p-3 bg-yellow-50 rounded-lg">
-              <div className="text-lg font-semibold text-yellow-600">
-                {timelineSteps.filter(s => s.status === 'active').length}
+            <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-center mb-1">
+                <Clock className="h-4 w-4 text-blue-600 mr-1" />
+                <div className="text-lg font-semibold text-blue-600">
+                  {timelineSteps.filter(s => s.status === 'active').length}
+                </div>
               </div>
-              <div className="text-sm text-gray-600">In Progress</div>
+              <div className="text-sm text-blue-700 font-medium">Currently Active</div>
             </div>
-            <div className="text-center p-3 bg-gray-50 rounded-lg">
-              <div className="text-lg font-semibold text-gray-600">
-                {timelineSteps.filter(s => s.status === 'pending').length}
+            <div className="text-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-center mb-1">
+                <Circle className="h-4 w-4 text-gray-600 mr-1" />
+                <div className="text-lg font-semibold text-gray-600">
+                  {timelineSteps.filter(s => s.status === 'pending').length}
+                </div>
               </div>
-              <div className="text-sm text-gray-600">Pending</div>
+              <div className="text-sm text-gray-700 font-medium">Not Yet Started</div>
             </div>
-            <div className="text-center p-3 bg-green-50 rounded-lg">
-              <div className="text-lg font-semibold text-green-600">
-                {timelineData?.estimatedCompletionDate ?
-                  new Date(timelineData.estimatedCompletionDate).toLocaleDateString('en-GB') :
-                  'TBD'
-                }
+            <div className="text-center p-3 bg-indigo-50 rounded-lg border border-indigo-200">
+              <div className="flex items-center justify-center mb-1">
+                <Calendar className="h-4 w-4 text-indigo-600 mr-1" />
+                <div className="text-lg font-semibold text-indigo-600">
+                  {timelineData?.estimatedCompletionDate ?
+                    new Date(timelineData.estimatedCompletionDate).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) :
+                    'TBD'
+                  }
+                </div>
               </div>
-              <div className="text-sm text-gray-600">Est. Completion</div>
+              <div className="text-sm text-indigo-700 font-medium">Target Completion</div>
             </div>
           </div>
         </div>
@@ -486,11 +508,9 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
                         <h4 className="text-lg font-semibold text-gray-900">
                           {step.title}
                         </h4>
-                        {step.status === 'active' && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            Current Step
-                          </span>
-                        )}
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusLabel(step.status).color}`}>
+                          {getStatusLabel(step.status).text}
+                        </span>
                       </div>
                       <div className="flex items-center space-x-2 text-sm text-gray-500">
                         <Calendar className="h-4 w-4" />
@@ -546,12 +566,13 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
                                   type="date"
                                   value={tempDate}
                                   onChange={(e) => setTempDate(e.target.value)}
+                                  onClick={(e) => e.stopPropagation()}
                                   className="px-2 py-1 border border-gray-300 rounded text-sm"
                                 />
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => handleSaveDate(step.id)}
+                                  onClick={(e) => handleSaveDate(step.id, e)}
                                   className="p-1"
                                 >
                                   <Save className="h-3 w-3" />
@@ -559,7 +580,7 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={handleCancelDateEdit}
+                                  onClick={(e) => handleCancelDateEdit(e)}
                                   className="p-1"
                                 >
                                   <X className="h-3 w-3" />
@@ -569,7 +590,7 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleEditDate(step.id)}
+                                onClick={(e) => handleEditDate(step.id, e)}
                                 className="flex items-center space-x-1"
                               >
                                 <Edit3 className="h-3 w-3" />

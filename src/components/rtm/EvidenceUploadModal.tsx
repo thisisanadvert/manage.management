@@ -13,14 +13,13 @@ import {
 import Button from '../ui/Button';
 import { RTMMilestone, RTMEvidence } from '../../services/rtmTimelineService';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface EvidenceUploadModalProps {
   stepId: string;
   stepTitle: string;
   onClose: () => void;
   onUploadComplete: () => void;
-  onClose: () => void;
-  onEvidenceUploaded: () => void;
 }
 
 interface UploadFile {
@@ -42,12 +41,12 @@ interface EvidenceFormData {
 }
 
 const EvidenceUploadModal: React.FC<EvidenceUploadModalProps> = ({
-  milestone,
-  buildingId,
-  userId,
+  stepId,
+  stepTitle,
   onClose,
-  onEvidenceUploaded
+  onUploadComplete
 }) => {
+  const { user } = useAuth();
   const [files, setFiles] = useState<UploadFile[]>([]);
   const [formData, setFormData] = useState<EvidenceFormData>({
     document_type: 'other',
@@ -96,9 +95,13 @@ const EvidenceUploadModal: React.FC<EvidenceUploadModalProps> = ({
     setFiles(prev => prev.filter(f => f.id !== fileId));
   };
 
-  const uploadFile = async (uploadFile: UploadFile): Promise<string> => {
+  const uploadFileToStorage = async (uploadFile: UploadFile): Promise<string> => {
+    if (!user?.id) {
+      throw new Error('User not authenticated');
+    }
+
     const fileExt = uploadFile.file.name.split('.').pop();
-    const fileName = `${buildingId}/${milestone.id}/${uploadFile.id}.${fileExt}`;
+    const fileName = `${user.id}/${stepId}/${uploadFile.id}.${fileExt}`;
     const filePath = `rtm-evidence/${fileName}`;
 
     const { data, error } = await supabase.storage
@@ -116,7 +119,7 @@ const EvidenceUploadModal: React.FC<EvidenceUploadModalProps> = ({
   };
 
   const handleUpload = async () => {
-    if (files.length === 0 || !formData.document_title.trim()) {
+    if (files.length === 0 || !formData.document_title.trim() || !user?.id) {
       alert('Please select files and provide a document title');
       return;
     }
@@ -129,47 +132,76 @@ const EvidenceUploadModal: React.FC<EvidenceUploadModalProps> = ({
 
         try {
           // Upload file to storage
-          const filePath = await uploadFile(uploadFile);
+          const filePath = await uploadFileToStorage(uploadFile);
 
-          // Create evidence record
-          const evidenceData: Omit<RTMEvidence, 'id' | 'milestone_id' | 'building_id' | 'uploaded_by' | 'created_at' | 'updated_at'> = {
-            document_type: formData.document_type as any,
-            document_title: formData.document_title,
-            document_description: formData.document_description,
-            file_path: filePath,
-            file_size: uploadFile.file.size,
-            file_type: uploadFile.file.type,
-            service_date: formData.service_date || undefined,
-            service_method: formData.service_method || undefined,
-            recipient_name: formData.recipient_name || undefined,
-            recipient_address: formData.recipient_address || undefined,
-            verified: false
-          };
-
-          const { error: dbError } = await supabase
-            .from('rtm_evidence')
+          // Create document record in main documents table
+          const { data: documentData, error: docError } = await supabase
+            .from('document_repository')
             .insert({
-              milestone_id: milestone.id!,
-              building_id: buildingId,
-              uploaded_by: userId,
-              ...evidenceData
+              building_id: user.metadata?.buildingId || user.id, // Use building ID if available
+              title: formData.document_title,
+              description: formData.document_description || `RTM Evidence: ${stepTitle}`,
+              file_name: uploadFile.file.name,
+              file_path: filePath,
+              file_size: uploadFile.file.size,
+              mime_type: uploadFile.file.type,
+              category: 'Legal', // RTM evidence is legal documentation
+              tags: [`rtm-${stepId}`, 'rtm-evidence', formData.document_type],
+              uploaded_by: user.id,
+              access_level: 'building',
+              metadata: {
+                rtm_step: stepId,
+                step_title: stepTitle,
+                document_type: formData.document_type,
+                service_date: formData.service_date,
+                service_method: formData.service_method,
+                recipient_name: formData.recipient_name,
+                recipient_address: formData.recipient_address
+              }
+            })
+            .select()
+            .single();
+
+          if (docError) {
+            throw docError;
+          }
+
+          // Also create RTM evidence record for timeline tracking
+          const { error: evidenceError } = await supabase
+            .from('rtm_timeline_evidence')
+            .insert({
+              user_id: user.id,
+              step_id: stepId,
+              document_id: documentData.id,
+              document_type: formData.document_type,
+              document_title: formData.document_title,
+              document_description: formData.document_description,
+              file_path: filePath,
+              file_size: uploadFile.file.size,
+              file_type: uploadFile.file.type,
+              service_date: formData.service_date || null,
+              service_method: formData.service_method || null,
+              recipient_name: formData.recipient_name || null,
+              recipient_address: formData.recipient_address || null,
+              verified: false
             });
 
-          if (dbError) {
-            throw dbError;
+          if (evidenceError) {
+            console.warn('Failed to create evidence record:', evidenceError);
+            // Don't fail the upload if evidence record creation fails
           }
 
           // Update file status
-          setFiles(prev => prev.map(f => 
-            f.id === uploadFile.id 
+          setFiles(prev => prev.map(f =>
+            f.id === uploadFile.id
               ? { ...f, uploaded: true, progress: 100 }
               : f
           ));
 
         } catch (error) {
           console.error('Error uploading file:', error);
-          setFiles(prev => prev.map(f => 
-            f.id === uploadFile.id 
+          setFiles(prev => prev.map(f =>
+            f.id === uploadFile.id
               ? { ...f, error: error instanceof Error ? error.message : 'Upload failed' }
               : f
           ));
@@ -179,7 +211,7 @@ const EvidenceUploadModal: React.FC<EvidenceUploadModalProps> = ({
       // Check if all files uploaded successfully
       const allUploaded = files.every(f => f.uploaded);
       if (allUploaded) {
-        onEvidenceUploaded();
+        onUploadComplete();
         onClose();
       }
 
@@ -207,10 +239,10 @@ const EvidenceUploadModal: React.FC<EvidenceUploadModalProps> = ({
         </div>
         
         <div className="space-y-6">
-          {/* Milestone Info */}
+          {/* Step Info */}
           <div className="bg-gray-50 p-4 rounded-lg">
-            <h4 className="font-medium text-gray-900 mb-2">{milestone.milestone_title}</h4>
-            <p className="text-sm text-gray-600">{milestone.evidence_description}</p>
+            <h4 className="font-medium text-gray-900 mb-2">{stepTitle}</h4>
+            <p className="text-sm text-gray-600">Upload evidence documents for this RTM timeline step</p>
           </div>
 
           {/* Document Details Form */}
