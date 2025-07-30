@@ -31,16 +31,19 @@ import AcquisitionPlanner from '../components/rtm/AcquisitionPlanner';
 import RTMTimeline from '../components/rtm/RTMTimeline';
 import RTMFeedback from '../components/rtm/RTMFeedback';
 import RTMHelpCenter from '../components/rtm/RTMHelpCenter';
+import EnhancedRTMTimeline from '../components/rtm/EnhancedRTMTimeline';
+import RTMProgressDashboard from '../components/rtm/RTMProgressDashboard';
+import RTMTimelineTest from '../components/rtm/RTMTimelineTest';
 
 const RTMManagement = () => {
   const [searchParams] = useSearchParams();
-  const [activeView, setActiveView] = useState<'overview' | 'eligibility' | 'survey' | 'formation' | 'notices' | 'acquisition' | 'timeline' | 'help' | 'feedback'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'eligibility' | 'survey' | 'formation' | 'notices' | 'acquisition' | 'timeline' | 'enhanced-timeline' | 'test-timeline' | 'help' | 'feedback'>('overview');
   const [currentStep, setCurrentStep] = useState('eligibility');
 
   // Handle URL parameters to open specific views
   useEffect(() => {
     const view = searchParams.get('view');
-    if (view && ['eligibility', 'survey', 'formation', 'notices', 'acquisition', 'timeline', 'help', 'feedback'].includes(view)) {
+    if (view && ['eligibility', 'survey', 'formation', 'notices', 'acquisition', 'timeline', 'enhanced-timeline', 'test-timeline', 'help', 'feedback'].includes(view)) {
       setActiveView(view as any);
     }
   }, [searchParams]);
@@ -93,6 +96,24 @@ const RTMManagement = () => {
       icon: <Calendar className="h-6 w-6" />,
       status: 'available',
       category: 'Planning'
+    },
+    {
+      id: 'enhanced-timeline',
+      title: 'Enhanced Timeline Tracker',
+      description: 'Smart timeline with deadline tracking, evidence uploads, and progress monitoring',
+      icon: <Shield className="h-6 w-6" />,
+      status: 'available',
+      category: 'Planning',
+      badge: 'New'
+    },
+    {
+      id: 'test-timeline',
+      title: 'Timeline Demo',
+      description: 'Interactive demonstration of the enhanced timeline features',
+      icon: <CheckCircle2 className="h-6 w-6" />,
+      status: 'available',
+      category: 'Demo',
+      badge: 'Demo'
     }
   ];
   
@@ -114,6 +135,10 @@ const RTMManagement = () => {
         return <AcquisitionPlanner />;
       case 'timeline':
         return <RTMTimeline currentStep={currentStep} onStepClick={handleStepClick} />;
+      case 'enhanced-timeline':
+        return <EnhancedRTMTimeline buildingId="building-id-placeholder" />;
+      case 'test-timeline':
+        return <RTMTimelineTest />;
       case 'help':
         return <RTMHelpCenter />;
       case 'feedback':
@@ -324,7 +349,9 @@ const RTMManagement = () => {
             {rtmTools.find(tool => tool.id === activeView)?.title ||
              (activeView === 'help' ? 'Help Center' :
               activeView === 'feedback' ? 'Feedback' :
-              activeView === 'timeline' ? 'Process Timeline' : 'Tool')}
+              activeView === 'timeline' ? 'Process Timeline' :
+              activeView === 'enhanced-timeline' ? 'Enhanced Timeline Tracker' :
+              activeView === 'test-timeline' ? 'Timeline Demo' : 'Tool')}
           </span>
         </div>
       )}

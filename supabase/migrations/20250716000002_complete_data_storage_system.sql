@@ -111,6 +111,126 @@ CREATE TABLE IF NOT EXISTS rtm_notices (
   updated_at timestamptz DEFAULT now()
 );
 
+-- RTM Timeline Milestones - Enhanced tracking system
+CREATE TABLE IF NOT EXISTS rtm_milestones (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  building_id uuid REFERENCES buildings(id) NOT NULL,
+  created_by uuid REFERENCES auth.users(id) NOT NULL,
+  milestone_type text NOT NULL CHECK (milestone_type IN (
+    'eligibility_assessment',
+    'company_formation',
+    'claim_notice_served',
+    'counter_notice_period',
+    'acquisition_complete'
+  )),
+  milestone_title text NOT NULL,
+  milestone_description text,
+
+  -- Status and timing
+  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'in_progress', 'completed', 'overdue')),
+  started_date timestamptz,
+  completed_date timestamptz,
+  target_completion_date timestamptz,
+
+  -- Statutory deadlines and calculations
+  statutory_deadline_days integer, -- e.g., 90 days for acquisition after claim notice
+  calculated_deadline timestamptz, -- Auto-calculated based on previous milestones
+
+  -- Evidence and documentation
+  evidence_required boolean DEFAULT false,
+  evidence_description text,
+
+  -- Dependencies
+  depends_on_milestone_id uuid REFERENCES rtm_milestones(id),
+
+  -- Metadata
+  milestone_order integer NOT NULL DEFAULT 0,
+  is_critical boolean DEFAULT false,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+-- RTM Evidence Documents
+CREATE TABLE IF NOT EXISTS rtm_evidence (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  milestone_id uuid REFERENCES rtm_milestones(id) NOT NULL,
+  building_id uuid REFERENCES buildings(id) NOT NULL,
+  uploaded_by uuid REFERENCES auth.users(id) NOT NULL,
+
+  -- Document details
+  document_type text NOT NULL CHECK (document_type IN (
+    'proof_of_postage',
+    'service_certificate',
+    'claim_notice_copy',
+    'counter_notice',
+    'companies_house_certificate',
+    'bank_account_confirmation',
+    'handover_documents',
+    'other'
+  )),
+  document_title text NOT NULL,
+  document_description text,
+  file_path text NOT NULL,
+  file_size integer,
+  file_type text,
+
+  -- Service details (for notices)
+  service_date date,
+  service_method text, -- 'recorded_delivery', 'hand_delivery', 'email', 'other'
+  recipient_name text,
+  recipient_address text,
+
+  -- Verification
+  verified boolean DEFAULT false,
+  verified_by uuid REFERENCES auth.users(id),
+  verified_at timestamptz,
+  verification_notes text,
+
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+-- RTM Timeline Progress Tracking
+CREATE TABLE IF NOT EXISTS rtm_timeline_progress (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  building_id uuid REFERENCES buildings(id) NOT NULL,
+  created_by uuid REFERENCES auth.users(id) NOT NULL,
+
+  -- Current state
+  current_milestone_id uuid REFERENCES rtm_milestones(id),
+  overall_status text NOT NULL DEFAULT 'not_started' CHECK (overall_status IN (
+    'not_started',
+    'eligibility_phase',
+    'formation_phase',
+    'notice_phase',
+    'waiting_period',
+    'acquisition_phase',
+    'completed',
+    'disputed',
+    'abandoned'
+  )),
+
+  -- Key dates
+  process_started_date timestamptz DEFAULT now(),
+  claim_notice_served_date timestamptz,
+  counter_notice_deadline timestamptz,
+  acquisition_date timestamptz,
+  process_completed_date timestamptz,
+
+  -- Progress metrics
+  total_milestones integer DEFAULT 0,
+  completed_milestones integer DEFAULT 0,
+  progress_percentage decimal(5,2) DEFAULT 0.00,
+
+  -- Alerts and notifications
+  next_action_required text,
+  next_deadline timestamptz,
+  days_until_next_deadline integer,
+
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
 -- =====================================================
 -- ENHANCED DOCUMENTS SYSTEM
 -- =====================================================
@@ -244,11 +364,136 @@ ALTER TABLE leaseholder_records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rtm_company_formations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rtm_company_directors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rtm_notices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rtm_milestones ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rtm_evidence ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rtm_timeline_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE document_repository ENABLE ROW LEVEL SECURITY;
 ALTER TABLE document_access_log ENABLE ROW LEVEL SECURITY;
 ALTER TABLE document_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE service_charge_demands ENABLE ROW LEVEL SECURITY;
 ALTER TABLE section20_consultations ENABLE ROW LEVEL SECURITY;
+
+-- Indexes for enhanced RTM timeline system
+CREATE INDEX IF NOT EXISTS idx_rtm_milestones_building_id ON rtm_milestones(building_id);
+CREATE INDEX IF NOT EXISTS idx_rtm_milestones_status ON rtm_milestones(status);
+CREATE INDEX IF NOT EXISTS idx_rtm_milestones_type ON rtm_milestones(milestone_type);
+CREATE INDEX IF NOT EXISTS idx_rtm_milestones_deadline ON rtm_milestones(calculated_deadline);
+CREATE INDEX IF NOT EXISTS idx_rtm_milestones_order ON rtm_milestones(building_id, milestone_order);
+
+CREATE INDEX IF NOT EXISTS idx_rtm_evidence_milestone_id ON rtm_evidence(milestone_id);
+CREATE INDEX IF NOT EXISTS idx_rtm_evidence_building_id ON rtm_evidence(building_id);
+CREATE INDEX IF NOT EXISTS idx_rtm_evidence_type ON rtm_evidence(document_type);
+CREATE INDEX IF NOT EXISTS idx_rtm_evidence_service_date ON rtm_evidence(service_date);
+
+CREATE INDEX IF NOT EXISTS idx_rtm_timeline_progress_building_id ON rtm_timeline_progress(building_id);
+CREATE INDEX IF NOT EXISTS idx_rtm_timeline_progress_status ON rtm_timeline_progress(overall_status);
+CREATE INDEX IF NOT EXISTS idx_rtm_timeline_progress_next_deadline ON rtm_timeline_progress(next_deadline);
+
+-- Function to calculate RTM deadlines based on milestone completion
+CREATE OR REPLACE FUNCTION calculate_rtm_deadline(
+  milestone_type text,
+  reference_date timestamptz,
+  statutory_days integer DEFAULT NULL
+) RETURNS timestamptz AS $$
+BEGIN
+  CASE milestone_type
+    WHEN 'claim_notice_served' THEN
+      -- Acquisition date: 3 months (90 days) after claim notice
+      RETURN reference_date + INTERVAL '90 days';
+    WHEN 'counter_notice_period' THEN
+      -- Counter notice deadline: 1 month (30 days) after claim notice
+      RETURN reference_date + INTERVAL '30 days';
+    WHEN 'company_formation' THEN
+      -- Company formation should be completed before claim notice
+      RETURN reference_date + INTERVAL '14 days';
+    ELSE
+      -- Use statutory days if provided, otherwise default to 30 days
+      RETURN reference_date + INTERVAL COALESCE(statutory_days, 30) || ' days';
+  END CASE;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to update RTM timeline progress
+CREATE OR REPLACE FUNCTION update_rtm_timeline_progress(building_uuid uuid)
+RETURNS void AS $$
+DECLARE
+  total_count integer;
+  completed_count integer;
+  progress_pct decimal(5,2);
+  current_milestone_rec record;
+  next_deadline_date timestamptz;
+  next_action text;
+BEGIN
+  -- Count total and completed milestones
+  SELECT COUNT(*) INTO total_count
+  FROM rtm_milestones
+  WHERE building_id = building_uuid;
+
+  SELECT COUNT(*) INTO completed_count
+  FROM rtm_milestones
+  WHERE building_id = building_uuid AND status = 'completed';
+
+  -- Calculate progress percentage
+  progress_pct := CASE
+    WHEN total_count > 0 THEN (completed_count::decimal / total_count::decimal) * 100
+    ELSE 0
+  END;
+
+  -- Find current milestone (first non-completed milestone in order)
+  SELECT * INTO current_milestone_rec
+  FROM rtm_milestones
+  WHERE building_id = building_uuid
+    AND status != 'completed'
+  ORDER BY milestone_order ASC
+  LIMIT 1;
+
+  -- Determine next deadline and action
+  IF current_milestone_rec.id IS NOT NULL THEN
+    next_deadline_date := current_milestone_rec.calculated_deadline;
+    next_action := 'Complete: ' || current_milestone_rec.milestone_title;
+  ELSE
+    next_deadline_date := NULL;
+    next_action := 'RTM process completed';
+  END IF;
+
+  -- Update or insert progress record
+  INSERT INTO rtm_timeline_progress (
+    building_id,
+    created_by,
+    current_milestone_id,
+    total_milestones,
+    completed_milestones,
+    progress_percentage,
+    next_action_required,
+    next_deadline,
+    days_until_next_deadline
+  )
+  VALUES (
+    building_uuid,
+    auth.uid(),
+    current_milestone_rec.id,
+    total_count,
+    completed_count,
+    progress_pct,
+    next_action,
+    next_deadline_date,
+    CASE
+      WHEN next_deadline_date IS NOT NULL THEN
+        EXTRACT(days FROM (next_deadline_date - now()))::integer
+      ELSE NULL
+    END
+  )
+  ON CONFLICT (building_id) DO UPDATE SET
+    current_milestone_id = EXCLUDED.current_milestone_id,
+    total_milestones = EXCLUDED.total_milestones,
+    completed_milestones = EXCLUDED.completed_milestones,
+    progress_percentage = EXCLUDED.progress_percentage,
+    next_action_required = EXCLUDED.next_action_required,
+    next_deadline = EXCLUDED.next_deadline,
+    days_until_next_deadline = EXCLUDED.days_until_next_deadline,
+    updated_at = now();
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- RTM System Policies
 CREATE POLICY "Users can access RTM data for their buildings" ON rtm_eligibility_assessments
@@ -289,6 +534,28 @@ CREATE POLICY "Users can access RTM directors for their buildings" ON rtm_compan
   );
 
 CREATE POLICY "Users can access RTM notices for their buildings" ON rtm_notices
+  FOR ALL USING (
+    building_id IN (
+      SELECT building_id FROM building_users WHERE user_id = auth.uid()
+    )
+  );
+
+-- RTM Timeline System Policies
+CREATE POLICY "Users can access RTM milestones for their buildings" ON rtm_milestones
+  FOR ALL USING (
+    building_id IN (
+      SELECT building_id FROM building_users WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can access RTM evidence for their buildings" ON rtm_evidence
+  FOR ALL USING (
+    building_id IN (
+      SELECT building_id FROM building_users WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can access RTM timeline progress for their buildings" ON rtm_timeline_progress
   FOR ALL USING (
     building_id IN (
       SELECT building_id FROM building_users WHERE user_id = auth.uid()

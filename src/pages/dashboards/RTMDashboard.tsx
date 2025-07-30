@@ -29,6 +29,7 @@ import {
 import LegalGuidanceTooltip from '../../components/legal/LegalGuidanceTooltip';
 import ComplianceStatusIndicator from '../../components/legal/ComplianceStatusIndicator';
 import ComplianceMonitoringService from '../../services/complianceMonitoringService';
+import RTMProgressDashboard from '../../components/rtm/RTMProgressDashboard';
 
 const RTMDashboard = () => {
   const { user } = useAuth();
@@ -187,68 +188,11 @@ const RTMDashboard = () => {
           {/* Action Items */}
           <ActionItems actionItems={dashboardData.actionItems} />
 
-          {/* RTM Formation Tools */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2">
-                <Shield className="h-5 w-5 text-blue-600" />
-                <h3 className="text-lg font-semibold text-gray-900">RTM Formation Tools</h3>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate('/rtm/rtm')}
-              >
-                View All Tools
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
-                   onClick={() => navigate('/rtm/rtm?view=eligibility')}>
-                <div className="flex items-center space-x-3">
-                  <CheckCircle2 className="h-8 w-8 text-green-600" />
-                  <div>
-                    <h4 className="font-medium text-gray-900">Eligibility Check</h4>
-                    <p className="text-sm text-gray-600">Verify RTM qualification</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
-                   onClick={() => navigate('/rtm/rtm?view=formation')}>
-                <div className="flex items-center space-x-3">
-                  <Building2 className="h-8 w-8 text-blue-600" />
-                  <div>
-                    <h4 className="font-medium text-gray-900">Company Formation</h4>
-                    <p className="text-sm text-gray-600">Set up RTM company</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
-                   onClick={() => navigate('/rtm/rtm?view=notices')}>
-                <div className="flex items-center space-x-3">
-                  <FileText className="h-8 w-8 text-orange-600" />
-                  <div>
-                    <h4 className="font-medium text-gray-900">Legal Notices</h4>
-                    <p className="text-sm text-gray-600">Generate required notices</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
-                   onClick={() => navigate('/rtm/legal-templates')}>
-                <div className="flex items-center space-x-3">
-                  <BookOpen className="h-8 w-8 text-purple-600" />
-                  <div>
-                    <h4 className="font-medium text-gray-900">Legal Guidance</h4>
-                    <p className="text-sm text-gray-600">Expert advice & templates</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card>
+          {/* RTM Progress Dashboard */}
+          <RTMProgressDashboard
+            buildingId={user?.metadata?.buildingId || ''}
+            buildingName={user?.metadata?.buildingName}
+          />
         </div>
 
         {/* Right Column - Quick Actions & Resources */}
