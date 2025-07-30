@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, Circle, Clock, AlertTriangle, Calendar, FileText, Users, Building2, Scale, BookOpen, Upload, Target, Shield, Eye } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, AlertTriangle, Calendar, FileText, Users, Building2, Scale, BookOpen, Upload, Target, Shield, Eye, Edit3, Save, X, Mail } from 'lucide-react';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import Badge from '../ui/Badge';
@@ -27,6 +27,8 @@ interface TimelineStep {
   actualEndDate?: string;
   notes?: string;
   progress?: number;
+  completedDate?: string;
+  isEditingDate?: boolean;
 }
 
 interface RTMTimelineProps {
@@ -44,6 +46,9 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
   const [showEvidenceModal, setShowEvidenceModal] = useState(false);
   const [selectedStepForEvidence, setSelectedStepForEvidence] = useState<string | null>(null);
   const [showDemo, setShowDemo] = useState(false);
+  const [editingDateStep, setEditingDateStep] = useState<string | null>(null);
+  const [tempDate, setTempDate] = useState<string>('');
+  const [stepCompletionDates, setStepCompletionDates] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (user?.id) {
@@ -90,6 +95,37 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
     return Math.round((completedSteps / totalSteps) * 100);
   };
 
+  const handleEditDate = (stepId: string) => {
+    const currentDate = stepCompletionDates[stepId] || new Date().toISOString().split('T')[0];
+    setTempDate(currentDate);
+    setEditingDateStep(stepId);
+  };
+
+  const handleSaveDate = (stepId: string) => {
+    setStepCompletionDates(prev => ({
+      ...prev,
+      [stepId]: tempDate
+    }));
+    setEditingDateStep(null);
+    setTempDate('');
+  };
+
+  const handleCancelDateEdit = () => {
+    setEditingDateStep(null);
+    setTempDate('');
+  };
+
+  const formatCompletionDate = (stepId: string) => {
+    const date = stepCompletionDates[stepId];
+    if (!date) return 'Not completed';
+    return new Date(date).toLocaleDateString('en-GB', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
   const timelineSteps: TimelineStep[] = [
     {
       id: 'eligibility',
@@ -113,7 +149,9 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
         'Lease documents showing qualifying criteria',
         'Leaseholder survey responses',
         'Building ownership structure',
-        'Current management performance issues'
+        'Current management performance issues',
+        'Letter confirming eligibility assessment',
+        'Proof of postage for survey distribution'
       ],
       legalRequirements: [
         'Building must contain at least 2 flats',
@@ -155,7 +193,9 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
         'Companies House incorporation certificate',
         'Signed articles of association',
         'Director consent forms',
-        'Bank account confirmation'
+        'Bank account confirmation',
+        'Letter confirming company formation',
+        'Proof of postage for director notifications'
       ],
       legalRequirements: [
         'Company name must end with RTM Ltd',
@@ -198,7 +238,9 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
         'Completed claim notice form',
         'Proof of service certificates',
         'Recorded delivery receipts',
-        'Service acknowledgements'
+        'Service acknowledgements',
+        'RTM claim notice letter',
+        'Proof of postage for all recipients'
       ],
       legalRequirements: [
         'Notice must be in prescribed form',
@@ -243,7 +285,9 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
         'Management handover checklist',
         'Account transfer confirmations',
         'Insurance policy assignments',
-        'Key and access transfers'
+        'Key and access transfers',
+        'Acquisition completion letter',
+        'Proof of postage for handover notifications'
       ],
       legalRequirements: [
         'Acquisition date 3 months after notice',
@@ -489,6 +533,63 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
                           </div>
                         )}
 
+                        {/* Completion Date Tracking */}
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-medium text-gray-900 flex items-center">
+                              <Calendar className="h-4 w-4 mr-2 text-green-600" />
+                              Completion Date
+                            </h5>
+                            {editingDateStep === step.id ? (
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="date"
+                                  value={tempDate}
+                                  onChange={(e) => setTempDate(e.target.value)}
+                                  className="px-2 py-1 border border-gray-300 rounded text-sm"
+                                />
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleSaveDate(step.id)}
+                                  className="p-1"
+                                >
+                                  <Save className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={handleCancelDateEdit}
+                                  className="p-1"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditDate(step.id)}
+                                className="flex items-center space-x-1"
+                              >
+                                <Edit3 className="h-3 w-3" />
+                                <span>Edit</span>
+                              </Button>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-700">
+                            {stepCompletionDates[step.id] ? (
+                              <span className="font-medium text-green-700">
+                                Completed: {formatCompletionDate(step.id)}
+                              </span>
+                            ) : (
+                              <span className="text-gray-500">
+                                Click "Edit" to set completion date
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
                         {/* Enhanced Sections Grid */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                           {/* Key Tasks */}
@@ -533,13 +634,42 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
                                 Evidence Required
                               </h5>
                               <ul className="space-y-2">
-                                {step.evidenceRequired.map((evidence, evidenceIndex) => (
-                                  <li key={evidenceIndex} className="flex items-start space-x-2">
-                                    <FileText className="h-3 w-3 text-green-600 mt-1.5 flex-shrink-0" />
-                                    <span className="text-sm text-gray-700">{evidence}</span>
-                                  </li>
-                                ))}
+                                {step.evidenceRequired.map((evidence, evidenceIndex) => {
+                                  const isLetterOrPostage = evidence.toLowerCase().includes('letter') || evidence.toLowerCase().includes('proof of postage');
+                                  return (
+                                    <li key={evidenceIndex} className={`flex items-start space-x-2 ${isLetterOrPostage ? 'bg-yellow-50 p-2 rounded border-l-4 border-yellow-400' : ''}`}>
+                                      {isLetterOrPostage ? (
+                                        <Mail className="h-3 w-3 text-yellow-600 mt-1.5 flex-shrink-0" />
+                                      ) : (
+                                        <FileText className="h-3 w-3 text-green-600 mt-1.5 flex-shrink-0" />
+                                      )}
+                                      <span className={`text-sm ${isLetterOrPostage ? 'text-yellow-800 font-medium' : 'text-gray-700'}`}>
+                                        {evidence}
+                                        {isLetterOrPostage && (
+                                          <span className="ml-2 text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">
+                                            Priority Evidence
+                                          </span>
+                                        )}
+                                      </span>
+                                    </li>
+                                  );
+                                })}
                               </ul>
+
+                              {/* Special callout for letter and postage evidence */}
+                              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <Mail className="h-4 w-4 text-yellow-600" />
+                                  <span className="text-sm font-medium text-yellow-800">
+                                    Priority Evidence Required
+                                  </span>
+                                </div>
+                                <p className="text-xs text-yellow-700">
+                                  Letters and proof of postage are critical for legal compliance.
+                                  Ensure all correspondence is properly documented and postal receipts are retained.
+                                </p>
+                              </div>
+
                               <Button
                                 variant="outline"
                                 size="sm"
