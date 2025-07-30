@@ -15,9 +15,10 @@ import { RTMMilestone, RTMEvidence } from '../../services/rtmTimelineService';
 import { supabase } from '../../lib/supabase';
 
 interface EvidenceUploadModalProps {
-  milestone: RTMMilestone;
-  buildingId: string;
-  userId: string;
+  stepId: string;
+  stepTitle: string;
+  onClose: () => void;
+  onUploadComplete: () => void;
   onClose: () => void;
   onEvidenceUploaded: () => void;
 }

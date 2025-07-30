@@ -17,17 +17,15 @@ import RTMTimelineService from '../../services/rtmTimelineService';
 import { supabase } from '../../lib/supabase';
 
 interface EvidenceListProps {
-  milestoneId: string;
-  buildingId: string;
-  canVerify?: boolean;
-  onEvidenceVerified?: () => void;
+  stepId: string;
+  evidence: RTMEvidence[];
+  onEvidenceUpdate: () => void;
 }
 
 const EvidenceList: React.FC<EvidenceListProps> = ({
-  milestoneId,
-  buildingId,
-  canVerify = false,
-  onEvidenceVerified
+  stepId,
+  evidence,
+  onEvidenceUpdate
 }) => {
   const [evidence, setEvidence] = useState<RTMEvidence[]>([]);
   const [loading, setLoading] = useState(true);

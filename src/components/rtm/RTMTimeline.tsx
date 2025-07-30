@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
-import { CheckCircle2, Circle, Clock, AlertTriangle, Calendar, FileText, Users, Building2, Scale, BookOpen } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { CheckCircle2, Circle, Clock, AlertTriangle, Calendar, FileText, Users, Building2, Scale, BookOpen, Upload, Target, Shield, Eye } from 'lucide-react';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
+import Badge from '../ui/Badge';
 import LegalGuidanceTooltip from '../legal/LegalGuidanceTooltip';
+import RTMTimelineService, { RTMTimelineOverview } from '../../services/rtmTimelineService';
+import EvidenceUploadModal from './EvidenceUploadModal';
+import EvidenceList from './EvidenceList';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface TimelineStep {
   id: string;
@@ -14,6 +19,14 @@ interface TimelineStep {
   documents: string[];
   deadline?: string;
   icon: React.ReactNode;
+  evidenceRequired?: string[];
+  legalRequirements?: string[];
+  riskFactors?: string[];
+  completionCriteria?: string[];
+  actualStartDate?: string;
+  actualEndDate?: string;
+  notes?: string;
+  progress?: number;
 }
 
 interface RTMTimelineProps {
@@ -21,11 +34,61 @@ interface RTMTimelineProps {
   onStepClick?: (stepId: string) => void;
 }
 
-const RTMTimeline: React.FC<RTMTimelineProps> = ({ 
-  currentStep = 'eligibility', 
-  onStepClick 
+const RTMTimeline: React.FC<RTMTimelineProps> = ({
+  currentStep = 'eligibility',
+  onStepClick
 }) => {
+  const { user } = useAuth();
   const [expandedStep, setExpandedStep] = useState<string | null>(null);
+  const [timelineData, setTimelineData] = useState<RTMTimelineOverview | null>(null);
+  const [showEvidenceModal, setShowEvidenceModal] = useState(false);
+  const [selectedStepForEvidence, setSelectedStepForEvidence] = useState<string | null>(null);
+  const [showDemo, setShowDemo] = useState(false);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadTimelineData();
+    }
+  }, [user?.id]);
+
+  const loadTimelineData = async () => {
+    try {
+      const data = await RTMTimelineService.getTimelineOverview(user!.id);
+      setTimelineData(data);
+    } catch (error) {
+      console.error('Failed to load timeline data:', error);
+    }
+  };
+
+  const handleUploadEvidence = (stepId: string) => {
+    setSelectedStepForEvidence(stepId);
+    setShowEvidenceModal(true);
+  };
+
+  const handleEvidenceUploaded = () => {
+    setShowEvidenceModal(false);
+    setSelectedStepForEvidence(null);
+    loadTimelineData();
+  };
+
+  const handleUpdateProgress = async (stepId: string, progress: number, notes?: string) => {
+    try {
+      await RTMTimelineService.updateStepProgress(user!.id, stepId, progress, notes);
+      loadTimelineData();
+    } catch (error) {
+      console.error('Failed to update progress:', error);
+    }
+  };
+
+  const calculateOverallProgress = () => {
+    if (!timelineData) return 0;
+    const totalSteps = timelineSteps.length;
+    const completedSteps = timelineSteps.filter(step => {
+      const stepData = timelineData.steps.find(s => s.stepId === step.id);
+      return stepData?.progress === 100;
+    }).length;
+    return Math.round((completedSteps / totalSteps) * 100);
+  };
 
   const timelineSteps: TimelineStep[] = [
     {
@@ -46,13 +109,34 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
         'Service charge accounts',
         'Leaseholder contact list'
       ],
+      evidenceRequired: [
+        'Lease documents showing qualifying criteria',
+        'Leaseholder survey responses',
+        'Building ownership structure',
+        'Current management performance issues'
+      ],
+      legalRequirements: [
+        'Building must contain at least 2 flats',
+        'At least 2/3 of flats must be held on long leases',
+        'Building must not be excluded under CLRA 2002'
+      ],
+      riskFactors: [
+        'Insufficient leaseholder support',
+        'Complex ownership structure',
+        'Existing management disputes'
+      ],
+      completionCriteria: [
+        'Eligibility confirmed',
+        'Minimum 50% leaseholder interest',
+        'Participant list compiled'
+      ],
       icon: <Users className="h-5 w-5" />
     },
     {
       id: 'formation',
       title: 'RTM Company Formation',
       description: 'Establish the RTM company and appoint directors',
-      status: currentStep === 'formation' ? 'active' : 
+      status: currentStep === 'formation' ? 'active' :
               ['eligibility'].includes(currentStep) ? 'pending' : 'completed',
       estimatedDuration: '1-2 weeks',
       keyTasks: [
@@ -67,13 +151,35 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
         'Director appointment forms',
         'Bank account opening documents'
       ],
+      evidenceRequired: [
+        'Companies House incorporation certificate',
+        'Signed articles of association',
+        'Director consent forms',
+        'Bank account confirmation'
+      ],
+      legalRequirements: [
+        'Company name must end with RTM Ltd',
+        'At least 2 qualifying leaseholder directors',
+        'Articles must comply with CLRA 2002',
+        'Company registered address in England/Wales'
+      ],
+      riskFactors: [
+        'Name rejection by Companies House',
+        'Director eligibility issues',
+        'Banking requirements not met'
+      ],
+      completionCriteria: [
+        'Company incorporated',
+        'Directors appointed',
+        'Bank account opened'
+      ],
       icon: <Building2 className="h-5 w-5" />
     },
     {
       id: 'notice',
       title: 'Claim Notice Service',
       description: 'Serve formal RTM claim notice to landlord and qualifying tenants',
-      status: currentStep === 'notice' ? 'active' : 
+      status: currentStep === 'notice' ? 'active' :
               ['eligibility', 'formation'].includes(currentStep) ? 'pending' : 'completed',
       estimatedDuration: '1 week',
       keyTasks: [
@@ -88,6 +194,29 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
         'List of qualifying tenants',
         'Landlord/managing agent details'
       ],
+      evidenceRequired: [
+        'Completed claim notice form',
+        'Proof of service certificates',
+        'Recorded delivery receipts',
+        'Service acknowledgements'
+      ],
+      legalRequirements: [
+        'Notice must be in prescribed form',
+        'Served on all qualifying tenants',
+        'Served on landlord/managing agent',
+        'Minimum 14 days notice period'
+      ],
+      riskFactors: [
+        'Incorrect service addresses',
+        'Missing qualifying tenants',
+        'Defective notice content',
+        'Service method challenges'
+      ],
+      completionCriteria: [
+        'All notices served correctly',
+        'Proof of service obtained',
+        'No service challenges received'
+      ],
       deadline: 'Must be served correctly to avoid delays',
       icon: <FileText className="h-5 w-5" />
     },
@@ -95,7 +224,7 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
       id: 'acquisition',
       title: 'Management Acquisition',
       description: 'Complete the transfer of management responsibilities',
-      status: currentStep === 'acquisition' ? 'active' : 
+      status: currentStep === 'acquisition' ? 'active' :
               ['eligibility', 'formation', 'notice'].includes(currentStep) ? 'pending' : 'completed',
       estimatedDuration: '3-6 months',
       keyTasks: [
@@ -109,6 +238,30 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
         'Service charge account transfers',
         'Insurance policy transfers',
         'Contractor contact details'
+      ],
+      evidenceRequired: [
+        'Management handover checklist',
+        'Account transfer confirmations',
+        'Insurance policy assignments',
+        'Key and access transfers'
+      ],
+      legalRequirements: [
+        'Acquisition date 3 months after notice',
+        'Counter-notice period compliance',
+        'Proper account transfers',
+        'Insurance continuity maintained'
+      ],
+      riskFactors: [
+        'Counter-notice challenges',
+        'Handover disputes',
+        'Account transfer delays',
+        'Insurance coverage gaps'
+      ],
+      completionCriteria: [
+        'Management rights acquired',
+        'All accounts transferred',
+        'Insurance policies assigned',
+        'Handover completed'
       ],
       deadline: 'Acquisition date: 3 months after claim notice',
       icon: <CheckCircle2 className="h-5 w-5" />
@@ -187,14 +340,78 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
         </div>
       </Card>
 
+      {/* Enhanced Progress Overview */}
       <Card>
         <div className="space-y-6">
-          <div>
-            <h3 className="text-xl font-semibold text-gray-900">RTM Process Timeline</h3>
-            <p className="text-gray-600 mt-1">
-              Track your progress through the Right to Manage formation process
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900">RTM Process Timeline</h3>
+              <p className="text-gray-600 mt-1">
+                Track your progress through the Right to Manage formation process
+              </p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDemo(!showDemo)}
+                className="flex items-center space-x-2"
+              >
+                <Eye className="h-4 w-4" />
+                <span>{showDemo ? 'Hide Demo' : 'Demo Mode'}</span>
+              </Button>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-blue-600">{calculateOverallProgress()}%</div>
+                <div className="text-sm text-gray-500">Complete</div>
+              </div>
+            </div>
           </div>
+
+          {/* Progress Bar */}
+          <div className="w-full bg-gray-200 rounded-full h-3">
+            <div
+              className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500"
+              style={{ width: `${calculateOverallProgress()}%` }}
+            />
+          </div>
+
+          {/* Key Metrics */}
+          <div className="grid grid-cols-4 gap-4">
+            <div className="text-center p-3 bg-blue-50 rounded-lg">
+              <div className="text-lg font-semibold text-blue-600">
+                {timelineSteps.filter(s => {
+                  const stepData = timelineData?.steps.find(sd => sd.stepId === s.id);
+                  return stepData?.progress === 100;
+                }).length}
+              </div>
+              <div className="text-sm text-gray-600">Completed</div>
+            </div>
+            <div className="text-center p-3 bg-yellow-50 rounded-lg">
+              <div className="text-lg font-semibold text-yellow-600">
+                {timelineSteps.filter(s => s.status === 'active').length}
+              </div>
+              <div className="text-sm text-gray-600">In Progress</div>
+            </div>
+            <div className="text-center p-3 bg-gray-50 rounded-lg">
+              <div className="text-lg font-semibold text-gray-600">
+                {timelineSteps.filter(s => s.status === 'pending').length}
+              </div>
+              <div className="text-sm text-gray-600">Pending</div>
+            </div>
+            <div className="text-center p-3 bg-green-50 rounded-lg">
+              <div className="text-lg font-semibold text-green-600">
+                {timelineData?.estimatedCompletionDate ?
+                  new Date(timelineData.estimatedCompletionDate).toLocaleDateString('en-GB') :
+                  'TBD'
+                }
+              </div>
+              <div className="text-sm text-gray-600">Est. Completion</div>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <Card>
 
         <div className="space-y-4">
           {timelineSteps.map((step, index) => (
@@ -248,19 +465,120 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
 
                     {/* Expanded Content */}
                     {expandedStep === step.id && (
-                      <div className="mt-4 space-y-4 border-t border-gray-200 pt-4">
-                        {/* Key Tasks */}
-                        <div>
-                          <h5 className="font-medium text-gray-900 mb-2">Key Tasks</h5>
-                          <ul className="space-y-1">
-                            {step.keyTasks.map((task, taskIndex) => (
-                              <li key={taskIndex} className="flex items-start space-x-2">
-                                <Circle className="h-3 w-3 text-gray-400 mt-1.5 flex-shrink-0" />
-                                <span className="text-sm text-gray-700">{task}</span>
-                              </li>
-                            ))}
-                          </ul>
+                      <div className="mt-4 space-y-6 border-t border-gray-200 pt-4">
+                        {/* Progress Tracking */}
+                        {timelineData?.steps.find(s => s.stepId === step.id) && (
+                          <div className="bg-blue-50 rounded-lg p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <h5 className="font-medium text-gray-900">Progress</h5>
+                              <span className="text-sm font-medium text-blue-600">
+                                {timelineData.steps.find(s => s.stepId === step.id)?.progress || 0}%
+                              </span>
+                            </div>
+                            <div className="w-full bg-blue-200 rounded-full h-2">
+                              <div
+                                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                style={{ width: `${timelineData.steps.find(s => s.stepId === step.id)?.progress || 0}%` }}
+                              />
+                            </div>
+                            {timelineData.steps.find(s => s.stepId === step.id)?.notes && (
+                              <p className="text-sm text-gray-600 mt-2">
+                                {timelineData.steps.find(s => s.stepId === step.id)?.notes}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Enhanced Sections Grid */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          {/* Key Tasks */}
+                          <div>
+                            <h5 className="font-medium text-gray-900 mb-3 flex items-center">
+                              <Target className="h-4 w-4 mr-2 text-blue-600" />
+                              Key Tasks
+                            </h5>
+                            <ul className="space-y-2">
+                              {step.keyTasks.map((task, taskIndex) => (
+                                <li key={taskIndex} className="flex items-start space-x-2">
+                                  <Circle className="h-3 w-3 text-gray-400 mt-1.5 flex-shrink-0" />
+                                  <span className="text-sm text-gray-700">{task}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* Legal Requirements */}
+                          {step.legalRequirements && (
+                            <div>
+                              <h5 className="font-medium text-gray-900 mb-3 flex items-center">
+                                <Scale className="h-4 w-4 mr-2 text-purple-600" />
+                                Legal Requirements
+                              </h5>
+                              <ul className="space-y-2">
+                                {step.legalRequirements.map((req, reqIndex) => (
+                                  <li key={reqIndex} className="flex items-start space-x-2">
+                                    <Shield className="h-3 w-3 text-purple-600 mt-1.5 flex-shrink-0" />
+                                    <span className="text-sm text-gray-700">{req}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Evidence Required */}
+                          {step.evidenceRequired && (
+                            <div>
+                              <h5 className="font-medium text-gray-900 mb-3 flex items-center">
+                                <FileText className="h-4 w-4 mr-2 text-green-600" />
+                                Evidence Required
+                              </h5>
+                              <ul className="space-y-2">
+                                {step.evidenceRequired.map((evidence, evidenceIndex) => (
+                                  <li key={evidenceIndex} className="flex items-start space-x-2">
+                                    <FileText className="h-3 w-3 text-green-600 mt-1.5 flex-shrink-0" />
+                                    <span className="text-sm text-gray-700">{evidence}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleUploadEvidence(step.id)}
+                                className="mt-3 flex items-center space-x-2"
+                              >
+                                <Upload className="h-4 w-4" />
+                                <span>Upload Evidence</span>
+                              </Button>
+                            </div>
+                          )}
+
+                          {/* Risk Factors */}
+                          {step.riskFactors && (
+                            <div>
+                              <h5 className="font-medium text-gray-900 mb-3 flex items-center">
+                                <AlertTriangle className="h-4 w-4 mr-2 text-red-600" />
+                                Risk Factors
+                              </h5>
+                              <ul className="space-y-2">
+                                {step.riskFactors.map((risk, riskIndex) => (
+                                  <li key={riskIndex} className="flex items-start space-x-2">
+                                    <AlertTriangle className="h-3 w-3 text-red-600 mt-1.5 flex-shrink-0" />
+                                    <span className="text-sm text-gray-700">{risk}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
                         </div>
+
+                        {/* Evidence List */}
+                        {timelineData?.steps.find(s => s.stepId === step.id) && (
+                          <EvidenceList
+                            stepId={step.id}
+                            evidence={timelineData.steps.find(s => s.stepId === step.id)?.evidence || []}
+                            onEvidenceUpdate={loadTimelineData}
+                          />
+                        )}
 
                         {/* Required Documents */}
                         <div>
@@ -314,37 +632,67 @@ const RTMTimeline: React.FC<RTMTimelineProps> = ({
           ))}
         </div>
 
-        {/* Overall Progress */}
+        {/* Enhanced Timeline Summary */}
         <div className="border-t border-gray-200 pt-6">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700">Overall Progress</span>
-            <span className="text-sm text-gray-600">
-              {timelineSteps.filter(step => step.status === 'completed').length} of {timelineSteps.length} completed
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ 
-                width: `${(timelineSteps.filter(step => step.status === 'completed').length / timelineSteps.length) * 100}%` 
-              }}
-            />
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900">Timeline Summary</h4>
+                <p className="text-sm text-gray-600">
+                  {timelineSteps.filter(step => step.status === 'completed').length} of {timelineSteps.length} steps completed
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-blue-600">{calculateOverallProgress()}%</div>
+                <div className="text-sm text-gray-500">Complete</div>
+              </div>
+            </div>
+
+            <div className="w-full bg-blue-200 rounded-full h-3 mb-4">
+              <div
+                className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500"
+                style={{ width: `${calculateOverallProgress()}%` }}
+              />
+            </div>
+
+            {timelineData?.estimatedCompletionDate && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Estimated completion:</span>
+                <span className="font-medium text-gray-900">
+                  {new Date(timelineData.estimatedCompletionDate).toLocaleDateString('en-GB', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Estimated Completion */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center space-x-2">
+        {/* Estimated Timeline */}
+        <div className="bg-blue-50 rounded-lg p-4">
+          <div className="flex items-center space-x-2 mb-2">
             <Calendar className="h-5 w-5 text-blue-600" />
-            <h4 className="font-medium text-blue-900">Estimated Timeline</h4>
+            <h4 className="font-medium text-gray-900">Estimated Timeline</h4>
           </div>
-          <p className="text-blue-800 text-sm mt-1">
-            The complete RTM process typically takes 6-12 months from start to finish, 
-            depending on complexity and any challenges from the current managing agent.
+          <p className="text-sm text-gray-700">
+            The complete RTM process typically takes 6-12 months from start to finish, depending on complexity and any challenges from the current managing agent.
           </p>
         </div>
-      </div>
-    </Card>
+        </div>
+      </Card>
+
+      {/* Evidence Upload Modal */}
+      {showEvidenceModal && selectedStepForEvidence && (
+        <EvidenceUploadModal
+          stepId={selectedStepForEvidence}
+          stepTitle={timelineSteps.find(s => s.id === selectedStepForEvidence)?.title || ''}
+          onClose={() => setShowEvidenceModal(false)}
+          onUploadComplete={handleEvidenceUploaded}
+        />
+      )}
     </div>
   );
 };
