@@ -17,7 +17,7 @@ import Card from '../ui/Card';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
 import RTMTimelineService, { RTMTimelineOverview } from '../../services/rtmTimelineService';
-import EnhancedRTMTimeline from './EnhancedRTMTimeline';
+import RTMTimeline from './RTMTimeline';
 import RTMDeadlineCalculator from './RTMDeadlineCalculator';
 
 interface RTMProgressDashboardProps {
@@ -421,9 +421,9 @@ const RTMProgressDashboard: React.FC<RTMProgressDashboardProps> = ({
       )}
 
       {activeTab === 'timeline' && (
-        <EnhancedRTMTimeline
-          buildingId={buildingId}
-          onMilestoneComplete={loadDashboardData}
+        <RTMTimeline
+          currentStep="eligibility"
+          onStepClick={() => {}}
         />
       )}
 
