@@ -5,6 +5,8 @@ import Card from '../ui/Card';
 import LegalGuidanceTooltip from '../legal/LegalGuidanceTooltip';
 import { useFormPersistence } from '../../hooks/useFormPersistence';
 import { useAuth } from '../../contexts/AuthContext';
+import InviteUserModal from '../invitations/InviteUserModal';
+import InvitationService, { CreateInvitationRequest } from '../../services/invitationService';
 
 interface Director {
   id: string;
@@ -32,6 +34,8 @@ interface CompanyDetails {
 
 const RTMCompanyFormation: React.FC = () => {
   const { user } = useAuth();
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const invitationService = InvitationService.getInstance();
 
   // Form persistence setup
   const initialCompanyDetails: CompanyDetails = {
@@ -59,6 +63,44 @@ const RTMCompanyFormation: React.FC = () => {
     autoSave: true,
     showSaveIndicator: true
   });
+
+  // Invitation handling
+  const handleCreateInvitation = async (invitation: CreateInvitationRequest): Promise<{ success: boolean; code?: string; error?: string }> => {
+    if (!user?.id) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    try {
+      const result = await invitationService.createInvitation(invitation, user.id);
+      if (result.data) {
+        // Add the invited director to the directors list
+        const director: Director = {
+          id: Date.now().toString(),
+          name: invitation.first_name && invitation.last_name
+            ? `${invitation.first_name} ${invitation.last_name}`
+            : invitation.email,
+          flatNumber: invitation.unit_number || '',
+          email: invitation.email,
+          isQualifyingTenant: true,
+          hasConsented: false,
+          isExistingUser: false,
+          invitationSent: true
+        };
+
+        setCompanyDetails(prev => ({
+          ...prev,
+          directors: [...prev.directors, director]
+        }));
+
+        return { success: true, code: result.data.invitation_code };
+      } else {
+        return { success: false, error: result.error?.message || 'Failed to create invitation' };
+      }
+    } catch (error) {
+      console.error('Error creating invitation:', error);
+      return { success: false, error: 'Failed to create invitation' };
+    }
+  };
 
   const [newDirector, setNewDirector] = useState<Partial<Director>>({
     name: '',
@@ -696,13 +738,22 @@ Premises: ${premisesAddress}`;
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h4 className="text-lg font-semibold text-gray-900">Company Directors</h4>
-            <Button 
-              variant="primary" 
-              leftIcon={<Users size={16} />}
-              onClick={() => setShowAddDirector(true)}
-            >
-              Add Director
-            </Button>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                leftIcon={<UserPlus size={16} />}
+                onClick={() => setShowInviteModal(true)}
+              >
+                Invite Directors
+              </Button>
+              <Button
+                variant="primary"
+                leftIcon={<Users size={16} />}
+                onClick={() => setShowAddDirector(true)}
+              >
+                Add Director
+              </Button>
+            </div>
           </div>
 
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
@@ -1197,6 +1248,24 @@ Premises: ${premisesAddress}`;
           )}
         </div>
       </Card>
+
+      {/* Invitation Modal */}
+      {showInviteModal && user?.metadata?.buildingId && (
+        <InviteUserModal
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          onInvite={handleCreateInvitation}
+          buildingId={user.metadata.buildingId}
+          context="company_formation"
+          defaultRole="rtm_director"
+          title="Invite RTM Directors"
+          description="Invite qualifying leaseholders to become directors of the RTM company"
+          contextData={{
+            company_name: companyDetails.proposedName,
+            formation_stage: 'director_recruitment'
+          }}
+        />
+      )}
     </div>
   );
 };

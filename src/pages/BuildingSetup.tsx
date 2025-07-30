@@ -9,7 +9,9 @@ import {
   Save,
   AlertTriangle,
   Info,
-  Loader2
+  Loader2,
+  Users,
+  UserPlus
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -17,6 +19,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useFormPersistence } from '../hooks/useFormPersistence';
+import InviteUserModal from '../components/invitations/InviteUserModal';
+import UserManagementList from '../components/invitations/UserManagementList';
+import InvitationService, { CreateInvitationRequest } from '../services/invitationService';
 
 interface BuildingData {
   name: string;
@@ -36,6 +41,16 @@ const BuildingSetup = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
   const [hasLoadedFromDatabase, setHasLoadedFromDatabase] = useState(false);
+
+  // Tab management
+  const [activeTab, setActiveTab] = useState<'building' | 'users'>('building');
+
+  // Invitation management
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [userListRefresh, setUserListRefresh] = useState(0);
+  const [buildingId, setBuildingId] = useState<string | null>(null);
+
+  const invitationService = InvitationService.getInstance();
 
   // Form persistence setup
   const initialBuildingData: BuildingData = {
@@ -63,6 +78,26 @@ const BuildingSetup = () => {
     showSaveIndicator: true
   });
 
+  // Invitation handling
+  const handleCreateInvitation = async (invitation: CreateInvitationRequest): Promise<{ success: boolean; code?: string; error?: string }> => {
+    if (!user?.id) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    try {
+      const result = await invitationService.createInvitation(invitation, user.id);
+      if (result.data) {
+        setUserListRefresh(prev => prev + 1); // Trigger refresh
+        return { success: true, code: result.data.invitation_code };
+      } else {
+        return { success: false, error: result.error?.message || 'Failed to create invitation' };
+      }
+    } catch (error) {
+      console.error('Error creating invitation:', error);
+      return { success: false, error: 'Failed to create invitation' };
+    }
+  };
+
   useEffect(() => {
     const fetchBuildingData = async () => {
       if (!user?.id) {
@@ -75,6 +110,7 @@ const BuildingSetup = () => {
       try {
         // Try to get building ID from user metadata first
         let buildingId = user?.metadata?.buildingId;
+        setBuildingId(buildingId);
 
         if (!buildingId) {
           // If not in metadata, try to get it from building_users table
@@ -93,6 +129,7 @@ const BuildingSetup = () => {
             }
           } else if (buildingUserData) {
             buildingId = buildingUserData.building_id;
+            setBuildingId(buildingId);
 
             // Update user metadata with the building ID
             try {
@@ -390,8 +427,68 @@ const BuildingSetup = () => {
         )}
       </div>
 
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('building')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'building'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <Building2 className="h-4 w-4 inline mr-2" />
+            Building Information
+          </button>
+
+          {/* Only show User Management tab if user has building and appropriate permissions */}
+          {buildingId && (user?.role?.includes('director') || user?.role === 'management-company') && (
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'users'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Users className="h-4 w-4 inline mr-2" />
+              User Management
+            </button>
+          )}
+        </nav>
+      </div>
+
       <Card>
-        {success ? (
+        {activeTab === 'users' ? (
+          // User Management Tab
+          <div className="p-6">
+            {buildingId ? (
+              <UserManagementList
+                buildingId={buildingId}
+                onInviteUser={() => setShowInviteModal(true)}
+                refreshTrigger={userListRefresh}
+              />
+            ) : (
+              <div className="text-center py-8">
+                <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Complete Building Setup First
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  You need to complete the building information setup before you can manage users.
+                </p>
+                <Button
+                  onClick={() => setActiveTab('building')}
+                  className="flex items-center space-x-2"
+                >
+                  <Building2 className="h-4 w-4" />
+                  <span>Go to Building Setup</span>
+                </Button>
+              </div>
+            )}
+          </div>
+        ) : success ? (
           <div className="flex flex-col items-center justify-center py-12">
             <div className="mb-4 rounded-full bg-success-100 p-6">
               <CheckCircle2 className="h-8 w-8 text-success-600" />
@@ -695,6 +792,19 @@ const BuildingSetup = () => {
             </li>
           </ul>
         </div>
+      )}
+
+      {/* Invitation Modal */}
+      {showInviteModal && buildingId && (
+        <InviteUserModal
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          onInvite={handleCreateInvitation}
+          buildingId={buildingId}
+          context="building_setup"
+          title="Invite User to Building"
+          description="Invite users to join this building and collaborate on building management"
+        />
       )}
     </div>
   );

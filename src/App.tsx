@@ -42,6 +42,7 @@ import Landing from './pages/Landing';
 import Pricing from './pages/Pricing';
 import AuthRedirectHandler from './components/auth/AuthRedirectHandler';
 import BuildingSetup from './pages/BuildingSetup';
+import JoinBuilding from './pages/JoinBuilding';
 import NotFound from './pages/NotFound';
 import PrivacyPolicy from './pages/legal/PrivacyPolicy';
 import TermsOfService from './pages/legal/TermsOfService';
@@ -252,6 +253,9 @@ function App() {
 
       {/* RTM Qualification Lead Magnet */}
       <Route path="/qualify" element={<RTMQualify />} />
+
+      {/* Join Building - accessible to both logged in and non-logged in users */}
+      <Route path="/join" element={<JoinBuilding />} />
 
       {/* Feature pages */}
       <Route path="/features/issue-management" element={<IssueManagement />} />

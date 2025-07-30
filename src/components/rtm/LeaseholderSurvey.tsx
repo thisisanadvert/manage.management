@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Users, Mail, Phone, Home, CheckCircle2, Send, Download, Eye, Scale, BookOpen } from 'lucide-react';
+import { Users, Mail, Phone, Home, CheckCircle2, Send, Download, Eye, Scale, BookOpen, UserPlus } from 'lucide-react';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import LegalGuidanceTooltip from '../legal/LegalGuidanceTooltip';
 import { useFormPersistence } from '../../hooks/useFormPersistence';
+import InviteUserModal from '../invitations/InviteUserModal';
+import InvitationService, { CreateInvitationRequest } from '../../services/invitationService';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface LeaseholderInfo {
   id: string;
@@ -31,6 +34,10 @@ interface SurveyData {
 }
 
 const LeaseholderSurvey: React.FC = () => {
+  const { user } = useAuth();
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const invitationService = InvitationService.getInstance();
+
   // Form persistence setup
   const initialSurveyData: SurveyData = {
     leaseholders: [],
@@ -49,6 +56,44 @@ const LeaseholderSurvey: React.FC = () => {
     autoSave: true,
     showSaveIndicator: true
   });
+
+  // Invitation handling
+  const handleCreateInvitation = async (invitation: CreateInvitationRequest): Promise<{ success: boolean; code?: string; error?: string }> => {
+    if (!user?.id) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    try {
+      const result = await invitationService.createInvitation(invitation, user.id);
+      if (result.data) {
+        // Add the invited leaseholder to the survey list
+        const leaseholder: LeaseholderInfo = {
+          id: Date.now().toString(),
+          flatNumber: invitation.unit_number || '',
+          name: invitation.first_name && invitation.last_name
+            ? `${invitation.first_name} ${invitation.last_name}`
+            : invitation.email,
+          email: invitation.email,
+          phone: invitation.phone || '',
+          interested: 'pending',
+          concerns: '',
+          contactMethod: 'email'
+        };
+
+        setSurveyData(prev => ({
+          ...prev,
+          leaseholders: [...prev.leaseholders, leaseholder]
+        }));
+
+        return { success: true, code: result.data.invitation_code };
+      } else {
+        return { success: false, error: result.error?.message || 'Failed to create invitation' };
+      }
+    } catch (error) {
+      console.error('Error creating invitation:', error);
+      return { success: false, error: 'Failed to create invitation' };
+    }
+  };
 
   const [newLeaseholder, setNewLeaseholder] = useState<Partial<LeaseholderInfo>>({
     flatNumber: '',
@@ -253,7 +298,17 @@ This is an informal survey. No legal obligations arise from your response.
       {/* Survey Statistics */}
       <Card>
         <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-gray-900">Leaseholder Survey Progress</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-semibold text-gray-900">Leaseholder Survey Progress</h3>
+            <Button
+              onClick={() => setShowInviteModal(true)}
+              className="flex items-center space-x-2"
+              size="sm"
+            >
+              <UserPlus className="h-4 w-4" />
+              <span>Invite Leaseholders</span>
+            </Button>
+          </div>
           
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="text-center">
@@ -482,6 +537,21 @@ This is an informal survey. No legal obligations arise from your response.
             </Button>
           </div>
         </Card>
+      )}
+
+      {/* Invitation Modal */}
+      {showInviteModal && user?.metadata?.buildingId && (
+        <InviteUserModal
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          onInvite={handleCreateInvitation}
+          buildingId={user.metadata.buildingId}
+          context="leaseholder_survey"
+          defaultRole="leaseholder"
+          title="Invite Leaseholders to Survey"
+          description="Invite leaseholders to participate in the RTM eligibility survey"
+          contextData={{ survey_type: 'rtm_eligibility' }}
+        />
       )}
     </div>
   );
