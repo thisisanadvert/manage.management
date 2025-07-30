@@ -63,8 +63,16 @@ const LeaseholderSurvey: React.FC = () => {
       return { success: false, error: 'User not authenticated' };
     }
 
+    if (!user?.metadata?.buildingId) {
+      return { success: false, error: 'No building ID found. Please complete building setup first.' };
+    }
+
+    console.log('Creating invitation:', { invitation, userId: user.id, buildingId: user.metadata.buildingId });
+
     try {
       const result = await invitationService.createInvitation(invitation, user.id);
+      console.log('Invitation result:', result);
+
       if (result.data) {
         // Add the invited leaseholder to the survey list
         const leaseholder: LeaseholderInfo = {
@@ -87,11 +95,12 @@ const LeaseholderSurvey: React.FC = () => {
 
         return { success: true, code: result.data.invitation_code };
       } else {
+        console.error('Invitation creation failed:', result.error);
         return { success: false, error: result.error?.message || 'Failed to create invitation' };
       }
     } catch (error) {
       console.error('Error creating invitation:', error);
-      return { success: false, error: 'Failed to create invitation' };
+      return { success: false, error: `Failed to create invitation: ${error instanceof Error ? error.message : 'Unknown error'}` };
     }
   };
 

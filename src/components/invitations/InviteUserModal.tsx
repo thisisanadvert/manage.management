@@ -3,7 +3,7 @@
  * Reusable modal for inviting users to buildings with context-specific options
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Mail, User, Building, UserPlus, Copy, Check } from 'lucide-react';
 import Button from '../ui/Button';
 import { UserBuildingRole, InvitationContext, CreateInvitationRequest } from '../../services/invitationService';
@@ -46,6 +46,26 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Handle escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        handleClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   const roleOptions: { value: UserBuildingRole; label: string; description: string }[] = [
     { value: 'leaseholder', label: 'Leaseholder', description: 'Standard building resident with basic access' },
     { value: 'freeholder', label: 'Freeholder', description: 'Building owner with maintenance permissions' },
@@ -76,6 +96,8 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({
     if (!formData.email.trim()) return;
 
     setIsSubmitting(true);
+    setError(null);
+
     try {
       const invitation: CreateInvitationRequest = {
         building_id: buildingId,
@@ -92,7 +114,7 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({
       };
 
       const result = await onInvite(invitation);
-      
+
       if (result.success && result.code) {
         setInvitationCode(result.code);
         // Reset form but keep modal open to show code
@@ -107,11 +129,11 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({
           expires_in_days: 7
         });
       } else {
-        alert(result.error || 'Failed to create invitation');
+        setError(result.error || 'Failed to create invitation');
       }
     } catch (error) {
       console.error('Error creating invitation:', error);
-      alert('Failed to create invitation');
+      setError('Failed to create invitation. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -132,6 +154,8 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({
   const handleClose = () => {
     setInvitationCode(null);
     setCopied(false);
+    setError(null);
+    setIsSubmitting(false);
     setFormData({
       email: '',
       first_name: '',
@@ -147,12 +171,52 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({
 
   if (!isOpen) return null;
 
+  // Add inline styles to ensure modal works properly
+  const overlayStyle: React.CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '1rem',
+    zIndex: 10000,
+    pointerEvents: 'auto'
+  };
+
+  const modalStyle: React.CSSProperties = {
+    backgroundColor: 'white',
+    borderRadius: '0.5rem',
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+    width: '100%',
+    maxWidth: '32rem',
+    maxHeight: '90vh',
+    overflow: 'auto',
+    position: 'relative',
+    pointerEvents: 'auto'
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+    <div
+      className="invitation-modal-overlay"
+      style={overlayStyle}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          handleClose();
+        }
+      }}
+    >
+      <div
+        className="invitation-modal-content"
+        style={modalStyle}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-gray-900">
               {title || contextTitles[context]}
             </h2>
             <p className="text-sm text-gray-600 mt-1">
@@ -161,13 +225,20 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({
           </div>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded"
+            type="button"
           >
-            <X className="h-6 w-6" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-4">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
+
           {invitationCode ? (
             // Success state - show invitation code
             <div className="text-center">
@@ -232,90 +303,98 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({
             </div>
           ) : (
             // Form state
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email Address *
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
                     type="email"
                     required
                     value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    onChange={(e) => {
+                      setError(null);
+                      setFormData(prev => ({ ...prev, email: e.target.value }));
+                    }}
+                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     placeholder="user@example.com"
+                    autoComplete="email"
                   />
                 </div>
               </div>
 
               {/* Name fields */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     First Name
                   </label>
                   <input
                     type="text"
                     value={formData.first_name}
                     onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     placeholder="John"
+                    autoComplete="given-name"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Last Name
                   </label>
                   <input
                     type="text"
                     value={formData.last_name}
                     onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     placeholder="Smith"
+                    autoComplete="family-name"
                   />
                 </div>
               </div>
 
               {/* Unit and Phone */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Unit Number
                   </label>
                   <input
                     type="text"
                     value={formData.unit_number}
                     onChange={(e) => setFormData(prev => ({ ...prev, unit_number: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     placeholder="Flat 1A"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Phone Number
                   </label>
                   <input
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     placeholder="+44 7XXX XXXXXX"
+                    autoComplete="tel"
                   />
                 </div>
               </div>
 
               {/* Role Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Role *
                 </label>
                 <select
                   value={formData.invited_role}
                   onChange={(e) => setFormData(prev => ({ ...prev, invited_role: e.target.value as UserBuildingRole }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  required
                 >
                   {roleOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -327,27 +406,27 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({
 
               {/* Invitation Message */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Personal Message (Optional)
                 </label>
                 <textarea
                   value={formData.invitation_message}
                   onChange={(e) => setFormData(prev => ({ ...prev, invitation_message: e.target.value }))}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Add a personal message to include with the invitation..."
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
+                  placeholder="Add a personal message..."
                 />
               </div>
 
               {/* Expiry */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Invitation Expires In
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Expires In
                 </label>
                 <select
                   value={formData.expires_in_days}
                   onChange={(e) => setFormData(prev => ({ ...prev, expires_in_days: parseInt(e.target.value) }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 >
                   <option value={1}>1 day</option>
                   <option value={3}>3 days</option>
@@ -358,12 +437,13 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({
               </div>
 
               {/* Actions */}
-              <div className="flex space-x-3 pt-4">
+              <div className="flex space-x-3 pt-2 border-t border-gray-200 mt-4">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleClose}
                   className="flex-1"
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </Button>
