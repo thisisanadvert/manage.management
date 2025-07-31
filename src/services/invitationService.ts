@@ -455,7 +455,8 @@ class InvitationService {
    */
   async getBuildingUsers(building_id: string): Promise<{ data: any[] | null; error: any }> {
     try {
-      const { data, error } = await supabase
+      // First try the user_building_roles table
+      const { data: rolesData, error: rolesError } = await supabase
         .from('user_building_roles')
         .select(`
           *,
@@ -468,10 +469,112 @@ class InvitationService {
         .eq('building_id', building_id)
         .order('joined_at', { ascending: false });
 
-      return { data, error };
+      if (!rolesError && rolesData) {
+        return { data: rolesData, error: null };
+      }
+
+      // If that fails, try the building_users table as fallback
+      console.log('user_building_roles failed, trying building_users table:', rolesError);
+
+      const { data: usersData, error: usersError } = await supabase
+        .from('building_users')
+        .select(`
+          *,
+          user:auth.users!building_users_user_id_fkey(
+            id,
+            email,
+            raw_user_meta_data
+          )
+        `)
+        .eq('building_id', building_id);
+
+      if (!usersError && usersData) {
+        // Transform building_users data to match user_building_roles format
+        const transformedData = usersData.map(item => ({
+          id: item.id,
+          user_id: item.user_id,
+          building_id: item.building_id,
+          role: item.role || 'leaseholder',
+          unit_number: null,
+          is_primary_contact: false,
+          can_invite_users: item.role?.includes('director') || item.role === 'management_company',
+          can_manage_finances: item.role?.includes('director'),
+          can_manage_documents: true,
+          can_view_all_units: item.role?.includes('director') || item.role === 'management_company',
+          joined_at: item.created_at,
+          user: item.user
+        }));
+
+        return { data: transformedData, error: null };
+      }
+
+      // If both fail, return empty array with a helpful error message
+      console.log('Both user tables failed:', { rolesError, usersError });
+
+      return {
+        data: [],
+        error: {
+          message: 'No user data found. This might be the first user for this building.',
+          details: { rolesError, usersError }
+        }
+      };
     } catch (error) {
       console.error('Error getting building users:', error);
       return { data: null, error };
+    }
+  }
+
+  /**
+   * Helper method to ensure user has proper building association
+   */
+  async ensureUserBuildingAssociation(user_id: string, building_id: string, role: string): Promise<{ success: boolean; error?: any }> {
+    try {
+      // Check if user already has a role in this building
+      const { data: existingRole } = await supabase
+        .from('user_building_roles')
+        .select('id')
+        .eq('user_id', user_id)
+        .eq('building_id', building_id)
+        .single();
+
+      if (existingRole) {
+        return { success: true };
+      }
+
+      // Create user building role
+      const rolePermissions = this.getRolePermissions(role as UserBuildingRole);
+      const userRole = {
+        user_id,
+        building_id,
+        role,
+        is_primary_contact: false,
+        joined_at: new Date().toISOString(),
+        ...rolePermissions
+      };
+
+      const { error } = await supabase
+        .from('user_building_roles')
+        .insert([userRole]);
+
+      if (error) {
+        // If user_building_roles fails, try building_users as fallback
+        const { error: buildingUserError } = await supabase
+          .from('building_users')
+          .insert([{
+            user_id,
+            building_id,
+            role
+          }]);
+
+        if (buildingUserError) {
+          return { success: false, error: buildingUserError };
+        }
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error ensuring user building association:', error);
+      return { success: false, error };
     }
   }
 }

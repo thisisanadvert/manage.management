@@ -64,23 +64,42 @@ const UserManagementList: React.FC<UserManagementListProps> = ({
     try {
       // Load building users
       const { data: usersData, error: usersError } = await invitationService.getBuildingUsers(buildingId);
-      if (usersError) {
+      if (usersError && usersError.message !== 'No user data found. This might be the first user for this building.') {
         console.error('Error loading users:', usersError);
-        setError('Failed to load building users');
+        console.log('Full error details:', usersError);
+
+        // Provide more specific error messages
+        if (usersError.message?.includes('permission denied')) {
+          setError('Permission denied. You may not have access to view building users.');
+        } else if (usersError.message?.includes('relation') && usersError.message?.includes('does not exist')) {
+          setError('Database tables not properly configured. Please contact support.');
+        } else {
+          setError(`Failed to load building users: ${usersError.message || 'Unknown error'}`);
+        }
       } else {
+        // Set users data (could be empty array for new buildings)
         setUsers(usersData || []);
+
+        // If we got the "first user" message, log it but don't show as error
+        if (usersError?.message === 'No user data found. This might be the first user for this building.') {
+          console.log('This appears to be a new building with no users yet');
+        }
       }
 
       // Load pending invitations
       const { data: invitationsData, error: invitationsError } = await invitationService.getBuildingInvitations(buildingId, user.id);
       if (invitationsError) {
         console.error('Error loading invitations:', invitationsError);
+        // Don't set error for invitations failure if users loaded successfully
+        if (!usersData) {
+          setError(prev => prev || 'Failed to load invitations');
+        }
       } else {
         setInvitations(invitationsData?.filter(inv => inv.status === 'pending') || []);
       }
     } catch (error) {
       console.error('Error loading data:', error);
-      setError('Failed to load user data');
+      setError(`Failed to load user data: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -154,16 +173,96 @@ const UserManagementList: React.FC<UserManagementListProps> = ({
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-800">{error}</p>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={loadData}
-          className="mt-2"
-        >
-          Try Again
-        </Button>
+      <div className="space-y-4">
+        {/* Header with invite button even when there's an error */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">User Management</h3>
+            <p className="text-sm text-gray-600">Manage building users and send invitations</p>
+          </div>
+          <Button
+            onClick={onInviteUser}
+            className="flex items-center space-x-2"
+          >
+            <UserPlus className="h-4 w-4" />
+            <span>Invite User</span>
+          </Button>
+        </div>
+
+        {/* Error display */}
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-start space-x-3">
+            <XCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h4 className="text-sm font-medium text-red-800 mb-1">Failed to Load Users</h4>
+              <p className="text-sm text-red-700">{error}</p>
+              <div className="mt-3 flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={loadData}
+                  className="text-red-700 border-red-300 hover:bg-red-50"
+                >
+                  Try Again
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.reload()}
+                  className="text-red-700 border-red-300 hover:bg-red-50"
+                >
+                  Refresh Page
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Show invitations even if users failed to load */}
+        {invitations.length > 0 && (
+          <div>
+            <h4 className="text-md font-medium text-gray-900 mb-3">Pending Invitations</h4>
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+              <div className="divide-y divide-gray-200">
+                {invitations.map((invitation) => (
+                  <div key={invitation.id} className="p-4 hover:bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                          <Mail className="h-5 w-5 text-orange-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {invitation.first_name && invitation.last_name
+                              ? `${invitation.first_name} ${invitation.last_name}`
+                              : invitation.email}
+                          </p>
+                          <p className="text-sm text-gray-500">{invitation.email}</p>
+                          {invitation.unit_number && (
+                            <p className="text-xs text-gray-400">Unit: {invitation.unit_number}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Badge variant="warning">
+                          <Clock className="h-3 w-3 mr-1" />
+                          Pending
+                        </Badge>
+                        <button
+                          onClick={() => handleRevokeInvitation(invitation.id!)}
+                          className="text-red-600 hover:text-red-800 p-1"
+                          title="Revoke invitation"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -175,7 +274,7 @@ const UserManagementList: React.FC<UserManagementListProps> = ({
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Building Users</h3>
           <p className="text-sm text-gray-600">
-            Manage users and invitations for this building
+            Manage users and invitations for this building ({users.length} users, {invitations.length} pending)
           </p>
         </div>
         <Button
@@ -188,20 +287,29 @@ const UserManagementList: React.FC<UserManagementListProps> = ({
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-blue-50 rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600">{users.length}</div>
-          <div className="text-sm text-blue-700">Active Users</div>
-        </div>
-        <div className="bg-yellow-50 rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-yellow-600">{invitations.length}</div>
-          <div className="text-sm text-yellow-700">Pending Invitations</div>
-        </div>
-        <div className="bg-purple-50 rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-purple-600">
-            {users.filter(u => u.role.includes('director')).length}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <Users className="h-5 w-5 text-blue-600" />
+            <span className="text-sm font-medium text-blue-900">Active Users</span>
           </div>
-          <div className="text-sm text-purple-700">Directors</div>
+          <p className="text-2xl font-bold text-blue-900 mt-1">{users.length}</p>
+        </div>
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <Clock className="h-5 w-5 text-orange-600" />
+            <span className="text-sm font-medium text-orange-900">Pending Invitations</span>
+          </div>
+          <p className="text-2xl font-bold text-orange-900 mt-1">{invitations.length}</p>
+        </div>
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <Shield className="h-5 w-5 text-purple-600" />
+            <span className="text-sm font-medium text-purple-900">Directors</span>
+          </div>
+          <p className="text-2xl font-bold text-purple-900 mt-1">
+            {users.filter(u => u.role?.includes('director')).length}
+          </p>
         </div>
       </div>
 
@@ -213,10 +321,19 @@ const UserManagementList: React.FC<UserManagementListProps> = ({
         </h4>
         
         {users.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-            <p>No users found</p>
-            <p className="text-sm">Invite users to get started</p>
+          <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+            <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+            <h4 className="text-lg font-medium text-gray-900 mb-2">No Users Found</h4>
+            <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              This building doesn't have any users yet. Start by inviting leaseholders, directors, or other stakeholders to join.
+            </p>
+            <Button
+              onClick={onInviteUser}
+              className="flex items-center space-x-2 mx-auto"
+            >
+              <UserPlus className="h-4 w-4" />
+              <span>Send Your First Invitation</span>
+            </Button>
           </div>
         ) : (
           <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
