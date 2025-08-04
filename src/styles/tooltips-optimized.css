@@ -1,0 +1,186 @@
+/* ========================================
+   OPTIMIZED TOOLTIP SYSTEM - PLATFORM WIDE
+   Clean, efficient, and conflict-free
+   ======================================== */
+
+/* Core Tooltip Foundation */
+[role="tooltip"],
+.tooltip-content,
+.legal-guidance-tooltip {
+  z-index: 1100 !important;
+  position: absolute !important;
+  isolation: isolate !important;
+  backdrop-filter: blur(8px) !important;
+  border-radius: 8px !important;
+  max-width: 320px !important;
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+  padding: 0.75rem 1rem !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Glassmorphism Tooltips */
+.tooltip-glassmorphism {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  color: rgb(31, 41, 55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Standard Dark Tooltips */
+.tooltip-content:not(.tooltip-glassmorphism) {
+  background-color: rgb(17, 24, 39) !important;
+  color: rgb(255, 255, 255) !important;
+  border: 1px solid rgb(75, 85, 99) !important;
+}
+
+/* Legal Guidance Tooltips */
+.legal-guidance-tooltip {
+  background-color: rgb(255, 255, 255) !important;
+  color: rgb(17, 24, 39) !important;
+  border: 1px solid rgb(59, 130, 246) !important;
+}
+
+/* Tooltip Arrows */
+.tooltip-arrow,
+.tooltip-glassmorphism-arrow {
+  position: absolute !important;
+  width: 8px !important;
+  height: 8px !important;
+  transform: rotate(45deg) !important;
+  z-index: 1099 !important;
+}
+
+.tooltip-glassmorphism-arrow {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+.tooltip-arrow:not(.tooltip-glassmorphism-arrow) {
+  background-color: rgb(17, 24, 39) !important;
+  border: 1px solid rgb(75, 85, 99) !important;
+}
+
+/* Tooltip Content Styling */
+.tooltip-content *,
+.legal-guidance-tooltip *,
+.tooltip-glassmorphism * {
+  color: inherit !important;
+}
+
+/* Tooltip Buttons */
+.tooltip-content button,
+.legal-guidance-tooltip button,
+.tooltip-glassmorphism button {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  border-radius: 4px !important;
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  transition: all 0.2s ease !important;
+  pointer-events: auto !important;
+  z-index: 1102 !important;
+}
+
+.tooltip-content button:hover,
+.legal-guidance-tooltip button:hover,
+.tooltip-glassmorphism button:hover {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Tooltip Positioning & Z-Index Management */
+.absolute.bottom-full,
+.absolute.top-full,
+.absolute.left-full,
+.absolute.right-full,
+div[class*="absolute"][class*="bottom-full"],
+div[class*="absolute"][class*="top-full"],
+div[class*="absolute"][class*="left-full"],
+div[class*="absolute"][class*="right-full"] {
+  z-index: 1100 !important;
+}
+
+/* Tooltip Triggers */
+button[aria-label*="guidance"],
+button[aria-label*="tooltip"],
+button[aria-label*="help"],
+button[aria-label*="information"] {
+  pointer-events: auto !important;
+  z-index: 999 !important;
+  position: relative !important;
+}
+
+/* Critical Color Overrides */
+.text-red-600 {
+  color: rgb(220, 38, 38) !important;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  [role="tooltip"],
+  .tooltip-content,
+  .legal-guidance-tooltip {
+    border-width: 2px !important;
+    border-style: solid !important;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  [role="tooltip"],
+  .tooltip-content,
+  .legal-guidance-tooltip {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Mobile Responsive Tooltips */
+@media (max-width: 768px) {
+  [role="tooltip"],
+  .tooltip-content,
+  .legal-guidance-tooltip {
+    max-width: 90vw !important;
+    font-size: 0.8rem !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+}
+
+/* Print Mode - Hide Tooltips */
+@media print {
+  [role="tooltip"],
+  .tooltip-content,
+  .legal-guidance-tooltip {
+    display: none !important;
+  }
+}
+
+/* Tooltip Visibility Overrides */
+.hidden [role="tooltip"],
+.invisible [role="tooltip"],
+.opacity-0 [role="tooltip"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Ensure tooltips work in modals */
+.modal [role="tooltip"],
+.modal .tooltip-content,
+.modal .legal-guidance-tooltip {
+  z-index: 1200 !important;
+}
+
+/* Z-Index Hierarchy */
+.z-\\[1100\\] {
+  z-index: 1100 !important;
+}
+
+.z-\\[999\\] {
+  z-index: 999 !important;
+}

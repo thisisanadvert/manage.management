@@ -1,89 +1,14 @@
 @import './styles/accessibility.css';
+@import './styles/tooltips-optimized.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Tooltip Visibility Fixes - Critical for User Experience */
-/* Glassmorphism Tooltips - Glass Panel Effect */
-.tooltip-glassmorphism {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  color: rgb(31, 41, 55) !important; /* gray-800 */
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05) !important;
-  z-index: 1100 !important;
-  isolation: isolate !important;
-  position: relative !important;
-}
-
-.tooltip-glassmorphism-arrow {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  z-index: 1099 !important;
-}
-
-/* Standard Dark Tooltips */
-.tooltip-content:not(.tooltip-glassmorphism) {
-  background-color: rgb(17 24 39) !important; /* gray-900 */
-  color: rgb(255 255 255) !important; /* white */
-  z-index: 1100 !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(75, 85, 99, 0.1) !important;
-  border: 2px solid rgb(75 85 99) !important; /* gray-600 border */
-  backdrop-filter: blur(8px) !important;
-  isolation: isolate !important;
-  position: relative !important;
-}
-
-.tooltip-arrow:not(.tooltip-glassmorphism-arrow) {
-  background-color: rgb(17 24 39) !important; /* gray-900 */
-  z-index: 1099 !important;
-  border: 1px solid rgb(75 85 99) !important;
-}
-
-/* Ensure tooltips are always visible above other content */
-[role="tooltip"] {
-  z-index: 1100 !important;
-  position: relative !important;
-  isolation: isolate !important;
-}
-
-/* Legal Guidance Tooltip Fixes */
-.legal-guidance-tooltip {
-  background-color: rgb(255 255 255) !important; /* white */
-  color: rgb(17 24 39) !important; /* gray-900 */
-  border: 2px solid rgb(59 130 246) !important; /* blue-500 border */
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(59, 130, 246, 0.1) !important;
-  z-index: 1100 !important;
-  backdrop-filter: blur(8px) !important;
-  position: relative !important;
-  isolation: isolate !important;
-}
-
-/* Ensure legal guidance tooltip content is readable */
-.legal-guidance-tooltip h3,
-.legal-guidance-tooltip h4,
-.legal-guidance-tooltip p,
-.legal-guidance-tooltip span,
-.legal-guidance-tooltip div {
-  color: inherit !important;
-}
-
-/* Fix legal guidance tooltip buttons */
-.legal-guidance-tooltip button {
-  background-color: rgb(249 250 251) !important; /* gray-50 */
-  color: rgb(75 85 99) !important; /* gray-600 */
-  border: 1px solid rgb(229 231 235) !important; /* gray-200 */
-}
-
-.legal-guidance-tooltip button:hover,
-.legal-guidance-tooltip button:focus {
-  background-color: rgb(243 244 246) !important; /* gray-100 */
-  color: rgb(55 65 81) !important; /* gray-700 */
-}
+/* ========================================
+   TOOLTIP STYLES MOVED TO SEPARATE FILE
+   See: src/styles/tooltips-optimized.css
+   ======================================== */
 
 /* TEMPORARILY DISABLED - MODAL CSS CAUSING CONFLICTS */
 /*
@@ -142,58 +67,31 @@ body.modal-open {
 }
 */
 
-/* Additional tooltip visibility fixes */
-/* Ensure all absolute positioned tooltips are visible */
-.absolute.bottom-full.left-0.mb-2.z-\[1000\] {
-  z-index: 1000 !important;
-}
-
-.absolute.bottom-full.left-0.mb-2.z-\[1000\] > div {
-  background-color: rgb(255 255 255) !important; /* white */
-  color: rgb(17 24 39) !important; /* gray-900 */
-  border: 1px solid rgb(229 231 235) !important; /* gray-200 */
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-  z-index: 1000 !important;
-}
-
-/* Fix click-based tooltip visibility */
-.absolute.bottom-full.left-0.mb-2 {
-  z-index: 1000 !important;
-}
-
-/* Ensure tooltip content is always readable */
-.absolute.bottom-full.left-0.mb-2 h3,
-.absolute.bottom-full.left-0.mb-2 h4,
-.absolute.bottom-full.left-0.mb-2 p,
-.absolute.bottom-full.left-0.mb-2 span,
-.absolute.bottom-full.left-0.mb-2 div {
-  color: inherit !important;
-}
-
-/* Fix mandatory indicators */
-.text-red-600 {
-  color: rgb(220 38 38) !important; /* red-600 */
-}
-
-/* Comprehensive tooltip visibility override */
-/* This ensures ALL tooltips are visible regardless of implementation */
+/* Tooltip Positioning & Z-Index Management */
+.absolute.bottom-full,
+.absolute.top-full,
+.absolute.left-full,
+.absolute.right-full,
 div[class*="absolute"][class*="bottom-full"],
 div[class*="absolute"][class*="top-full"],
 div[class*="absolute"][class*="left-full"],
 div[class*="absolute"][class*="right-full"] {
-  z-index: 1000 !important;
+  z-index: 1100 !important;
 }
 
-/* Ensure tooltip content containers are visible */
-div[class*="absolute"][class*="bottom-full"] > div,
-div[class*="absolute"][class*="top-full"] > div,
-div[class*="absolute"][class*="left-full"] > div,
-div[class*="absolute"][class*="right-full"] > div {
-  background-color: rgb(255 255 255) !important;
-  color: rgb(17 24 39) !important;
-  border: 1px solid rgb(229 231 235) !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-  z-index: 1000 !important;
+/* Tooltip Triggers */
+button[aria-label*="guidance"],
+button[aria-label*="tooltip"],
+button[aria-label*="help"],
+button[aria-label*="information"] {
+  pointer-events: auto !important;
+  z-index: 999 !important;
+  position: relative !important;
+}
+
+/* Critical Color Overrides */
+.text-red-600 {
+  color: rgb(220, 38, 38) !important;
 }
 
 /* Force visibility for any hidden tooltips */
