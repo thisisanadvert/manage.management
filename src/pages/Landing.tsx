@@ -20,7 +20,7 @@ import {
   Type,
   Eye,
   Zap,
-  HelpCircle,
+
   Sparkles
 } from 'lucide-react';
 import Button from '../components/ui/Button';
@@ -47,50 +47,50 @@ const Landing = () => {
     {
       title: 'Document Storage',
       description: 'Keep all your building paperwork in one safe place - no more lost documents!',
-      tooltip: 'Store leases, insurance papers, maintenance records, and meeting minutes securely online. Everyone can access what they need, when they need it.',
       icon: FileText,
       color: 'bg-blue-100 text-blue-600',
-      beginnerFriendly: true
+      beginnerFriendly: true,
+      link: '/features/document-management'
     },
     {
       title: 'Easy Voting',
       description: 'Make decisions together without endless email chains or confusing meetings.',
-      tooltip: 'Create simple polls for building decisions like choosing contractors, approving budgets, or scheduling maintenance. Everyone votes online at their convenience.',
       icon: Vote,
       color: 'bg-purple-100 text-purple-600',
-      beginnerFriendly: true
+      beginnerFriendly: true,
+      link: '/features/voting-system'
     },
     {
       title: 'Stay Connected',
       description: 'Get important updates about your building delivered straight to you.',
-      tooltip: 'Receive notifications about maintenance work, building news, and important announcements. No more missed information or wondering what\'s happening.',
       icon: MessageSquare,
       color: 'bg-green-100 text-green-600',
-      beginnerFriendly: true
+      beginnerFriendly: true,
+      link: '/features/communication-hub'
     },
     {
       title: 'Money Matters Made Simple',
       description: 'See exactly where your service charges go - complete transparency.',
-      tooltip: 'View detailed breakdowns of building expenses, track service charge payments, and understand your building\'s finances with clear, simple reports.',
       icon: BarChart4,
       color: 'bg-yellow-100 text-yellow-600',
-      beginnerFriendly: true
+      beginnerFriendly: true,
+      link: '/features/financial-tracking'
     },
     {
       title: 'Maintenance Made Easy',
       description: 'Report problems and track fixes without the hassle.',
-      tooltip: 'Quickly report issues like broken lifts or leaky pipes. Track progress and get updates when work is scheduled or completed.',
       icon: Clock,
       color: 'bg-red-100 text-red-600',
-      beginnerFriendly: true
+      beginnerFriendly: true,
+      link: '/features/issue-management'
     },
     {
       title: 'Trusted Suppliers',
       description: 'Find reliable contractors and services recommended by other buildings.',
-      tooltip: 'Access a network of vetted suppliers for everything from cleaning to major repairs. See reviews and ratings from other building managers.',
       icon: Heart,
       color: 'bg-pink-100 text-pink-600',
-      beginnerFriendly: true
+      beginnerFriendly: true,
+      link: '/help' // Link to help page since suppliers is still in development
     }
   ];
 
@@ -328,7 +328,7 @@ The reforms' emphasis on standardisation, digital communication, and leaseholder
                 title="RTM means 'Right to Manage' - when residents take control of managing their building. RMC means 'Resident Management Company' - when residents own the freehold and manage the building themselves. Click to learn more about qualifying!"
               >
                 <span>Perfect for RTM directors, RMC directors, and homeowners</span>
-                <HelpCircle size={14} className="text-gray-400 hover:text-primary-600 transition-colors" />
+                <ArrowRight size={14} className="text-gray-400 hover:text-primary-600 transition-colors" />
               </button>
             </div>
             <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4 px-4">
@@ -402,32 +402,31 @@ The reforms' emphasis on standardisation, digital communication, and leaseholder
                 return (
                   <div
                     key={index}
-                    className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:scale-105 group"
+                    onClick={() => navigate(feature.link)}
+                    className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:scale-105 group cursor-pointer"
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className={`${feature.color} w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform`}>
                         <Icon size={24} />
                       </div>
-                      <div
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                        title={feature.tooltip}
-                      >
-                        <HelpCircle size={16} className="text-gray-400 hover:text-gray-600" />
-                      </div>
+                      <ArrowRight size={16} className="text-gray-400 group-hover:text-primary-600 transition-colors" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
                       {feature.title}
                     </h3>
-                    <p className="text-gray-600">
+                    <p className="text-gray-600 mb-3">
                       {feature.description}
                     </p>
-                    {feature.beginnerFriendly && (
-                      <div className="mt-3">
+                    <div className="flex items-center justify-between">
+                      {feature.beginnerFriendly && (
                         <Badge variant="secondary" className="text-xs">
                           ✨ Beginner Friendly
                         </Badge>
-                      </div>
-                    )}
+                      )}
+                      <span className="text-sm text-primary-600 font-medium group-hover:text-primary-700 transition-colors">
+                        Learn more →
+                      </span>
+                    </div>
                   </div>
                 );
               })}
