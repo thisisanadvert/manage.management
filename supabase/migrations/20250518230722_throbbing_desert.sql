@@ -296,10 +296,34 @@ CREATE POLICY "users_upload_documents"
         SELECT building_id::text
         FROM building_users
         WHERE user_id = auth.uid()
-        AND role IN ('rtm-director', 'sof-director')
+        AND role IN ('rtm-director', 'sof-director', 'rmc-director')
       )
       OR
       -- Allow users to upload issue documents
+      SPLIT_PART(name, '/', 1) = 'issues' AND
+      EXISTS (
+        SELECT 1 FROM issues i
+        JOIN building_users bu ON bu.building_id = i.building_id
+        WHERE i.id::text = SPLIT_PART(name, '/', 2)
+        AND bu.user_id = auth.uid()
+      )
+    )
+  );
+
+CREATE POLICY "users_delete_documents"
+  ON storage.objects
+  FOR DELETE
+  USING (
+    bucket_id = 'documents' AND (
+      -- Allow directors to delete documents from their buildings
+      SPLIT_PART(name, '/', 1) IN (
+        SELECT building_id::text
+        FROM building_users
+        WHERE user_id = auth.uid()
+        AND role IN ('rtm-director', 'sof-director', 'rmc-director')
+      )
+      OR
+      -- Allow users to delete issue documents they uploaded
       SPLIT_PART(name, '/', 1) = 'issues' AND
       EXISTS (
         SELECT 1 FROM issues i
