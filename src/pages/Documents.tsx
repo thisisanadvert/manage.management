@@ -279,6 +279,7 @@ const Documents = () => {
 
   // Deletion functionality
   const handleOpenDeleteModal = (doc: any) => {
+    console.log('🗑️ Opening delete modal for document:', doc);
     // Close any other open modals first
     setShowUploadModal(false);
     setShowPreviewModal(false);
@@ -286,6 +287,7 @@ const Documents = () => {
 
     setDeleteDocument(doc);
     setShowDeleteModal(true);
+    console.log('🗑️ Delete modal state set to true');
   };
 
   const handleDeleteDocument = async () => {
@@ -1190,16 +1192,26 @@ const Documents = () => {
 
   // Delete Modal Component
   function DeleteModal() {
+    console.log('🗑️ DeleteModal rendering, deleteDocument:', deleteDocument);
     return (
       <div
         className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         onClick={(e) => {
+          console.log('🗑️ Modal backdrop clicked');
           if (e.target === e.currentTarget) {
             setShowDeleteModal(false);
           }
         }}
+        style={{ pointerEvents: 'auto' }}
       >
-        <div className="bg-white rounded-lg p-6 max-w-sm w-full m-4">
+        <div
+          className="bg-white rounded-lg p-6 max-w-sm w-full m-4"
+          onClick={(e) => {
+            console.log('🗑️ Modal content clicked');
+            e.stopPropagation();
+          }}
+          style={{ pointerEvents: 'auto' }}
+        >
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold text-red-600">Delete Document</h2>
             <button
@@ -1240,9 +1252,15 @@ const Documents = () => {
               Cancel
             </button>
             <button
-              onClick={handleDeleteDocument}
+              onClick={(e) => {
+                console.log('🔴 DELETE BUTTON CLICKED!');
+                e.preventDefault();
+                e.stopPropagation();
+                handleDeleteDocument();
+              }}
               disabled={isDeleting}
               className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+              style={{ pointerEvents: 'auto' }}
             >
               {isDeleting ? 'Deleting...' : 'Delete Document'}
             </button>
