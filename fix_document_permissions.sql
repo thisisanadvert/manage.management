@@ -1,6 +1,9 @@
 -- Fix document upload and deletion permissions
 -- Run this in your Supabase SQL Editor to fix the document repository issues
 
+-- IMPORTANT: First add the missing 'rmc-director' role to the enum
+ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'rmc-director';
+
 -- First, let's check what storage policies currently exist
 -- You can run this query to see current policies:
 -- SELECT * FROM pg_policies WHERE tablename = 'objects' AND schemaname = 'storage';

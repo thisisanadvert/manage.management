@@ -1,5 +1,9 @@
 -- Fix document deletion policy for storage.objects
 -- This migration adds the missing DELETE policy that prevents users from deleting documents
+-- Also adds the missing 'rmc-director' role to the user_role enum
+
+-- First, add the missing 'rmc-director' role to the enum
+ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'rmc-director';
 
 -- Drop existing DELETE policy if it exists
 DROP POLICY IF EXISTS "users_delete_documents" ON storage.objects;
