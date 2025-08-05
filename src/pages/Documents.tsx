@@ -237,6 +237,11 @@ const Documents = () => {
 
   // Tagging functionality
   const handleOpenTagModal = async (doc: any) => {
+    // Close any other open modals first
+    setShowUploadModal(false);
+    setShowPreviewModal(false);
+    setShowDeleteModal(false);
+
     setTagDocument(doc);
     const currentTags = doc.tags || [];
     setSelectedTags(currentTags);
@@ -274,16 +279,26 @@ const Documents = () => {
 
   // Deletion functionality
   const handleOpenDeleteModal = (doc: any) => {
+    // Close any other open modals first
+    setShowUploadModal(false);
+    setShowPreviewModal(false);
+    setShowTagModal(false);
+
     setDeleteDocument(doc);
     setShowDeleteModal(true);
   };
 
   const handleDeleteDocument = async () => {
-    if (!deleteDocument) return;
+    if (!deleteDocument || !user) {
+      console.error('❌ Cannot delete: missing document or user');
+      return;
+    }
 
     try {
       setIsDeleting(true);
       console.log('🗑️ Starting deletion for document:', deleteDocument.id);
+      console.log('🗑️ User:', user.email, 'Role:', user.user_metadata?.role);
+      console.log('🗑️ Document path:', deleteDocument.file_path);
 
       // Delete document record from database (new table structure)
       console.log('🗑️ Deleting database record...');
@@ -294,8 +309,10 @@ const Documents = () => {
 
       if (dbError) {
         console.error('❌ Database deletion error:', dbError);
+        console.error('❌ Error details:', JSON.stringify(dbError, null, 2));
         throw dbError;
       }
+      console.log('✅ Database record deleted successfully');
 
       // Delete from storage last
       console.log('🗑️ Deleting from storage...');
@@ -305,7 +322,10 @@ const Documents = () => {
 
       if (storageError) {
         console.error('❌ Storage deletion error:', storageError);
+        console.error('❌ Storage error details:', JSON.stringify(storageError, null, 2));
         // Don't throw here - database record is already deleted
+      } else {
+        console.log('✅ Storage file deleted successfully');
       }
 
       console.log('✅ Document deleted successfully');
@@ -315,7 +335,8 @@ const Documents = () => {
       setDeleteDocument(null);
     } catch (error) {
       console.error('❌ Error deleting document:', error);
-      alert('Failed to delete document. Please try again.');
+      console.error('❌ Full error object:', JSON.stringify(error, null, 2));
+      alert(`Failed to delete document: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsDeleting(false);
     }
@@ -639,7 +660,7 @@ const Documents = () => {
 
     return (
     <div
-      className="fixed inset-0 bg-transparent flex items-center justify-center z-[10000]"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       style={{ pointerEvents: 'auto' }}
       onClick={(e) => {
         console.log('Modal backdrop clicked');
@@ -1082,7 +1103,7 @@ const Documents = () => {
   function TagModal() {
     return (
       <div
-        className="fixed inset-0 bg-transparent flex items-center justify-center z-50"
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             setShowTagModal(false);
@@ -1171,7 +1192,7 @@ const Documents = () => {
   function DeleteModal() {
     return (
       <div
-        className="fixed inset-0 bg-transparent flex items-center justify-center z-50"
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             setShowDeleteModal(false);
