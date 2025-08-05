@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Bell, Lock, Mail, Shield, Smartphone, ToggleLeft as Toggle, CheckCircle2, XCircle, Database, Settings as SettingsIcon } from 'lucide-react';
+import { Bell, Lock, Mail, Shield, Smartphone, ToggleLeft as Toggle, CheckCircle2, XCircle, Database, Settings as SettingsIcon, Users } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import GDPRCompliance from '../components/gdpr/GDPRCompliance';
+import AttioSettings from '../components/integrations/AttioSettings';
 import { useAuth } from '../contexts/AuthContext';
 
 const Settings = () => {
@@ -71,11 +72,12 @@ const Settings = () => {
     { id: 'privacy', label: 'Privacy & Data', icon: <Database className="h-4 w-4" /> }
   ];
 
-  // Add integrations tab for management company users
-  const tabs = user?.role === 'management-company'
+  // Add integrations tab for management company users and RTM/RMC directors
+  const tabs = (user?.role === 'management-company' || user?.role?.includes('director'))
     ? [
         ...baseTabs,
-        { id: 'integrations', label: 'Integrations', icon: <SettingsIcon className="h-4 w-4" /> }
+        { id: 'integrations', label: 'Integrations', icon: <SettingsIcon className="h-4 w-4" /> },
+        { id: 'attio', label: 'Attio CRM', icon: <Users className="h-4 w-4" /> }
       ]
     : baseTabs;
 
@@ -242,8 +244,8 @@ const Settings = () => {
         <GDPRCompliance />
       )}
 
-      {/* Integrations Tab - Only for Management Company users */}
-      {activeTab === 'integrations' && user?.role === 'management-company' && (
+      {/* Integrations Tab - For Management Company users and RTM/RMC Directors */}
+      {activeTab === 'integrations' && (user?.role === 'management-company' || user?.role?.includes('director')) && (
         <div className="space-y-6">
           <Card>
             <h2 className="text-lg font-semibold mb-4 flex items-center">
@@ -252,23 +254,43 @@ const Settings = () => {
             </h2>
 
             <div className="space-y-4">
-              {/* MRI Integration */}
+              {/* Attio CRM Integration */}
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center">
-                  <Database className="h-5 w-5 text-gray-400" />
+                  <Users className="h-5 w-5 text-gray-400" />
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-900">MRI Integration</p>
-                    <p className="text-xs text-gray-500">Connect with MRI property management system</p>
+                    <p className="text-sm font-medium text-gray-900">Attio CRM Integration</p>
+                    <p className="text-xs text-gray-500">Automatically sync RTM qualification leads to your CRM</p>
                   </div>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.location.href = '/settings/mri-integration'}
+                  onClick={() => setActiveTab('attio')}
                 >
                   Configure
                 </Button>
               </div>
+
+              {/* MRI Integration - Only for Management Company users */}
+              {user?.role === 'management-company' && (
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center">
+                    <Database className="h-5 w-5 text-gray-400" />
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-gray-900">MRI Integration</p>
+                      <p className="text-xs text-gray-500">Connect with MRI property management system</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.location.href = '/settings/mri-integration'}
+                  >
+                    Configure
+                  </Button>
+                </div>
+              )}
 
               {/* Future integrations placeholder */}
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg opacity-50">
@@ -284,6 +306,11 @@ const Settings = () => {
             </div>
           </Card>
         </div>
+      )}
+
+      {/* Attio CRM Tab */}
+      {activeTab === 'attio' && (user?.role === 'management-company' || user?.role?.includes('director')) && (
+        <AttioSettings />
       )}
 
       {showPasswordModal && <PasswordModal />}

@@ -66,20 +66,36 @@ const RTMQualify = () => {
     setCurrentStep('preview');
   };
 
-  const handleSignupComplete = (contactInfo: { name: string; email: string; phone?: string }) => {
+  const handleSignupComplete = async (contactInfo: { name: string; email: string; phone?: string }) => {
     const updatedData = {
       ...qualificationData!,
       contactInfo
     };
     setQualificationData(updatedData);
     localStorage.setItem('rtm_qualification_data', JSON.stringify(updatedData));
-    
-    // Redirect to signup with pre-filled data
-    navigate('/signup', { 
-      state: { 
+
+    // Sync to Attio CRM if enabled
+    try {
+      const { attioService } = await import('../services/attioService');
+      await attioService.syncUserToAttio({
+        email: contactInfo.email,
+        firstName: contactInfo.name.split(' ')[0] || contactInfo.name,
+        lastName: contactInfo.name.split(' ').slice(1).join(' ') || '',
+        phone: contactInfo.phone,
         qualificationData: updatedData,
         source: 'rtm-qualify'
-      } 
+      });
+    } catch (error) {
+      console.log('Attio sync failed (non-critical):', error);
+      // Don't block the user flow if Attio sync fails
+    }
+
+    // Redirect to signup with pre-filled data
+    navigate('/signup', {
+      state: {
+        qualificationData: updatedData,
+        source: 'rtm-qualify'
+      }
     });
   };
 
