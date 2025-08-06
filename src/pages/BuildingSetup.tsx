@@ -361,6 +361,31 @@ const BuildingSetup = () => {
 
       setSuccess(true);
 
+      // Sync to Attio CRM if enabled
+      try {
+        const { attioService } = await import('../services/attioService');
+        await attioService.syncUserToAttio({
+          email: user.email,
+          firstName: user.metadata?.firstName || user.email.split('@')[0],
+          lastName: user.metadata?.lastName || '',
+          phone: user.metadata?.phone,
+          role: user.role || 'building-owner',
+          buildingName: buildingData.name,
+          buildingAddress: buildingData.address,
+          buildingData: {
+            total_units: buildingData.totalUnits,
+            building_age: buildingData.buildingAge,
+            building_type: buildingData.buildingType,
+            service_charge_frequency: buildingData.serviceChargeFrequency,
+            management_structure: buildingData.managementStructure
+          },
+          source: 'building-setup'
+        });
+      } catch (error) {
+        console.log('Attio sync failed (non-critical):', error);
+        // Don't block the user flow if Attio sync fails
+      }
+
       // Navigate after a delay to show success message
       setTimeout(() => {
         const basePath = user?.role?.split('-')[0];

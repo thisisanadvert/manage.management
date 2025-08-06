@@ -230,3 +230,109 @@ CREATE TRIGGER trigger_sync_user_signup_to_attio
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION sync_user_signup_to_attio();
+
+-- Function to sync building setup to Attio
+CREATE OR REPLACE FUNCTION sync_building_setup_to_attio()
+RETURNS TRIGGER AS $$
+DECLARE
+  building_owner_email text;
+  building_owner_name text;
+  building_owner_role text;
+BEGIN
+  -- Get the building owner/creator details
+  IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
+    -- Try to get the user who created/owns this building
+    SELECT
+      u.email,
+      COALESCE(
+        u.raw_user_meta_data->>'firstName' || ' ' || u.raw_user_meta_data->>'lastName',
+        u.email
+      ) as full_name,
+      COALESCE(u.raw_user_meta_data->>'role', 'building-owner') as user_role
+    INTO building_owner_email, building_owner_name, building_owner_role
+    FROM auth.users u
+    WHERE u.id = NEW.created_by
+    LIMIT 1;
+
+    -- If no creator found, try to find any user associated with this building
+    IF building_owner_email IS NULL THEN
+      SELECT
+        u.email,
+        COALESCE(
+          u.raw_user_meta_data->>'firstName' || ' ' || u.raw_user_meta_data->>'lastName',
+          u.email
+        ) as full_name,
+        COALESCE(u.raw_user_meta_data->>'role', 'building-owner') as user_role
+      INTO building_owner_email, building_owner_name, building_owner_role
+      FROM auth.users u
+      JOIN building_users bu ON bu.user_id = u.id
+      WHERE bu.building_id = NEW.id
+      LIMIT 1;
+    END IF;
+
+    -- If we found a user, sync to Attio
+    IF building_owner_email IS NOT NULL THEN
+      -- Call the Attio sync function asynchronously
+      PERFORM net.http_post(
+        url := current_setting('app.supabase_url') || '/functions/v1/sync-to-attio',
+        headers := jsonb_build_object(
+          'Authorization', 'Bearer ' || current_setting('app.supabase_service_role_key'),
+          'Content-Type', 'application/json'
+        ),
+        body := jsonb_build_object(
+          'email', building_owner_email,
+          'firstName', split_part(building_owner_name, ' ', 1),
+          'lastName', CASE
+            WHEN position(' ' in building_owner_name) > 0
+            THEN substring(building_owner_name from position(' ' in building_owner_name) + 1)
+            ELSE ''
+          END,
+          'role', building_owner_role,
+          'buildingName', NEW.name,
+          'buildingAddress', NEW.address,
+          'buildingData', jsonb_build_object(
+            'total_units', NEW.total_units,
+            'building_age', NEW.building_age,
+            'building_type', NEW.building_type,
+            'service_charge_frequency', NEW.service_charge_frequency,
+            'management_structure', NEW.management_structure
+          ),
+          'source', CASE WHEN TG_OP = 'INSERT' THEN 'building-setup' ELSE 'building-update' END
+        )
+      );
+
+      -- Log the sync attempt
+      INSERT INTO attio_sync_log (
+        email,
+        source,
+        sync_status,
+        building_id,
+        building_info
+      ) VALUES (
+        building_owner_email,
+        CASE WHEN TG_OP = 'INSERT' THEN 'building-setup' ELSE 'building-update' END,
+        'pending',
+        NEW.id,
+        jsonb_build_object(
+          'name', NEW.name,
+          'address', NEW.address,
+          'total_units', NEW.total_units,
+          'building_age', NEW.building_age,
+          'building_type', NEW.building_type,
+          'service_charge_frequency', NEW.service_charge_frequency,
+          'management_structure', NEW.management_structure
+        )
+      );
+    END IF;
+  END IF;
+
+  RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create trigger for building setup/updates
+DROP TRIGGER IF EXISTS trigger_sync_building_setup_to_attio ON buildings;
+CREATE TRIGGER trigger_sync_building_setup_to_attio
+  AFTER INSERT OR UPDATE ON buildings
+  FOR EACH ROW
+  EXECUTE FUNCTION sync_building_setup_to_attio();

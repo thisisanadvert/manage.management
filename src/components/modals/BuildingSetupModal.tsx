@@ -207,6 +207,32 @@ const BuildingSetupModal = ({ isOpen, onClose, onSetupComplete }: BuildingSetupM
       if (stepsError) console.error('Error updating onboarding step:', stepsError);
 
       setSuccess(true);
+
+      // Sync to Attio CRM if enabled
+      try {
+        const { attioService } = await import('../../services/attioService');
+        await attioService.syncUserToAttio({
+          email: user.email,
+          firstName: user.metadata?.firstName || user.email.split('@')[0],
+          lastName: user.metadata?.lastName || '',
+          phone: user.metadata?.phone,
+          role: user.role || 'building-owner',
+          buildingName: formData.name,
+          buildingAddress: formData.address,
+          buildingData: {
+            total_units: formData.totalUnits,
+            building_age: formData.buildingAge,
+            building_type: formData.buildingType,
+            service_charge_frequency: formData.serviceChargeFrequency,
+            management_structure: formData.managementStructure
+          },
+          source: 'building-setup-modal'
+        });
+      } catch (error) {
+        console.log('Attio sync failed (non-critical):', error);
+        // Don't block the user flow if Attio sync fails
+      }
+
       setTimeout(() => {
         onSetupComplete();
         onClose();

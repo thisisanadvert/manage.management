@@ -90,17 +90,18 @@ serve(async (req) => {
   }
 
   try {
-    const { 
-      email, 
-      firstName, 
-      lastName, 
-      phone, 
-      role, 
-      buildingName, 
-      buildingAddress, 
-      unitNumber, 
+    const {
+      email,
+      firstName,
+      lastName,
+      phone,
+      role,
+      buildingName,
+      buildingAddress,
+      unitNumber,
       companyName,
       qualificationData,
+      buildingData,
       source = 'rtm-qualify'
     } = await req.json()
 
@@ -132,9 +133,6 @@ serve(async (req) => {
         }),
         ...(role && {
           job_title: [{ value: role.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) }]
-        }),
-        ...(buildingName && {
-          company_name: [{ value: buildingName }]
         })
       }
     }
@@ -159,6 +157,21 @@ serve(async (req) => {
             categories: [{ option: 'Residential Building' }]
           }
         }
+
+        // Add building data if available
+        if (buildingData) {
+          // Add custom attributes for building data
+          if (buildingData.total_units) {
+            companyData.values.total_units = [{ value: buildingData.total_units.toString() }]
+          }
+          if (buildingData.building_type) {
+            companyData.values.building_type = [{ value: buildingData.building_type }]
+          }
+          if (buildingData.management_structure) {
+            companyData.values.management_structure = [{ value: buildingData.management_structure }]
+          }
+        }
+
         company = await attio.createCompany(companyData)
         console.log('Created company in Attio:', company.id.record_id)
       } catch (error) {
@@ -184,7 +197,8 @@ serve(async (req) => {
         building_info: {
           name: buildingName,
           address: buildingAddress,
-          unit_number: unitNumber
+          unit_number: unitNumber,
+          building_data: buildingData
         }
       })
 
