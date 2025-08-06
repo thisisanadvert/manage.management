@@ -8,38 +8,23 @@ const corsHeaders = {
 
 serve(async (req) => {
   console.log(`${req.method} ${req.url}`)
-
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
-  // Simple health check
-  if (req.method === 'GET') {
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: 'Attio sync function is running',
-        timestamp: new Date().toISOString(),
-        version: '1.0.4'
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200
-      }
-    )
-  }
-
-  // For now, just return success for POST requests
+  // Simple test endpoint
   return new Response(
-    JSON.stringify({
-      success: true,
-      message: 'Function received POST request',
-      timestamp: new Date().toISOString()
+    JSON.stringify({ 
+      success: true, 
+      message: 'Test function is working',
+      timestamp: new Date().toISOString(),
+      method: req.method
     }),
-    {
+    { 
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200
+      status: 200 
     }
   )
 })
