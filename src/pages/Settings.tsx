@@ -72,9 +72,9 @@ const Settings = () => {
     { id: 'privacy', label: 'Privacy & Data', icon: <Database className="h-4 w-4" /> }
   ];
 
-  // Add integrations tab for management company users and RTM/RMC directors
+  // Add integrations tab for management company users, RTM/RMC directors, and super-admin
   // Add Attio CRM tab for all users (access control handled in component)
-  const tabs = (user?.role === 'management-company' || user?.role?.includes('director'))
+  const tabs = (user?.role === 'management-company' || user?.role?.includes('director') || user?.role === 'super-admin')
     ? [
         ...baseTabs,
         { id: 'integrations', label: 'Integrations', icon: <SettingsIcon className="h-4 w-4" /> },
@@ -245,8 +245,8 @@ const Settings = () => {
         <GDPRCompliance />
       )}
 
-      {/* Integrations Tab - For Management Company users and RTM/RMC Directors */}
-      {activeTab === 'integrations' && (user?.role === 'management-company' || user?.role?.includes('director')) && (
+      {/* Integrations Tab - For Management Company users, RTM/RMC Directors, and Super-Admin */}
+      {activeTab === 'integrations' && (user?.role === 'management-company' || user?.role?.includes('director') || user?.role === 'super-admin') && (
         <div className="space-y-6">
           <Card>
             <h2 className="text-lg font-semibold mb-4 flex items-center">
