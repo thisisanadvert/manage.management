@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, Search, Menu, Settings, User, LogOut } from 'lucide-react';
+import { Menu, Settings, User, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Logo from '../ui/Logo';
@@ -102,36 +102,9 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
               <Logo size="md" showText={true} />
             </a>
           </div>
-          
-          {/* Search - Coming Soon */}
-          <div className="hidden md:flex items-center w-1/3 relative">
-            <div className="w-full relative">
-              <input
-                type="text"
-                placeholder="Search coming soon..."
-                disabled
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 bg-gray-50 text-gray-400 cursor-not-allowed"
-              />
-              <Search
-                size={18}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              />
-            </div>
-          </div>
-          
+
           {/* Right-side actions */}
           <div className="flex items-center space-x-4">
-            {/* Notifications - Coming Soon */}
-            <div className="relative">
-              <button
-                disabled
-                className="p-2 rounded-md text-gray-400 cursor-not-allowed"
-                aria-label="Notifications (Coming Soon)"
-                title="Notifications coming soon"
-              >
-                <Bell size={20} />
-              </button>
-            </div>
             
             {/* User profile */}
             <div className="relative dropdown-container">
