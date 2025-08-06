@@ -10,7 +10,7 @@ import Button from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 
 const AttioDiagnostics: React.FC = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [diagnostics, setDiagnostics] = useState<any>(null);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -54,10 +54,15 @@ const AttioDiagnostics: React.FC = () => {
 
       // Check 3: Edge Function Connectivity
       try {
+        const userToken = session?.access_token;
+        if (!userToken) {
+          throw new Error('No user session token available');
+        }
+
         const response = await fetch(`${supabaseUrl}/functions/v1/sync-to-attio`, {
-          method: 'OPTIONS', // Use OPTIONS to test connectivity without triggering the function
+          method: 'GET', // Use GET to test the health check endpoint
           headers: {
-            'Authorization': `Bearer ${supabaseKey}`,
+            'Authorization': `Bearer ${userToken}`,
           },
         });
 
@@ -87,10 +92,15 @@ const AttioDiagnostics: React.FC = () => {
 
       // Check 4: Test API Call
       try {
+        const userToken = session?.access_token;
+        if (!userToken) {
+          throw new Error('No user session token available');
+        }
+
         const testResponse = await fetch(`${supabaseUrl}/functions/v1/sync-to-attio`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${supabaseKey}`,
+            'Authorization': `Bearer ${userToken}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({

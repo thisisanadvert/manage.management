@@ -61,12 +61,13 @@ class AttioService {
   /**
    * Manually sync a user to Attio CRM
    */
-  async syncUserToAttio(userData: SyncToAttioRequest): Promise<{ success: boolean; error?: string; person_id?: string; company_id?: string }> {
+  async syncUserToAttio(userData: SyncToAttioRequest, sessionToken?: string): Promise<{ success: boolean; error?: string; person_id?: string; company_id?: string }> {
     try {
+      const token = sessionToken || import.meta.env.VITE_SUPABASE_ANON_KEY;
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-to-attio`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(userData),

@@ -6,9 +6,11 @@
 import React, { useState } from 'react';
 import { TestTube, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
 import Button from '../ui/Button';
+import { useAuth } from '../../contexts/AuthContext';
 import { attioService } from '../../services/attioService';
 
 const AttioTestButton: React.FC = () => {
+  const { session } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
 
@@ -17,11 +19,16 @@ const AttioTestButton: React.FC = () => {
     setResult(null);
 
     try {
+      const userToken = session?.access_token;
+      if (!userToken) {
+        throw new Error('No user session token available');
+      }
+
       // First, test if the Edge Function is accessible
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-to-attio`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Authorization': `Bearer ${userToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({

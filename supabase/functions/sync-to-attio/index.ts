@@ -76,13 +76,28 @@ serve(async (req) => {
   }
 
   try {
+    // For testing, let's add a simple health check endpoint
+    if (req.method === 'GET') {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'Attio sync function is running',
+          timestamp: new Date().toISOString()
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200
+        }
+      )
+    }
+
     // Get authorization header
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       throw new Error('Authorization header required')
     }
 
-    // Create Supabase client to verify user
+    // Create Supabase client to verify user (need service role to validate tokens)
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -90,16 +105,22 @@ serve(async (req) => {
 
     // Get user from token
     const token = authHeader.replace('Bearer ', '')
+    console.log('Attempting to validate token...')
+
     const { data: { user }, error: userError } = await supabase.auth.getUser(token)
 
     if (userError || !user) {
-      throw new Error('Invalid authentication token')
+      console.error('User validation failed:', userError)
+      throw new Error(`Invalid authentication token: ${userError?.message || 'Unknown error'}`)
     }
+
+    console.log('User validated:', user.email, 'Role:', user.user_metadata?.role)
 
     // Check if user is super-admin (only super-admins can use Attio integration)
     const userRole = user.user_metadata?.role || user.app_metadata?.role
     if (userRole !== 'super-admin') {
-      throw new Error('Access denied: Attio integration is only available to super-admin users')
+      console.error('Access denied for role:', userRole)
+      throw new Error(`Access denied: Attio integration is only available to super-admin users. Current role: ${userRole}`)
     }
 
     const {
@@ -119,6 +140,7 @@ serve(async (req) => {
 
     // Get Attio API key from environment
     const attioApiKey = Deno.env.get('ATTIO_API_KEY')
+    console.log('Attio API key configured:', !!attioApiKey)
     if (!attioApiKey) {
       throw new Error('Attio API key not configured')
     }
