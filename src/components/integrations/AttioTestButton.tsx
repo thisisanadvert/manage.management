@@ -17,31 +17,51 @@ const AttioTestButton: React.FC = () => {
     setResult(null);
 
     try {
-      // Test with sample data
-      const testResult = await attioService.syncUserToAttio({
-        email: 'test@manage.management',
-        firstName: 'Test',
-        lastName: 'User',
-        phone: '07123456789',
-        role: 'rtm-director',
-        buildingName: 'Test Building',
-        buildingAddress: '123 Test Street, London',
-        unitNumber: 'Flat 1',
-        source: 'integration-test',
-        qualificationData: {
-          eligibilityScore: 0.85,
-          issues: [],
-          recommendations: ['Consider RTM formation']
-        }
+      // First, test if the Edge Function is accessible
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-to-attio`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: 'test@manage.management',
+          firstName: 'Test',
+          lastName: 'User',
+          phone: '07123456789',
+          role: 'rtm-director',
+          buildingName: 'Test Building',
+          buildingAddress: '123 Test Street, London',
+          unitNumber: 'Flat 1',
+          source: 'integration-test',
+          qualificationData: {
+            eligibilityScore: 0.85,
+            issues: [],
+            recommendations: ['Consider RTM formation']
+          }
+        }),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('Success response:', result);
+
       setResult({
-        success: testResult.success,
-        message: testResult.success 
-          ? `Success! Person created in Attio with ID: ${testResult.person_id}`
-          : testResult.error || 'Test failed'
+        success: result.success,
+        message: result.success
+          ? `Success! Person created in Attio with ID: ${result.person_id}`
+          : result.error || 'Test failed'
       });
     } catch (error) {
+      console.error('Test error:', error);
       setResult({
         success: false,
         message: error instanceof Error ? error.message : 'Unknown error occurred'

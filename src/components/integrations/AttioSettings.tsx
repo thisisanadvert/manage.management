@@ -24,6 +24,7 @@ import Badge from '../ui/Badge';
 import { useAuth } from '../../contexts/AuthContext';
 import { attioService, AttioSettings, AttioSyncLog } from '../../services/attioService';
 import AttioTestButton from './AttioTestButton';
+import AttioDiagnostics from './AttioDiagnostics';
 
 const AttioSettingsComponent: React.FC = () => {
   const { user } = useAuth();
@@ -203,6 +204,9 @@ const AttioSettingsComponent: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* Diagnostics Section */}
+      <AttioDiagnostics />
 
       {/* Test Result */}
       {testResult && (
