@@ -186,10 +186,20 @@ const BuildingSetup = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setError(null); // Clear any previous errors when user makes changes
-    setBuildingData(prev => ({
-      ...prev,
-      [name]: name === 'totalUnits' || name === 'buildingAge' ? parseInt(value) || 0 : value
-    }));
+
+    if (name === 'totalUnits' || name === 'buildingAge') {
+      // For numeric fields, only allow digits and handle empty values
+      const numericValue = value.replace(/[^0-9]/g, '');
+      setBuildingData(prev => ({
+        ...prev,
+        [name]: numericValue === '' ? 0 : parseInt(numericValue, 10)
+      }));
+    } else {
+      setBuildingData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -622,14 +632,15 @@ const BuildingSetup = () => {
                     <Home size={16} className="text-gray-400" />
                   </div>
                   <input
-                    type="number"
+                    type="text"
                     name="totalUnits"
-                    value={buildingData.totalUnits}
+                    value={buildingData.totalUnits || ''}
                     onChange={handleChange}
-                    min="1"
                     required
                     placeholder="e.g., 24"
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                   />
                 </div>
                 <p className="mt-1 text-xs text-gray-500">
@@ -646,13 +657,14 @@ const BuildingSetup = () => {
                     <Calendar size={16} className="text-gray-400" />
                   </div>
                   <input
-                    type="number"
+                    type="text"
                     name="buildingAge"
-                    value={buildingData.buildingAge}
+                    value={buildingData.buildingAge || ''}
                     onChange={handleChange}
-                    min="0"
                     placeholder="e.g., 25"
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                   />
                 </div>
                 <p className="mt-1 text-xs text-gray-500">

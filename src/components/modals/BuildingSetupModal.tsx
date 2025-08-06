@@ -79,10 +79,20 @@ const BuildingSetupModal = ({ isOpen, onClose, onSetupComplete }: BuildingSetupM
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'totalUnits' || name === 'buildingAge' ? parseInt(value) || 0 : value
-    }));
+
+    if (name === 'totalUnits' || name === 'buildingAge') {
+      // For numeric fields, only allow digits and handle empty values
+      const numericValue = value.replace(/[^0-9]/g, '');
+      setFormData(prev => ({
+        ...prev,
+        [name]: numericValue === '' ? 0 : parseInt(numericValue, 10)
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -362,15 +372,16 @@ const BuildingSetupModal = ({ isOpen, onClose, onSetupComplete }: BuildingSetupM
                           <Home size={16} className="text-gray-400" />
                         </div>
                         <input
-                          type="number"
+                          type="text"
                           id="totalUnits"
                           name="totalUnits"
-                          value={formData.totalUnits}
+                          value={formData.totalUnits || ''}
                           onChange={handleChange}
-                          min="1"
                           required
                           className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                           placeholder="e.g., 24"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                         />
                       </div>
                       <p className="mt-1 text-xs text-gray-500">
@@ -387,14 +398,15 @@ const BuildingSetupModal = ({ isOpen, onClose, onSetupComplete }: BuildingSetupM
                           <Calendar size={16} className="text-gray-400" />
                         </div>
                         <input
-                          type="number"
+                          type="text"
                           id="buildingAge"
                           name="buildingAge"
-                          value={formData.buildingAge}
+                          value={formData.buildingAge || ''}
                           onChange={handleChange}
-                          min="0"
                           className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                           placeholder="e.g., 25"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                         />
                       </div>
                       <p className="mt-1 text-xs text-gray-500">
