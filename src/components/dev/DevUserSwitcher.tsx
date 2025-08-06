@@ -17,10 +17,10 @@ const DEV_USERS: DevUser[] = [
   // Real Frankie's Central Park Building
   {
     email: 'frankie@manage.management',
-    role: 'rtm-director',
-    name: 'Frankie (Central Park)',
-    icon: <Crown className="h-4 w-4 text-blue-600" />,
-    description: 'Your real Central Park building account'
+    role: 'super-admin',
+    name: 'Frankie (Super Admin)',
+    icon: <Shield className="h-4 w-4 text-blue-600" />,
+    description: 'Your super-admin account with full access'
   },
   // Demo Users for Testing
   {
