@@ -266,16 +266,27 @@ const Settings = () => {
                   <Users className="h-5 w-5 text-gray-400" />
                   <div className="ml-3">
                     <p className="text-sm font-medium text-gray-900">Attio CRM Integration</p>
-                    <p className="text-xs text-gray-500">Automatically sync RTM qualification leads to your CRM</p>
+                    <p className="text-xs text-gray-500">
+                      {user?.role === 'super-admin'
+                        ? 'Automatically sync RTM qualification leads to your CRM'
+                        : 'Centralized lead management (Super-admin only)'
+                      }
+                    </p>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setActiveTab('attio')}
-                >
-                  Configure
-                </Button>
+                {user?.role === 'super-admin' ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveTab('attio')}
+                  >
+                    Configure
+                  </Button>
+                ) : (
+                  <Badge variant="secondary" size="sm">
+                    Super-admin Only
+                  </Badge>
+                )}
               </div>
 
               {/* MRI Integration - Only for Management Company users */}
