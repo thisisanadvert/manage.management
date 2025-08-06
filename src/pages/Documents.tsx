@@ -543,6 +543,35 @@ const Documents = () => {
     const fileName = previewDocument.file_name || previewDocument.file_path.split('/').pop();
     const fileExtension = fileName?.split('.').pop()?.toLowerCase();
 
+    // Add escape key handler and prevent body scroll
+    useEffect(() => {
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          handleClosePreview();
+        }
+      };
+
+      if (showPreviewModal) {
+        document.addEventListener('keydown', handleEscape);
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+      }
+
+      return () => {
+        document.removeEventListener('keydown', handleEscape);
+        document.body.style.overflow = 'unset';
+      };
+    }, [showPreviewModal]);
+
+    const handleClosePreview = () => {
+      setShowPreviewModal(false);
+      setPreviewDocument(null);
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
+    };
+
     const renderPreview = () => {
       if (['pdf'].includes(fileExtension)) {
         return (
@@ -550,15 +579,19 @@ const Documents = () => {
             src={previewUrl}
             className="w-full h-full border-0"
             title="Document Preview"
+            style={{ minHeight: '400px' }}
           />
         );
       } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
         return (
-          <img
-            src={previewUrl}
-            alt="Document Preview"
-            className="max-w-full max-h-full object-contain"
-          />
+          <div className="w-full h-full flex items-center justify-center overflow-auto">
+            <img
+              src={previewUrl}
+              alt="Document Preview"
+              className="max-w-full max-h-full object-contain"
+              style={{ maxHeight: 'calc(100vh - 200px)' }}
+            />
+          </div>
         );
       } else if (['txt', 'md'].includes(fileExtension)) {
         return (
@@ -580,8 +613,24 @@ const Documents = () => {
     };
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg w-11/12 h-5/6 max-w-4xl flex flex-col">
+      <div
+        className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+        style={{ pointerEvents: 'auto' }}
+        onClick={(e) => {
+          // Close modal when clicking on the backdrop
+          if (e.target === e.currentTarget) {
+            handleClosePreview();
+          }
+        }}
+      >
+        <div
+          className="bg-white rounded-lg w-11/12 h-5/6 max-w-4xl flex flex-col"
+          style={{ pointerEvents: 'auto' }}
+          onClick={(e) => {
+            // Prevent closing when clicking inside the modal content
+            e.stopPropagation();
+          }}
+        >
           <div className="flex justify-between items-center p-4 border-b">
             <h2 className="text-xl font-semibold truncate">{fileName}</h2>
             <div className="flex gap-2">
@@ -613,21 +662,17 @@ const Documents = () => {
                 Download
               </Button>
               <button
-                onClick={() => {
-                  setShowPreviewModal(false);
-                  setPreviewDocument(null);
-                  if (previewUrl) {
-                    URL.revokeObjectURL(previewUrl);
-                    setPreviewUrl(null);
-                  }
-                }}
-                className="p-2 hover:bg-gray-100 rounded"
+                onClick={handleClosePreview}
+                className="p-2 hover:bg-gray-100 rounded transition-colors"
+                style={{ pointerEvents: 'auto' }}
+                type="button"
+                aria-label="Close preview"
               >
                 <X size={20} className="text-gray-500" />
               </button>
             </div>
           </div>
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-auto">
             {renderPreview()}
           </div>
         </div>
