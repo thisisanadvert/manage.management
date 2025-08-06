@@ -8,27 +8,13 @@ const corsHeaders = {
 
 interface AttioPersonData {
   values: {
-    name: Array<{
-      first_name: string
-      last_name: string
-      full_name: string
-    }>
-    email_addresses: Array<{
-      email_address: string
-    }>
-    phone_numbers?: Array<{
-      phone_number: string
-    }>
-    job_title?: Array<{ value: string }>
-    company_name?: Array<{ value: string }>
+    [key: string]: any
   }
 }
 
 interface AttioCompanyData {
   values: {
-    name: Array<{ value: string }>
-    domains?: Array<{ domain: string }>
-    categories?: Array<{ option: string }>
+    [key: string]: any
   }
 }
 
@@ -90,6 +76,32 @@ serve(async (req) => {
   }
 
   try {
+    // Get authorization header
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      throw new Error('Authorization header required')
+    }
+
+    // Create Supabase client to verify user
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    // Get user from token
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+
+    if (userError || !user) {
+      throw new Error('Invalid authentication token')
+    }
+
+    // Check if user is super-admin (only super-admins can use Attio integration)
+    const userRole = user.user_metadata?.role || user.app_metadata?.role
+    if (userRole !== 'super-admin') {
+      throw new Error('Access denied: Attio integration is only available to super-admin users')
+    }
+
     const {
       email,
       firstName,
@@ -116,23 +128,40 @@ serve(async (req) => {
     // Check if person already exists
     let person = await attio.findPersonByEmail(email)
     
+    // Create person data using standard Attio person attributes
     const personData: AttioPersonData = {
       values: {
-        name: [{
+        // Use standard person attributes - these are the default slugs in Attio
+        'name': [{
           first_name: firstName || '',
           last_name: lastName || '',
           full_name: `${firstName || ''} ${lastName || ''}`.trim() || email.split('@')[0]
         }],
-        email_addresses: [{
+        'email_addresses': [{
           email_address: email
         }],
+        // Add phone if provided
         ...(phone && {
-          phone_numbers: [{
+          'phone_numbers': [{
             phone_number: phone
           }]
         }),
+        // Add job title if role provided
         ...(role && {
-          job_title: [{ value: role.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) }]
+          'job_title': role.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())
+        }),
+        // Add custom fields for manage.management tracking
+        'source': source,
+        'building_name': buildingName || '',
+        'building_address': buildingAddress || '',
+        'unit_number': unitNumber || '',
+        // Add qualification data as JSON if available
+        ...(qualificationData && {
+          'rtm_qualification_data': JSON.stringify(qualificationData)
+        }),
+        // Add building data as JSON if available
+        ...(buildingData && {
+          'building_data': JSON.stringify(buildingData)
         })
       }
     }
@@ -153,22 +182,22 @@ serve(async (req) => {
       try {
         const companyData: AttioCompanyData = {
           values: {
-            name: [{ value: buildingName }],
-            categories: [{ option: 'Residential Building' }]
-          }
-        }
-
-        // Add building data if available
-        if (buildingData) {
-          // Add custom attributes for building data
-          if (buildingData.total_units) {
-            companyData.values.total_units = [{ value: buildingData.total_units.toString() }]
-          }
-          if (buildingData.building_type) {
-            companyData.values.building_type = [{ value: buildingData.building_type }]
-          }
-          if (buildingData.management_structure) {
-            companyData.values.management_structure = [{ value: buildingData.management_structure }]
+            // Use standard company attributes
+            'name': buildingName,
+            'categories': 'Residential Building',
+            'description': `Property managed through manage.management platform`,
+            // Add building-specific data
+            'address': buildingAddress || '',
+            'source': 'manage.management',
+            // Add building data if available
+            ...(buildingData && {
+              'total_units': buildingData.total_units?.toString() || '',
+              'building_age': buildingData.building_age?.toString() || '',
+              'building_type': buildingData.building_type || '',
+              'service_charge_frequency': buildingData.service_charge_frequency || '',
+              'management_structure': buildingData.management_structure || '',
+              'building_data_json': JSON.stringify(buildingData)
+            })
           }
         }
 

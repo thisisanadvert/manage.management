@@ -27,12 +27,27 @@ import AttioTestButton from './AttioTestButton';
 
 const AttioSettingsComponent: React.FC = () => {
   const { user } = useAuth();
+
+  // Only allow super-admin users to access Attio integration
+  if (user?.role !== 'super-admin') {
+    return (
+      <Card>
+        <div className="p-8 text-center">
+          <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-yellow-500" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Access Restricted</h3>
+          <p className="text-gray-600">
+            Attio CRM integration is only available to super-admin users for centralized lead management across all buildings.
+          </p>
+        </div>
+      </Card>
+    );
+  }
   const [settings, setSettings] = useState<AttioSettings>({
-    building_id: user?.metadata?.buildingId || '',
+    building_id: 'global', // Global settings for manage.management company
     auto_sync_enabled: true,
     sync_on_signup: true,
     sync_on_qualification: true,
-    default_person_tags: ['RTM Lead'],
+    default_person_tags: ['RTM Lead', 'manage.management'],
     default_company_category: 'Residential Building'
   });
   const [syncLogs, setSyncLogs] = useState<AttioSyncLog[]>([]);
@@ -51,27 +66,25 @@ const AttioSettingsComponent: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, [user?.metadata?.buildingId]);
+  }, []);
 
   const loadData = async () => {
-    if (!user?.metadata?.buildingId) return;
-
     setIsLoading(true);
     try {
-      // Load settings
-      const { data: settingsData } = await attioService.getAttioSettings(user.metadata.buildingId);
+      // Load global settings for manage.management
+      const { data: settingsData } = await attioService.getAttioSettings('global');
       if (settingsData) {
         setSettings(settingsData);
       }
 
-      // Load recent sync logs
-      const { data: logsData } = await attioService.getSyncLogs(user.metadata.buildingId, 10);
+      // Load recent sync logs across all buildings
+      const { data: logsData } = await attioService.getSyncLogs(undefined, 20);
       if (logsData) {
         setSyncLogs(logsData);
       }
 
-      // Load statistics
-      const stats = await attioService.getSyncStatistics(user.metadata.buildingId);
+      // Load statistics across all buildings
+      const stats = await attioService.getSyncStatistics();
       setStatistics(stats);
     } catch (error) {
       console.error('Error loading Attio data:', error);
@@ -81,13 +94,11 @@ const AttioSettingsComponent: React.FC = () => {
   };
 
   const handleSaveSettings = async () => {
-    if (!user?.metadata?.buildingId) return;
-
     setIsSaving(true);
     try {
-      const result = await attioService.updateAttioSettings(user.metadata.buildingId, settings);
+      const result = await attioService.updateAttioSettings('global', settings);
       if (result.success) {
-        setTestResult({ success: true, message: 'Settings saved successfully!' });
+        setTestResult({ success: true, message: 'Global settings saved successfully!' });
         setTimeout(() => setTestResult(null), 3000);
       } else {
         setTestResult({ success: false, message: result.error || 'Failed to save settings' });
@@ -176,7 +187,7 @@ const AttioSettingsComponent: React.FC = () => {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Attio CRM Integration</h2>
           <p className="text-gray-600 mt-1">
-            Automatically sync RTM qualification leads and user data to your Attio CRM
+            Centralized lead management for manage.management - automatically sync RTM qualification leads and building data across all properties to your Attio CRM
           </p>
         </div>
         <div className="flex items-center space-x-2">

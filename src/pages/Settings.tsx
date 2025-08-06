@@ -73,10 +73,16 @@ const Settings = () => {
   ];
 
   // Add integrations tab for management company users and RTM/RMC directors
+  // Add Attio CRM tab only for super-admin users
   const tabs = (user?.role === 'management-company' || user?.role?.includes('director'))
     ? [
         ...baseTabs,
         { id: 'integrations', label: 'Integrations', icon: <SettingsIcon className="h-4 w-4" /> },
+        ...(user?.role === 'super-admin' ? [{ id: 'attio', label: 'Attio CRM', icon: <Users className="h-4 w-4" /> }] : [])
+      ]
+    : user?.role === 'super-admin'
+    ? [
+        ...baseTabs,
         { id: 'attio', label: 'Attio CRM', icon: <Users className="h-4 w-4" /> }
       ]
     : baseTabs;
@@ -308,8 +314,8 @@ const Settings = () => {
         </div>
       )}
 
-      {/* Attio CRM Tab */}
-      {activeTab === 'attio' && (user?.role === 'management-company' || user?.role?.includes('director')) && (
+      {/* Attio CRM Tab - Only for super-admin users */}
+      {activeTab === 'attio' && user?.role === 'super-admin' && (
         <AttioSettings />
       )}
 
