@@ -105,7 +105,6 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
 
           {/* Right-side actions */}
           <div className="flex items-center space-x-4">
-            
             {/* User profile */}
             <div className="relative dropdown-container">
               <button
