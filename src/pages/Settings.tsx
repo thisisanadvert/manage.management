@@ -73,16 +73,11 @@ const Settings = () => {
   ];
 
   // Add integrations tab for management company users and RTM/RMC directors
-  // Add Attio CRM tab only for super-admin users
+  // Add Attio CRM tab for all users (access control handled in component)
   const tabs = (user?.role === 'management-company' || user?.role?.includes('director'))
     ? [
         ...baseTabs,
         { id: 'integrations', label: 'Integrations', icon: <SettingsIcon className="h-4 w-4" /> },
-        ...(user?.role === 'super-admin' ? [{ id: 'attio', label: 'Attio CRM', icon: <Users className="h-4 w-4" /> }] : [])
-      ]
-    : user?.role === 'super-admin'
-    ? [
-        ...baseTabs,
         { id: 'attio', label: 'Attio CRM', icon: <Users className="h-4 w-4" /> }
       ]
     : baseTabs;
@@ -274,19 +269,13 @@ const Settings = () => {
                     </p>
                   </div>
                 </div>
-                {user?.role === 'super-admin' ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setActiveTab('attio')}
-                  >
-                    Configure
-                  </Button>
-                ) : (
-                  <Badge variant="secondary" size="sm">
-                    Super-admin Only
-                  </Badge>
-                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setActiveTab('attio')}
+                >
+                  Configure
+                </Button>
               </div>
 
               {/* MRI Integration - Only for Management Company users */}
@@ -325,8 +314,8 @@ const Settings = () => {
         </div>
       )}
 
-      {/* Attio CRM Tab - Only for super-admin users */}
-      {activeTab === 'attio' && user?.role === 'super-admin' && (
+      {/* Attio CRM Tab - Access control handled in component */}
+      {activeTab === 'attio' && (
         <AttioSettings />
       )}
 
