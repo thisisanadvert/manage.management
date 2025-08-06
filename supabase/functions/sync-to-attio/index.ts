@@ -61,11 +61,11 @@ class AttioService {
   }
 
   async createPerson(personData: AttioPersonData) {
-    return this.makeRequest('/objects/people/records', 'POST', personData)
+    return this.makeRequest('/objects/people/records', 'POST', { data: personData })
   }
 
   async createCompany(companyData: AttioCompanyData) {
-    return this.makeRequest('/objects/companies/records', 'POST', companyData)
+    return this.makeRequest('/objects/companies/records', 'POST', { data: companyData })
   }
 
   async findPersonByEmail(email: string) {
@@ -79,7 +79,7 @@ class AttioService {
   }
 
   async updatePerson(personId: string, personData: Partial<AttioPersonData>) {
-    return this.makeRequest(`/objects/people/records/${personId}`, 'PATCH', personData)
+    return this.makeRequest(`/objects/people/records/${personId}`, 'PATCH', { data: personData })
   }
 }
 
