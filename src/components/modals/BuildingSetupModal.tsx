@@ -93,16 +93,19 @@ const BuildingSetupModal = ({ isOpen, onClose, onSetupComplete }: BuildingSetupM
     try {
       // Get the building ID from user metadata or from building_users table
       let buildingId = user?.metadata?.buildingId;
-      
+      let buildingUserData = null;
+
       if (!buildingId && user?.id) {
         // Try to find the building ID from the building_users table
         try {
-          const { data: buildingUserData, error: buildingUserError } = await supabase
+          const { data, error: buildingUserError } = await supabase
             .from('building_users')
             .select('building_id')
             .eq('user_id', user?.id)
             .limit(1)
             .maybeSingle();
+
+          buildingUserData = data;
 
           if (buildingUserError) {
             console.error('Error querying building_users in modal:', buildingUserError);
@@ -125,15 +128,10 @@ const BuildingSetupModal = ({ isOpen, onClose, onSetupComplete }: BuildingSetupM
             throw error;
           }
         }
-        
-        if (buildingUserData) {
-          buildingId = buildingUserData.building_id;
-          
-          // Update user metadata with the building ID
-          await supabase.auth.updateUser({
-            data: { buildingId: buildingId }
-          });
-        } else {
+      }
+
+      if (!buildingId) {
+        // If no building found, create a new one
           // If no building found, create a new one
           const { data: newBuilding, error: newBuildingError } = await supabase
             .from('buildings')

@@ -234,9 +234,9 @@ const Signup = () => {
         }
 
         // Sign out immediately after signup to prevent auto-login
-        // User will need to manually login and complete onboarding
+        // User will see success screen and then manually login
         if (authData.session) {
-          console.log('Signing out after signup to prevent auto-login');
+          console.log('Signing out after signup to show success screen');
           await supabase.auth.signOut();
         }
 
@@ -536,7 +536,7 @@ const Signup = () => {
                     isLoading={isSubmitting}
                     disabled={isSubmitting}
                   >
-                    {isInvitation ? 'Create Account' : (selectedOption?.available ? 'Register Interest' : 'Join Waitlist')}
+                    {isInvitation ? 'Create Account' : (selectedOption?.available ? 'Sign Up' : 'Join Waitlist')}
                   </Button>
                 </form>
               </div>
@@ -544,22 +544,22 @@ const Signup = () => {
               <div className="mt-8 p-6 bg-green-50 rounded-lg text-center">
                 <CheckCircle2 className="mx-auto h-12 w-12 text-green-600 mb-4" />
                 <h3 className="text-lg font-medium text-green-900 mb-2">
-                  {isInvitation ? 'Welcome!' : 'Thank you!'}
+                  {isInvitation ? 'Welcome!' : 'Account Created Successfully!'}
                 </h3>
                 <div className="space-y-4">
                   <p className="text-green-700">
                     {isInvitation
                       ? 'Your account has been created successfully! You can now access your building\'s management platform.'
-                      : 'Welcome to Manage.Management! Your account has been created successfully.'
+                      : 'Brilliant! Your account has been created successfully.'
                     }
                   </p>
 
                   {!isInvitation && (
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h4 className="font-medium text-blue-900 mb-2">Next Steps:</h4>
+                      <h4 className="font-medium text-blue-900 mb-2">What happens next:</h4>
                       <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
                         <li>Click "Sign In" below to access your account</li>
-                        <li>Use the password you just created</li>
+                        <li>Use the email and password you just created</li>
                         <li>Complete your building setup to get started</li>
                       </ol>
                     </div>
@@ -571,7 +571,7 @@ const Signup = () => {
                   className="mt-6"
                   onClick={() => navigate('/login?newUser=true')}
                 >
-                  {isInvitation ? 'Sign In to Your Building' : 'Sign In to Continue Setup'}
+                  {isInvitation ? 'Sign In to Your Building' : 'Sign In to Your Account'}
                 </Button>
               </div>
             ) : null}
