@@ -8,11 +8,15 @@ const corsHeaders = {
 
 interface AttioPersonData {
   values: {
-    name: Array<{ value: string }>
-    email_addresses: Array<{ 
+    name: Array<{
+      first_name: string
+      last_name: string
+      full_name: string
+    }>
+    email_addresses: Array<{
       email_address: string
       label: string
-      is_primary: boolean 
+      is_primary: boolean
     }>
     phone_numbers?: Array<{
       phone_number: string
@@ -118,7 +122,11 @@ serve(async (req) => {
     
     const personData: AttioPersonData = {
       values: {
-        name: [{ value: `${firstName} ${lastName}`.trim() }],
+        name: [{
+          first_name: firstName || '',
+          last_name: lastName || '',
+          full_name: `${firstName || ''} ${lastName || ''}`.trim() || email.split('@')[0]
+        }],
         email_addresses: [{
           email_address: email,
           label: 'Work',
