@@ -15,13 +15,9 @@ interface AttioPersonData {
     }>
     email_addresses: Array<{
       email_address: string
-      label: string
-      is_primary: boolean
     }>
     phone_numbers?: Array<{
       phone_number: string
-      label: string
-      is_primary: boolean
     }>
     job_title?: Array<{ value: string }>
     company_name?: Array<{ value: string }>
@@ -128,15 +124,11 @@ serve(async (req) => {
           full_name: `${firstName || ''} ${lastName || ''}`.trim() || email.split('@')[0]
         }],
         email_addresses: [{
-          email_address: email,
-          label: 'Work',
-          is_primary: true
+          email_address: email
         }],
         ...(phone && {
           phone_numbers: [{
-            phone_number: phone,
-            label: 'Mobile',
-            is_primary: true
+            phone_number: phone
           }]
         }),
         ...(role && {
