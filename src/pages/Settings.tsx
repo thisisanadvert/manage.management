@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, Mail, Shield, Smartphone, ToggleLeft as Toggle, CheckCircle2, XCircle, Database, Settings as SettingsIcon, Users } from 'lucide-react';
+import { Lock, Mail, Shield, Smartphone, ToggleLeft as Toggle, CheckCircle2, XCircle, Database, Settings as SettingsIcon, Users, Bell } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
