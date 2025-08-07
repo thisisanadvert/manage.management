@@ -833,7 +833,7 @@ Last updated: {{lastUpdated}}
     description: 'Statutory register of members for RTM companies under Companies Act 2006',
     category: 'company_documents',
     framework: 'CLRA_2002',
-    applicableRoles: ['rtm-director', 'rmc-director'],
+    applicableRoles: ['rtm-director', 'rmc-director', 'super-admin'],
     content: `REGISTER OF MEMBERS
 {{companyName}}
 Company Number: {{companyNumber}}

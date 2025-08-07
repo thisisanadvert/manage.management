@@ -22,6 +22,14 @@ const LegalTemplates: React.FC = () => {
   const availableTemplates = user?.role ? getTemplatesByRole(user.role) : LEGAL_TEMPLATES;
   console.log('Available templates for role:', availableTemplates.length, availableTemplates.map(t => t.id));
 
+  // Check specifically for Register of Members template
+  const registerTemplate = LEGAL_TEMPLATES.find(t => t.id === 'register-of-members');
+  console.log('Register of Members template found:', registerTemplate ? 'YES' : 'NO');
+  if (registerTemplate) {
+    console.log('Register template roles:', registerTemplate.applicableRoles);
+    console.log('User role matches:', registerTemplate.applicableRoles.includes(user?.role as any));
+  }
+
   // Filter templates based on search and category
   const filteredTemplates = availableTemplates.filter(template => {
     const matchesSearch = template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -29,6 +37,10 @@ const LegalTemplates: React.FC = () => {
     const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  console.log('Filtered templates:', filteredTemplates.length, filteredTemplates.map(t => t.id));
+  console.log('Selected category:', selectedCategory);
+  console.log('Search term:', searchTerm);
 
   const categories: Array<{ id: TemplateCategory | 'all'; label: string; icon: React.ReactNode }> = [
     { id: 'all', label: 'All Templates', icon: <FileText className="h-4 w-4" /> },
@@ -55,6 +67,8 @@ const LegalTemplates: React.FC = () => {
         return 'bg-gray-100 text-gray-800';
       case 'privacy_notice':
         return 'bg-red-100 text-red-800';
+      case 'company_documents':
+        return 'bg-indigo-100 text-indigo-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
