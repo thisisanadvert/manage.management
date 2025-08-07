@@ -181,14 +181,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Play login success sound
         const isNewUser = data.user.user_metadata?.needsBuildingSetup || data.user.user_metadata?.needsPasswordSetup;
+        console.log('🎵 Attempting to play login sound. New user:', isNewUser);
         try {
           if (isNewUser) {
+            console.log('🎵 Playing welcome sound...');
             await sonicBranding.playWelcome();
           } else {
+            console.log('🎵 Playing login success sound...');
             await sonicBranding.playLoginSuccess();
           }
+          console.log('🎵 Login sound played successfully');
         } catch (error) {
-          console.warn('Failed to play login sound:', error);
+          console.warn('🎵 Failed to play login sound:', error);
         }
 
         // Check if user needs to set up password

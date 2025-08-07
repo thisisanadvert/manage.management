@@ -57,21 +57,31 @@ class AudioService {
    * Check if audio should be played based on user preferences
    */
   private shouldPlayAudio(): boolean {
+    console.log('🎵 Checking if audio should play...');
+    console.log('🎵 Config enabled:', this.config.enabled);
+
     if (!this.config.enabled) {
+      console.log('🎵 Audio disabled in config');
       return false;
     }
 
     if (this.config.respectUserPreferences) {
       // Check for reduced motion preference (often correlates with audio preferences)
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      console.log('🎵 Prefers reduced motion:', prefersReducedMotion);
       if (prefersReducedMotion) {
+        console.log('🎵 Audio disabled due to reduced motion preference');
         return false;
       }
 
       // Check if user has interacted with the page (required for autoplay)
-      return document.hasStoredUserActivation || document.hasFocus();
+      const hasUserActivation = (document as any).hasStoredUserActivation || document.hasFocus();
+      console.log('🎵 Has user activation:', hasUserActivation);
+      console.log('🎵 Document has focus:', document.hasFocus());
+      return hasUserActivation;
     }
 
+    console.log('🎵 Audio should play');
     return true;
   }
 
@@ -106,15 +116,21 @@ class AudioService {
    * Play an audio file
    */
   async playAudio(audioPath: string, config: AudioConfig = {}): Promise<void> {
+    console.log(`🎵 Attempting to play audio: ${audioPath}`);
+
     if (!this.shouldPlayAudio()) {
+      console.log('🎵 Audio playback blocked by shouldPlayAudio check');
       return;
     }
 
     try {
       let audio = this.audioCache.get(audioPath);
-      
+      console.log(`🎵 Audio cached: ${!!audio}`);
+
       if (!audio) {
+        console.log(`🎵 Preloading audio: ${audioPath}`);
         audio = await this.preloadAudio(audioPath);
+        console.log(`🎵 Audio preloaded successfully`);
       }
 
       // Apply configuration
@@ -122,13 +138,18 @@ class AudioService {
       audio.playbackRate = config.playbackRate ?? 1.0;
       audio.loop = config.loop ?? false;
 
+      console.log(`🎵 Audio config - Volume: ${audio.volume}, Rate: ${audio.playbackRate}`);
+
       // Reset audio to beginning
       audio.currentTime = 0;
 
       // Play the audio
+      console.log(`🎵 Playing audio...`);
       await audio.play();
+      console.log(`🎵 Audio played successfully!`);
     } catch (error) {
-      console.warn(`Failed to play audio: ${audioPath}`, error);
+      console.warn(`🎵 Failed to play audio: ${audioPath}`, error);
+      throw error;
     }
   }
 
@@ -244,8 +265,11 @@ export const sonicBranding = {
  */
 export const initializeSonicBranding = async (): Promise<void> => {
   try {
+    console.log('🎵 Initializing sonic branding system...');
+
     // Preload audio files when the user first interacts with the page
     const preloadOnInteraction = () => {
+      console.log('🎵 User interaction detected, preloading audio files...');
       sonicBranding.preloadAll();
       // Remove listeners after first interaction
       document.removeEventListener('click', preloadOnInteraction);
@@ -256,6 +280,19 @@ export const initializeSonicBranding = async (): Promise<void> => {
     document.addEventListener('click', preloadOnInteraction, { once: true });
     document.addEventListener('keydown', preloadOnInteraction, { once: true });
     document.addEventListener('touchstart', preloadOnInteraction, { once: true });
+
+    // Add debug function to window for testing
+    (window as any).testSonicBranding = async () => {
+      console.log('🎵 Testing sonic branding...');
+      try {
+        await sonicBranding.playLoginSuccess();
+        console.log('🎵 Test successful!');
+      } catch (error) {
+        console.error('🎵 Test failed:', error);
+      }
+    };
+
+    console.log('🎵 Sonic branding initialized. Test with: window.testSonicBranding()');
   } catch (error) {
     console.warn('Failed to initialize sonic branding:', error);
   }
