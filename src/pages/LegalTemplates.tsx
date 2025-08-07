@@ -37,7 +37,8 @@ const LegalTemplates: React.FC = () => {
     { id: 'rtm_notice', label: 'RTM Notices', icon: <Building2 className="h-4 w-4" /> },
     { id: 'agm_notice', label: 'AGM Notices', icon: <FileText className="h-4 w-4" /> },
     { id: 'meeting_minutes', label: 'Meeting Minutes', icon: <FileText className="h-4 w-4" /> },
-    { id: 'privacy_notice', label: 'Privacy Notices', icon: <FileText className="h-4 w-4" /> }
+    { id: 'privacy_notice', label: 'Privacy Notices', icon: <FileText className="h-4 w-4" /> },
+    { id: 'company_documents', label: 'Company Documents', icon: <Building2 className="h-4 w-4" /> }
   ];
 
   const getCategoryColor = (category: TemplateCategory): string => {

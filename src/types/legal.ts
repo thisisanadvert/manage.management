@@ -77,7 +77,7 @@ export interface LegalTemplate {
   version: string;
 }
 
-export type TemplateCategory = 
+export type TemplateCategory =
   | 'section_20_consultation'
   | 'service_charge_demand'
   | 'rtm_notice'
@@ -86,7 +86,8 @@ export type TemplateCategory =
   | 'privacy_notice'
   | 'building_safety'
   | 'fire_safety'
-  | 'insurance_notice';
+  | 'insurance_notice'
+  | 'company_documents';
 
 export interface TemplateVariable {
   name: string;

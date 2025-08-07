@@ -825,6 +825,384 @@ Last updated: {{lastUpdated}}
     ],
     lastUpdated: new Date('2024-12-01'),
     version: '1.0'
+  },
+
+  {
+    id: 'register-of-members',
+    title: 'Register of Members',
+    description: 'Statutory register of members for RTM companies under Companies Act 2006',
+    category: 'company_documents',
+    framework: 'CLRA_2002',
+    applicableRoles: ['rtm-director', 'rmc-director'],
+    content: `REGISTER OF MEMBERS
+{{companyName}}
+Company Number: {{companyNumber}}
+
+Prepared in accordance with Section 113 of the Companies Act 2006
+Date of Register: {{registerDate}}
+
+REGISTER ENTRIES:
+
+MEMBER 1
+Name: {{member1Name}}
+Address: {{member1Address}}
+Date of Becoming Member: {{member1DateJoined}}
+Date Ceased to be Member: {{member1DateCeased}}
+Number of Shares Held: {{member1SharesHeld}}
+Class of Shares: {{member1ShareClass}}
+Amount Paid on Shares: £{{member1AmountPaid}}
+Amount Agreed to be Paid: £{{member1AmountAgreed}}
+Flat/Unit Number: {{member1UnitNumber}}
+Notes: {{member1Notes}}
+
+MEMBER 2
+Name: {{member2Name}}
+Address: {{member2Address}}
+Date of Becoming Member: {{member2DateJoined}}
+Date Ceased to be Member: {{member2DateCeased}}
+Number of Shares Held: {{member2SharesHeld}}
+Class of Shares: {{member2ShareClass}}
+Amount Paid on Shares: £{{member2AmountPaid}}
+Amount Agreed to be Paid: £{{member2AmountAgreed}}
+Flat/Unit Number: {{member2UnitNumber}}
+Notes: {{member2Notes}}
+
+MEMBER 3
+Name: {{member3Name}}
+Address: {{member3Address}}
+Date of Becoming Member: {{member3DateJoined}}
+Date Ceased to be Member: N/A
+Number of Shares Held: 1
+Class of Shares: Ordinary
+Amount Paid on Shares: £1.00
+Amount Agreed to be Paid: £1.00
+Flat/Unit Number: {{member3UnitNumber}}
+Notes:
+
+MEMBER 4
+Name: {{member4Name}}
+Address: {{member4Address}}
+Date of Becoming Member: {{member4DateJoined}}
+Date Ceased to be Member: N/A
+Number of Shares Held: 1
+Class of Shares: Ordinary
+Amount Paid on Shares: £1.00
+Amount Agreed to be Paid: £1.00
+Flat/Unit Number: {{member4UnitNumber}}
+Notes:
+
+MEMBER 5
+Name: {{member5Name}}
+Address: {{member5Address}}
+Date of Becoming Member: {{member5DateJoined}}
+Date Ceased to be Member: N/A
+Number of Shares Held: 1
+Class of Shares: Ordinary
+Amount Paid on Shares: £1.00
+Amount Agreed to be Paid: £1.00
+Flat/Unit Number: {{member5UnitNumber}}
+Notes:
+
+[Additional members can be added manually following the same format]
+
+SHARE CAPITAL SUMMARY:
+Total Authorised Share Capital: £{{authorisedCapital}}
+Total Issued Share Capital: £{{issuedCapital}}
+Total Paid-up Share Capital: £{{paidUpCapital}}
+Number of Members: {{totalMembers}}
+
+CERTIFICATION:
+I certify that this register is a true and accurate record of the members of {{companyName}} as at {{registerDate}}.
+
+Signed: _________________________
+Name: {{directorName}}
+Position: Director
+Date: {{certificationDate}}
+
+LEGAL NOTES:
+1. This register must be kept at the company's registered office or at a place notified to Companies House
+2. The register must be available for inspection by members free of charge
+3. Non-members may inspect the register upon payment of the prescribed fee
+4. Any changes to membership must be recorded within 14 days
+5. Failure to maintain proper records is a criminal offence under the Companies Act 2006
+
+PRIVACY NOTICE:
+The information in this register is processed in accordance with the Companies Act 2006 and the General Data Protection Regulation (GDPR). Personal data is held for the purpose of maintaining statutory company records and may be disclosed as required by law.
+
+For data protection enquiries, contact: {{dataProtectionContact}}
+
+This register complies with:
+- Companies Act 2006, Section 113
+- Commonhold and Leasehold Reform Act 2002
+- The Companies (Model Articles) Regulations 2008
+- General Data Protection Regulation (GDPR)`,
+    variables: [
+      {
+        name: 'companyName',
+        type: 'text',
+        required: true,
+        description: 'Full name of the RTM company'
+      },
+      {
+        name: 'companyNumber',
+        type: 'text',
+        required: true,
+        description: 'Companies House registration number'
+      },
+      {
+        name: 'registerDate',
+        type: 'date',
+        required: true,
+        description: 'Date this register was prepared'
+      },
+      {
+        name: 'authorisedCapital',
+        type: 'currency',
+        required: true,
+        description: 'Total authorised share capital'
+      },
+      {
+        name: 'issuedCapital',
+        type: 'currency',
+        required: true,
+        description: 'Total issued share capital'
+      },
+      {
+        name: 'paidUpCapital',
+        type: 'currency',
+        required: true,
+        description: 'Total paid-up share capital'
+      },
+      {
+        name: 'totalMembers',
+        type: 'number',
+        required: true,
+        description: 'Total number of current members'
+      },
+      {
+        name: 'directorName',
+        type: 'text',
+        required: true,
+        description: 'Name of certifying director'
+      },
+      {
+        name: 'certificationDate',
+        type: 'date',
+        required: true,
+        description: 'Date of certification'
+      },
+      {
+        name: 'dataProtectionContact',
+        type: 'text',
+        required: true,
+        description: 'Contact details for data protection enquiries'
+      },
+      // Member 1 fields
+      {
+        name: 'member1Name',
+        type: 'text',
+        required: false,
+        description: 'Full name of member 1'
+      },
+      {
+        name: 'member1Address',
+        type: 'address',
+        required: false,
+        description: 'Full address of member 1'
+      },
+      {
+        name: 'member1DateJoined',
+        type: 'date',
+        required: false,
+        description: 'Date member 1 became a member'
+      },
+      {
+        name: 'member1DateCeased',
+        type: 'date',
+        required: false,
+        description: 'Date member 1 ceased to be a member (leave blank if current)'
+      },
+      {
+        name: 'member1SharesHeld',
+        type: 'number',
+        required: false,
+        description: 'Number of shares held by member 1',
+        defaultValue: '1'
+      },
+      {
+        name: 'member1ShareClass',
+        type: 'text',
+        required: false,
+        description: 'Class of shares held by member 1',
+        defaultValue: 'Ordinary'
+      },
+      {
+        name: 'member1AmountPaid',
+        type: 'currency',
+        required: false,
+        description: 'Amount paid on shares by member 1',
+        defaultValue: '1.00'
+      },
+      {
+        name: 'member1AmountAgreed',
+        type: 'currency',
+        required: false,
+        description: 'Amount agreed to be paid by member 1',
+        defaultValue: '1.00'
+      },
+      {
+        name: 'member1UnitNumber',
+        type: 'text',
+        required: false,
+        description: 'Flat/unit number of member 1'
+      },
+      {
+        name: 'member1Notes',
+        type: 'text',
+        required: false,
+        description: 'Additional notes for member 1'
+      },
+      // Member 2 fields
+      {
+        name: 'member2Name',
+        type: 'text',
+        required: false,
+        description: 'Full name of member 2'
+      },
+      {
+        name: 'member2Address',
+        type: 'address',
+        required: false,
+        description: 'Full address of member 2'
+      },
+      {
+        name: 'member2DateJoined',
+        type: 'date',
+        required: false,
+        description: 'Date member 2 became a member'
+      },
+      {
+        name: 'member2DateCeased',
+        type: 'date',
+        required: false,
+        description: 'Date member 2 ceased to be a member (leave blank if current)'
+      },
+      {
+        name: 'member2SharesHeld',
+        type: 'number',
+        required: false,
+        description: 'Number of shares held by member 2',
+        defaultValue: '1'
+      },
+      {
+        name: 'member2ShareClass',
+        type: 'text',
+        required: false,
+        description: 'Class of shares held by member 2',
+        defaultValue: 'Ordinary'
+      },
+      {
+        name: 'member2AmountPaid',
+        type: 'currency',
+        required: false,
+        description: 'Amount paid on shares by member 2',
+        defaultValue: '1.00'
+      },
+      {
+        name: 'member2AmountAgreed',
+        type: 'currency',
+        required: false,
+        description: 'Amount agreed to be paid by member 2',
+        defaultValue: '1.00'
+      },
+      {
+        name: 'member2UnitNumber',
+        type: 'text',
+        required: false,
+        description: 'Flat/unit number of member 2'
+      },
+      {
+        name: 'member2Notes',
+        type: 'text',
+        required: false,
+        description: 'Additional notes for member 2'
+      },
+      // Member 3-5 fields (abbreviated for space - users can add more members manually if needed)
+      {
+        name: 'member3Name',
+        type: 'text',
+        required: false,
+        description: 'Full name of member 3'
+      },
+      {
+        name: 'member3Address',
+        type: 'address',
+        required: false,
+        description: 'Full address of member 3'
+      },
+      {
+        name: 'member3DateJoined',
+        type: 'date',
+        required: false,
+        description: 'Date member 3 became a member'
+      },
+      {
+        name: 'member3UnitNumber',
+        type: 'text',
+        required: false,
+        description: 'Flat/unit number of member 3'
+      },
+      {
+        name: 'member4Name',
+        type: 'text',
+        required: false,
+        description: 'Full name of member 4'
+      },
+      {
+        name: 'member4Address',
+        type: 'address',
+        required: false,
+        description: 'Full address of member 4'
+      },
+      {
+        name: 'member4DateJoined',
+        type: 'date',
+        required: false,
+        description: 'Date member 4 became a member'
+      },
+      {
+        name: 'member4UnitNumber',
+        type: 'text',
+        required: false,
+        description: 'Flat/unit number of member 4'
+      },
+      {
+        name: 'member5Name',
+        type: 'text',
+        required: false,
+        description: 'Full name of member 5'
+      },
+      {
+        name: 'member5Address',
+        type: 'address',
+        required: false,
+        description: 'Full address of member 5'
+      },
+      {
+        name: 'member5DateJoined',
+        type: 'date',
+        required: false,
+        description: 'Date member 5 became a member'
+      },
+      {
+        name: 'member5UnitNumber',
+        type: 'text',
+        required: false,
+        description: 'Flat/unit number of member 5'
+      }
+    ],
+    lastUpdated: new Date('2024-12-01'),
+    version: '1.0'
   }
 ];
 
