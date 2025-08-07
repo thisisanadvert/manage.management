@@ -63,11 +63,13 @@ export const useSonicBranding = (): UseSonicBrandingReturn => {
   // Audio playback functions
   const playLoginSuccess = useCallback(async () => {
     try {
+      console.log('🎵 Hook: playLoginSuccess called, config:', config);
       await sonicBranding.playLoginSuccess();
     } catch (error) {
       console.warn('Failed to play login success sound:', error);
+      throw error;
     }
-  }, []);
+  }, [config]);
 
   const playLoginError = useCallback(async () => {
     try {

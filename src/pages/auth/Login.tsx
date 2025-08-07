@@ -76,8 +76,20 @@ const Login = () => {
         // Play login success sound immediately while we have user activation
         try {
           console.log('🎵 Playing login sound from form submission...');
-          await playLoginSuccess();
-          console.log('🎵 Login sound played from form!');
+
+          // Direct approach - bypass the hook system for now
+          const audio = new Audio('/audio/login-success.mp3');
+          audio.volume = 0.6;
+          await audio.play();
+          console.log('🎵 Direct login sound played from form!');
+
+          // Also try the hook approach
+          try {
+            await playLoginSuccess();
+            console.log('🎵 Hook login sound also played!');
+          } catch (hookError) {
+            console.warn('🎵 Hook approach failed:', hookError);
+          }
         } catch (audioError) {
           console.warn('🎵 Failed to play login sound from form:', audioError);
         }

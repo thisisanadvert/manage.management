@@ -26,6 +26,7 @@ class AudioService {
 
   constructor() {
     this.loadConfig();
+    console.log('🎵 AudioService initialized with config:', this.config);
   }
 
   /**
