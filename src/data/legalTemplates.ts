@@ -843,67 +843,20 @@ Date of Register: {{registerDate}}
 
 REGISTER ENTRIES:
 
-MEMBER 1
-Name: {{member1Name}}
-Address: {{member1Address}}
-Date of Becoming Member: {{member1DateJoined}}
-Date Ceased to be Member: {{member1DateCeased}}
-Number of Shares Held: {{member1SharesHeld}}
-Class of Shares: {{member1ShareClass}}
-Amount Paid on Shares: £{{member1AmountPaid}}
-Amount Agreed to be Paid: £{{member1AmountAgreed}}
-Flat/Unit Number: {{member1UnitNumber}}
-Notes: {{member1Notes}}
+{{#each members}}
+MEMBER {{@index}}
+Name: {{name}}
+Address: {{address}}
+Date of Becoming Member: {{dateJoined}}
+{{#if dateCeased}}Date Ceased to be Member: {{dateCeased}}{{else}}Date Ceased to be Member: N/A{{/if}}
+Number of Shares Held: {{sharesHeld}}
+Class of Shares: {{shareClass}}
+Amount Paid on Shares: £{{amountPaid}}
+Amount Agreed to be Paid: £{{amountAgreed}}
+Flat/Unit Number: {{unitNumber}}
+{{#if notes}}Notes: {{notes}}{{/if}}
 
-MEMBER 2
-Name: {{member2Name}}
-Address: {{member2Address}}
-Date of Becoming Member: {{member2DateJoined}}
-Date Ceased to be Member: {{member2DateCeased}}
-Number of Shares Held: {{member2SharesHeld}}
-Class of Shares: {{member2ShareClass}}
-Amount Paid on Shares: £{{member2AmountPaid}}
-Amount Agreed to be Paid: £{{member2AmountAgreed}}
-Flat/Unit Number: {{member2UnitNumber}}
-Notes: {{member2Notes}}
-
-MEMBER 3
-Name: {{member3Name}}
-Address: {{member3Address}}
-Date of Becoming Member: {{member3DateJoined}}
-Date Ceased to be Member: N/A
-Number of Shares Held: 1
-Class of Shares: Ordinary
-Amount Paid on Shares: £1.00
-Amount Agreed to be Paid: £1.00
-Flat/Unit Number: {{member3UnitNumber}}
-Notes:
-
-MEMBER 4
-Name: {{member4Name}}
-Address: {{member4Address}}
-Date of Becoming Member: {{member4DateJoined}}
-Date Ceased to be Member: N/A
-Number of Shares Held: 1
-Class of Shares: Ordinary
-Amount Paid on Shares: £1.00
-Amount Agreed to be Paid: £1.00
-Flat/Unit Number: {{member4UnitNumber}}
-Notes:
-
-MEMBER 5
-Name: {{member5Name}}
-Address: {{member5Address}}
-Date of Becoming Member: {{member5DateJoined}}
-Date Ceased to be Member: N/A
-Number of Shares Held: 1
-Class of Shares: Ordinary
-Amount Paid on Shares: £1.00
-Amount Agreed to be Paid: £1.00
-Flat/Unit Number: {{member5UnitNumber}}
-Notes:
-
-[Additional members can be added manually following the same format]
+{{/each}}
 
 SHARE CAPITAL SUMMARY:
 Total Authorised Share Capital: £{{authorisedCapital}}
@@ -937,6 +890,7 @@ This register complies with:
 - The Companies (Model Articles) Regulations 2008
 - General Data Protection Regulation (GDPR)`,
     variables: [
+      // Company details
       {
         name: 'companyName',
         type: 'text',
@@ -955,11 +909,13 @@ This register complies with:
         required: true,
         description: 'Date this register was prepared'
       },
+      // Share capital
       {
         name: 'authorisedCapital',
         type: 'currency',
         required: true,
-        description: 'Total authorised share capital'
+        description: 'Total authorised share capital',
+        defaultValue: '100.00'
       },
       {
         name: 'issuedCapital',
@@ -979,6 +935,7 @@ This register complies with:
         required: true,
         description: 'Total number of current members'
       },
+      // Certification
       {
         name: 'directorName',
         type: 'text',
@@ -997,212 +954,30 @@ This register complies with:
         required: true,
         description: 'Contact details for data protection enquiries'
       },
-      // Member 1 fields
+      // Dynamic members array
       {
-        name: 'member1Name',
-        type: 'text',
-        required: false,
-        description: 'Full name of member 1'
-      },
-      {
-        name: 'member1Address',
-        type: 'address',
-        required: false,
-        description: 'Full address of member 1'
-      },
-      {
-        name: 'member1DateJoined',
-        type: 'date',
-        required: false,
-        description: 'Date member 1 became a member'
-      },
-      {
-        name: 'member1DateCeased',
-        type: 'date',
-        required: false,
-        description: 'Date member 1 ceased to be a member (leave blank if current)'
-      },
-      {
-        name: 'member1SharesHeld',
-        type: 'number',
-        required: false,
-        description: 'Number of shares held by member 1',
-        defaultValue: '1'
-      },
-      {
-        name: 'member1ShareClass',
-        type: 'text',
-        required: false,
-        description: 'Class of shares held by member 1',
-        defaultValue: 'Ordinary'
-      },
-      {
-        name: 'member1AmountPaid',
-        type: 'currency',
-        required: false,
-        description: 'Amount paid on shares by member 1',
-        defaultValue: '1.00'
-      },
-      {
-        name: 'member1AmountAgreed',
-        type: 'currency',
-        required: false,
-        description: 'Amount agreed to be paid by member 1',
-        defaultValue: '1.00'
-      },
-      {
-        name: 'member1UnitNumber',
-        type: 'text',
-        required: false,
-        description: 'Flat/unit number of member 1'
-      },
-      {
-        name: 'member1Notes',
-        type: 'text',
-        required: false,
-        description: 'Additional notes for member 1'
-      },
-      // Member 2 fields
-      {
-        name: 'member2Name',
-        type: 'text',
-        required: false,
-        description: 'Full name of member 2'
-      },
-      {
-        name: 'member2Address',
-        type: 'address',
-        required: false,
-        description: 'Full address of member 2'
-      },
-      {
-        name: 'member2DateJoined',
-        type: 'date',
-        required: false,
-        description: 'Date member 2 became a member'
-      },
-      {
-        name: 'member2DateCeased',
-        type: 'date',
-        required: false,
-        description: 'Date member 2 ceased to be a member (leave blank if current)'
-      },
-      {
-        name: 'member2SharesHeld',
-        type: 'number',
-        required: false,
-        description: 'Number of shares held by member 2',
-        defaultValue: '1'
-      },
-      {
-        name: 'member2ShareClass',
-        type: 'text',
-        required: false,
-        description: 'Class of shares held by member 2',
-        defaultValue: 'Ordinary'
-      },
-      {
-        name: 'member2AmountPaid',
-        type: 'currency',
-        required: false,
-        description: 'Amount paid on shares by member 2',
-        defaultValue: '1.00'
-      },
-      {
-        name: 'member2AmountAgreed',
-        type: 'currency',
-        required: false,
-        description: 'Amount agreed to be paid by member 2',
-        defaultValue: '1.00'
-      },
-      {
-        name: 'member2UnitNumber',
-        type: 'text',
-        required: false,
-        description: 'Flat/unit number of member 2'
-      },
-      {
-        name: 'member2Notes',
-        type: 'text',
-        required: false,
-        description: 'Additional notes for member 2'
-      },
-      // Member 3-5 fields (abbreviated for space - users can add more members manually if needed)
-      {
-        name: 'member3Name',
-        type: 'text',
-        required: false,
-        description: 'Full name of member 3'
-      },
-      {
-        name: 'member3Address',
-        type: 'address',
-        required: false,
-        description: 'Full address of member 3'
-      },
-      {
-        name: 'member3DateJoined',
-        type: 'date',
-        required: false,
-        description: 'Date member 3 became a member'
-      },
-      {
-        name: 'member3UnitNumber',
-        type: 'text',
-        required: false,
-        description: 'Flat/unit number of member 3'
-      },
-      {
-        name: 'member4Name',
-        type: 'text',
-        required: false,
-        description: 'Full name of member 4'
-      },
-      {
-        name: 'member4Address',
-        type: 'address',
-        required: false,
-        description: 'Full address of member 4'
-      },
-      {
-        name: 'member4DateJoined',
-        type: 'date',
-        required: false,
-        description: 'Date member 4 became a member'
-      },
-      {
-        name: 'member4UnitNumber',
-        type: 'text',
-        required: false,
-        description: 'Flat/unit number of member 4'
-      },
-      {
-        name: 'member5Name',
-        type: 'text',
-        required: false,
-        description: 'Full name of member 5'
-      },
-      {
-        name: 'member5Address',
-        type: 'address',
-        required: false,
-        description: 'Full address of member 5'
-      },
-      {
-        name: 'member5DateJoined',
-        type: 'date',
-        required: false,
-        description: 'Date member 5 became a member'
-      },
-      {
-        name: 'member5UnitNumber',
-        type: 'text',
-        required: false,
-        description: 'Flat/unit number of member 5'
+        name: 'members',
+        type: 'array',
+        required: true,
+        description: 'List of company members',
+        minItems: 1,
+        maxItems: 50,
+        itemSchema: {
+          name: { type: 'text', required: true, description: 'Full name of member' },
+          address: { type: 'address', required: true, description: 'Full address of member' },
+          dateJoined: { type: 'date', required: true, description: 'Date became a member' },
+          dateCeased: { type: 'date', required: false, description: 'Date ceased to be member (leave blank if current)' },
+          sharesHeld: { type: 'number', required: true, description: 'Number of shares held', defaultValue: 1 },
+          shareClass: { type: 'text', required: true, description: 'Class of shares', defaultValue: 'Ordinary' },
+          amountPaid: { type: 'currency', required: true, description: 'Amount paid on shares', defaultValue: '1.00' },
+          amountAgreed: { type: 'currency', required: true, description: 'Amount agreed to be paid', defaultValue: '1.00' },
+          unitNumber: { type: 'text', required: true, description: 'Flat/unit number' },
+          notes: { type: 'text', required: false, description: 'Additional notes' }
+        }
       }
     ],
     lastUpdated: new Date('2024-12-01'),
-    version: '1.0'
+    version: '3.0'
   }
 ];
 

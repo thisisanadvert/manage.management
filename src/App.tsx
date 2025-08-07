@@ -22,6 +22,7 @@ import UserImpersonationDashboard from './components/admin/UserImpersonationDash
 import { useAuth } from './contexts/AuthContext';
 import FormPersistenceService from './services/formPersistenceService';
 import { setupEmergencyFix, startModalOverlayAutoFix, disableModalOverlayInteraction } from './utils/modalOverlayFix';
+import { initializeSonicBranding } from './utils/audioUtils';
 
 
 import BuildingDetails from './pages/BuildingDetails';
@@ -149,10 +150,13 @@ function App() {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  // Initialize form persistence service
+  // Initialize form persistence service and sonic branding
   React.useEffect(() => {
     const formPersistenceService = FormPersistenceService.getInstance();
     formPersistenceService.initialize();
+
+    // Initialize sonic branding system
+    initializeSonicBranding();
   }, []);
 
   // Initialize modal overlay fix

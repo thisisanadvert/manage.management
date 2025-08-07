@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { sonicBranding } from '../utils/audioUtils';
 import { ImpersonationState, ImpersonationReason } from '../types/impersonation';
 import ImpersonationAuditService from '../services/impersonationAuditService';
 
@@ -160,6 +161,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error('Login error:', error);
+        // Play login error sound
+        try {
+          await sonicBranding.playLoginError();
+        } catch (audioError) {
+          console.warn('Failed to play login error sound:', audioError);
+        }
         return { error };
       }
 
@@ -171,6 +178,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           metadata: data.user.user_metadata
         };
         setUser(userWithRole);
+
+        // Play login success sound
+        const isNewUser = data.user.user_metadata?.needsBuildingSetup || data.user.user_metadata?.needsPasswordSetup;
+        try {
+          if (isNewUser) {
+            await sonicBranding.playWelcome();
+          } else {
+            await sonicBranding.playLoginSuccess();
+          }
+        } catch (error) {
+          console.warn('Failed to play login sound:', error);
+        }
 
         // Check if user needs to set up password
         if (data.user.user_metadata?.needsPasswordSetup) {
