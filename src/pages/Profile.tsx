@@ -11,13 +11,13 @@ import {
   Lock,
   Bell,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  Info
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import NotificationPreferences from '../components/notifications/NotificationPreferences';
 
 const Profile = () => {
   const { user, signOut } = useAuth();
@@ -320,7 +320,23 @@ const Profile = () => {
         </form>
         </Card>
       ) : activeTab === 'notifications' ? (
-        <NotificationPreferences />
+        <Card>
+          <div className="flex items-center space-x-3 mb-6">
+            <Bell className="h-6 w-6 text-primary-600" />
+            <h3 className="text-lg font-medium text-gray-900">Notification Preferences</h3>
+          </div>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start space-x-3">
+              <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-blue-900">Coming Soon</h4>
+                <p className="text-sm text-blue-800 mt-1">
+                  Notification preferences will be available in a future update. You'll be able to customise how and when you receive notifications about issues, finances, documents, and more.
+                </p>
+              </div>
+            </div>
+          </div>
+        </Card>
       ) : null}
       
       <Card>

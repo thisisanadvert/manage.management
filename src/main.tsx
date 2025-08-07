@@ -5,8 +5,6 @@ import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './contexts/AuthContext';
 import { BuildingProvider } from './contexts/BuildingContext';
 import { OnboardingProvider } from './contexts/OnboardingContext';
-import { NotificationProvider } from './contexts/NotificationContext';
-import { SearchProvider } from './contexts/SearchContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import App from './App';
 import './index.css';
@@ -19,11 +17,7 @@ createRoot(document.getElementById('root')!).render(
           <AuthProvider>
             <BuildingProvider>
               <OnboardingProvider>
-                <NotificationProvider>
-                  <SearchProvider>
-                    <App />
-                  </SearchProvider>
-                </NotificationProvider>
+                <App />
               </OnboardingProvider>
             </BuildingProvider>
           </AuthProvider>

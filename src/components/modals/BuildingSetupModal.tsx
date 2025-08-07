@@ -142,8 +142,7 @@ const BuildingSetupModal = ({ isOpen, onClose, onSetupComplete }: BuildingSetupM
 
       if (!buildingId) {
         // If no building found, create a new one
-          // If no building found, create a new one
-          const { data: newBuilding, error: newBuildingError } = await supabase
+        const { data: newBuilding, error: newBuildingError } = await supabase
             .from('buildings')
             .insert([
               {
@@ -181,9 +180,8 @@ const BuildingSetupModal = ({ isOpen, onClose, onSetupComplete }: BuildingSetupM
               data: { buildingId: buildingId }
             });
           }
-        }
       }
-      
+
       if (!buildingId) throw new Error('Could not find or create a building. Please contact support.');
 
       const { data, error } = await supabase
