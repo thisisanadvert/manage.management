@@ -75,9 +75,20 @@ class AudioService {
       }
 
       // Check if user has interacted with the page (required for autoplay)
-      const hasUserActivation = (document as any).hasStoredUserActivation || document.hasFocus();
-      console.log('🎵 Has user activation:', hasUserActivation);
-      console.log('🎵 Document has focus:', document.hasFocus());
+      const hasStoredActivation = (document as any).hasStoredUserActivation;
+      const hasFocus = document.hasFocus();
+      const hasUserActivation = hasStoredActivation || hasFocus;
+
+      console.log('🎵 Has stored user activation:', hasStoredActivation);
+      console.log('🎵 Document has focus:', hasFocus);
+      console.log('🎵 Final user activation check:', hasUserActivation);
+
+      // For login scenarios, we'll be more permissive since the user just clicked login
+      if (!hasUserActivation) {
+        console.log('🎵 No user activation detected, but attempting to play anyway for login');
+        return true; // Try to play anyway for login scenarios
+      }
+
       return hasUserActivation;
     }
 
@@ -211,6 +222,36 @@ export const sonicBranding = {
       volume: 0.6,
       playbackRate: 1.0
     });
+  },
+
+  /**
+   * Play login success sound with retry logic for autoplay issues
+   */
+  async playLoginSuccessWithRetry(): Promise<void> {
+    const maxRetries = 3;
+    let retryCount = 0;
+
+    const attemptPlay = async (): Promise<void> => {
+      try {
+        await audioService.playAudio('/audio/login-success.mp3', {
+          volume: 0.6,
+          playbackRate: 1.0
+        });
+      } catch (error) {
+        retryCount++;
+        console.log(`🎵 Login sound attempt ${retryCount} failed:`, error);
+
+        if (retryCount < maxRetries) {
+          // Wait a bit longer and try again
+          await new Promise(resolve => setTimeout(resolve, 200 * retryCount));
+          return attemptPlay();
+        } else {
+          throw error;
+        }
+      }
+    };
+
+    return attemptPlay();
   },
 
   /**

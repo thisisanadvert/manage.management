@@ -179,21 +179,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
         setUser(userWithRole);
 
-        // Play login success sound
+        // Play login success sound with a small delay to ensure user interaction is registered
         const isNewUser = data.user.user_metadata?.needsBuildingSetup || data.user.user_metadata?.needsPasswordSetup;
         console.log('🎵 Attempting to play login sound. New user:', isNewUser);
-        try {
-          if (isNewUser) {
-            console.log('🎵 Playing welcome sound...');
-            await sonicBranding.playWelcome();
-          } else {
-            console.log('🎵 Playing login success sound...');
-            await sonicBranding.playLoginSuccess();
+
+        // Use setTimeout to ensure the audio plays after the login button click is fully processed
+        setTimeout(async () => {
+          try {
+            if (isNewUser) {
+              console.log('🎵 Playing welcome sound...');
+              await sonicBranding.playWelcome();
+            } else {
+              console.log('🎵 Playing login success sound...');
+              await sonicBranding.playLoginSuccessWithRetry();
+            }
+            console.log('🎵 Login sound played successfully');
+          } catch (error) {
+            console.warn('🎵 Failed to play login sound:', error);
           }
-          console.log('🎵 Login sound played successfully');
-        } catch (error) {
-          console.warn('🎵 Failed to play login sound:', error);
-        }
+        }, 100); // Small delay to ensure user interaction is registered
 
         // Check if user needs to set up password
         if (data.user.user_metadata?.needsPasswordSetup) {

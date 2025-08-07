@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Building2, Lock, Mail } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSonicBranding } from '../../hooks/useSonicBranding';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ const Login = () => {
   const [searchParams] = useSearchParams();
   const [isNewUser, setIsNewUser] = useState(false);
   const { signIn, user } = useAuth();
+  const { playLoginSuccess, playWelcome } = useSonicBranding();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -71,6 +73,14 @@ const Login = () => {
         }
       } else {
         console.log('Login form - no error returned, login should be successful');
+        // Play login success sound immediately while we have user activation
+        try {
+          console.log('🎵 Playing login sound from form submission...');
+          await playLoginSuccess();
+          console.log('🎵 Login sound played from form!');
+        } catch (audioError) {
+          console.warn('🎵 Failed to play login sound from form:', audioError);
+        }
       }
     } catch (err: any) {
       console.error('Login form catch error:', err);
