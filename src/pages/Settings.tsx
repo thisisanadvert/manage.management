@@ -73,14 +73,25 @@ const Settings = () => {
   ];
 
   // Add integrations tab for management company users, RTM/RMC directors, and super-admin
-  // Add Attio CRM tab for all users (access control handled in component)
-  const tabs = (user?.role === 'management-company' || user?.role?.includes('director') || user?.role === 'super-admin')
-    ? [
-        ...baseTabs,
-        { id: 'integrations', label: 'Integrations', icon: <SettingsIcon className="h-4 w-4" /> },
-        { id: 'attio', label: 'Attio CRM', icon: <Users className="h-4 w-4" /> }
-      ]
-    : baseTabs;
+  const hasIntegrationsAccess = user?.role === 'management-company' || user?.role?.includes('director') || user?.role === 'super-admin';
+
+  // Build tabs array with conditional Attio CRM tab (super-admin only)
+  let tabs = baseTabs;
+
+  if (hasIntegrationsAccess) {
+    tabs = [
+      ...baseTabs,
+      { id: 'integrations', label: 'Integrations', icon: <SettingsIcon className="h-4 w-4" /> }
+    ];
+  }
+
+  // Add Attio CRM tab only for super-admin users
+  if (user?.role === 'super-admin') {
+    tabs = [
+      ...tabs,
+      { id: 'attio', label: 'Attio CRM', icon: <Users className="h-4 w-4" /> }
+    ];
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-16 lg:pb-0">
@@ -255,28 +266,27 @@ const Settings = () => {
             </h2>
 
             <div className="space-y-4">
-              {/* Attio CRM Integration */}
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center">
-                  <Users className="h-5 w-5 text-gray-400" />
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-900">Attio CRM Integration</p>
-                    <p className="text-xs text-gray-500">
-                      {user?.role === 'super-admin'
-                        ? 'Automatically sync RTM qualification leads to your CRM'
-                        : 'Centralized lead management (Super-admin only)'
-                      }
-                    </p>
+              {/* Attio CRM Integration - Super-admin only */}
+              {user?.role === 'super-admin' && (
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center">
+                    <Users className="h-5 w-5 text-gray-400" />
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-gray-900">Attio CRM Integration</p>
+                      <p className="text-xs text-gray-500">
+                        Automatically sync RTM qualification leads to your CRM
+                      </p>
+                    </div>
                   </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveTab('attio')}
+                  >
+                    Configure
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setActiveTab('attio')}
-                >
-                  Configure
-                </Button>
-              </div>
+              )}
 
               {/* MRI Integration - Only for Management Company users */}
               {user?.role === 'management-company' && (
@@ -314,8 +324,8 @@ const Settings = () => {
         </div>
       )}
 
-      {/* Attio CRM Tab - Access control handled in component */}
-      {activeTab === 'attio' && (
+      {/* Attio CRM Tab - Super-admin only */}
+      {activeTab === 'attio' && user?.role === 'super-admin' && (
         <AttioSettings />
       )}
 
