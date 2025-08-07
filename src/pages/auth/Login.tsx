@@ -83,13 +83,6 @@ const Login = () => {
           await audio.play();
           console.log('🎵 Direct login sound played from form!');
 
-          // Also try the hook approach
-          try {
-            await playLoginSuccess();
-            console.log('🎵 Hook login sound also played!');
-          } catch (hookError) {
-            console.warn('🎵 Hook approach failed:', hookError);
-          }
         } catch (audioError) {
           console.warn('🎵 Failed to play login sound from form:', audioError);
         }

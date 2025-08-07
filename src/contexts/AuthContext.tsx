@@ -186,13 +186,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Use setTimeout to ensure the audio plays after the login button click is fully processed
         setTimeout(async () => {
           try {
-            if (isNewUser) {
-              console.log('🎵 Playing welcome sound...');
-              await sonicBranding.playWelcome();
-            } else {
-              console.log('🎵 Playing login success sound...');
-              await sonicBranding.playLoginSuccessWithRetry();
-            }
+            // Always play login success sound for now (welcome.mp3 doesn't exist yet)
+            console.log('🎵 Playing login success sound...');
+            await sonicBranding.playLoginSuccessWithRetry();
             console.log('🎵 Login sound played successfully');
           } catch (error) {
             console.warn('🎵 Failed to play login sound:', error);

@@ -266,10 +266,11 @@ export const sonicBranding = {
   },
 
   /**
-   * Play welcome sound for new users
+   * Play welcome sound for new users (fallback to login success sound)
    */
   async playWelcome(): Promise<void> {
-    await audioService.playAudio('/audio/welcome.mp3', {
+    // Use login-success.mp3 as fallback since welcome.mp3 doesn't exist yet
+    await audioService.playAudio('/audio/login-success.mp3', {
       volume: 0.7,
       playbackRate: 1.0
     });
