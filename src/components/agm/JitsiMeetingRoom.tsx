@@ -88,8 +88,19 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
       }
 
       const domain = 'meet.jit.si';
+
+      // Ensure room name doesn't trigger lobby by avoiding certain patterns
+      let roomName = meeting.room_name;
+
+      // Add a suffix to avoid any cached lobby settings for this room
+      const timestamp = new Date().getTime();
+      const sessionId = Math.random().toString(36).substring(2, 8);
+      roomName = `${meeting.room_name}-session-${sessionId}`;
+
+      console.log('Using room name:', roomName);
+
       const options = {
-        roomName: meeting.room_name,
+        roomName: roomName,
         width: '100%',
         height: 600,
         parentNode: jitsiContainerRef.current,
@@ -121,14 +132,22 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           enableEmailInStats: false,
           enableUserRolesBasedOnToken: false,
           enableFeaturesBasedOnToken: false,
-          // Lobby and moderation settings
+          // Lobby and moderation settings - multiple approaches to ensure lobby is disabled
           enableLobby: false, // Disable lobby for AGMs
           enableModeratedMode: false, // Disable moderated mode
           enableAutoModeration: false,
           disableLobbyPassword: true,
+          lobbyEnabled: false, // Alternative lobby setting
+          moderatedRoomServiceUrl: '', // Disable moderated room service
           // Additional security and access settings
           enableGuestDomain: true,
-          enableNoAudioSignal: false
+          enableNoAudioSignal: false,
+          // Force disable lobby at multiple levels
+          disableModeratorIndicator: false,
+          hideDisplayName: false,
+          // Room creation settings
+          createRoom: true,
+          openBridgeChannel: true
         },
         interfaceConfigOverwrite: {
           TOOLBAR_BUTTONS: [
@@ -238,12 +257,17 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
         endpointTextMessageReceived: () => {
           // Handle chat messages if needed
         },
-        errorOccurred: (error: { message?: string; error?: string; name?: string }) => {
+        errorOccurred: (errorEvent: any) => {
           clearTimeout(connectionTimeout);
-          console.error('Jitsi error:', error);
+          console.error('Jitsi error:', errorEvent);
 
           let errorMsg = 'Meeting error occurred';
-          const errorCode = error.name || error.error || error.message;
+
+          // Handle nested error structure - the actual error is in errorEvent.error
+          const actualError = errorEvent.error || errorEvent;
+          const errorCode = actualError.name || actualError.error || actualError.message || errorEvent.name || errorEvent.error || errorEvent.message;
+
+          console.log('Error code extracted:', errorCode);
 
           if (errorCode) {
             switch (errorCode) {
@@ -260,7 +284,7 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
                 errorMsg = 'Authentication required to join this meeting';
                 break;
               case 'conference.connectionError.membersOnly':
-                errorMsg = 'Meeting lobby is enabled. Please wait for the host to admit you, or try refreshing the page.';
+                errorMsg = 'Meeting lobby is enabled. The host needs to disable the lobby or admit you manually. Please try refreshing the page.';
                 break;
               case 'connection.otherError':
                 errorMsg = 'Connection error. Please check your internet and try again.';
@@ -291,23 +315,32 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
         }
       });
 
-      // Set moderator status and disable lobby for hosts
-      if (isHost) {
-        // Execute commands after a short delay to ensure API is ready
-        setTimeout(() => {
+      // Immediately try to disable lobby and set moderator status
+      setTimeout(() => {
+        try {
+          console.log('Attempting to disable lobby...');
           api.executeCommand('toggleLobby', false); // Disable lobby for AGMs
           api.executeCommand('setPassword', ''); // Remove any password
-        }, 1000);
-      } else {
-        // For non-hosts, also try to disable lobby after joining
-        setTimeout(() => {
-          try {
-            api.executeCommand('toggleLobby', false);
-          } catch (e) {
-            console.log('Non-host cannot disable lobby, which is expected');
+
+          if (isHost) {
+            console.log('Setting moderator privileges...');
+            // Additional host commands
+            api.executeCommand('setVideoQuality', 720);
           }
-        }, 2000);
-      }
+        } catch (e) {
+          console.error('Error executing Jitsi commands:', e);
+        }
+      }, 500);
+
+      // Try again after a longer delay to ensure it sticks
+      setTimeout(() => {
+        try {
+          api.executeCommand('toggleLobby', false);
+          console.log('Second attempt to disable lobby completed');
+        } catch (e) {
+          console.error('Second attempt to disable lobby failed:', e);
+        }
+      }, 3000);
 
     };
 
