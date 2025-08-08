@@ -25,6 +25,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useEffectiveBuildingId } from '../contexts/BuildingContext';
 import { AGMMeetingService } from '../services/agmMeetingService';
 import { AGMMeeting, AGMData } from '../types/agm';
+import { AGMMigrationHelper } from '../utils/agmMigrationHelper';
 
 const AGMs = () => {
   const { user } = useAuth();
@@ -35,28 +36,41 @@ const AGMs = () => {
   const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
   const [meetingError, setMeetingError] = useState<string | null>(null);
   const [agmMeetings, setAGMMeetings] = useState<{ [key: number]: AGMMeeting }>({});
+  const [migrationStatus, setMigrationStatus] = useState<{
+    isReady: boolean;
+    missingComponents: string[];
+    instructions: string[];
+  } | null>(null);
 
   // Check if user can host meetings
   const canHostMeeting = user?.role === 'rtm-director' || user?.role === 'rmc-director';
 
-  // Load existing meetings for AGMs
+  // Check migration status and load existing meetings for AGMs
   useEffect(() => {
-    const loadAGMMeetings = async () => {
+    const loadAGMData = async () => {
       if (!buildingId) return;
 
       try {
-        const meetings = await AGMMeetingService.getMeetingsForBuilding(buildingId);
-        const meetingsMap: { [key: number]: AGMMeeting } = {};
-        meetings.forEach(meeting => {
-          meetingsMap[meeting.agm_id] = meeting;
-        });
-        setAGMMeetings(meetingsMap);
+        // Check if database is ready
+        const status = await AGMMigrationHelper.getMigrationStatus();
+        setMigrationStatus(status);
+
+        // Only try to load meetings if database is ready
+        if (status.isReady) {
+          const meetings = await AGMMeetingService.getMeetingsForBuilding(buildingId);
+          const meetingsMap: { [key: number]: AGMMeeting } = {};
+          meetings.forEach(meeting => {
+            meetingsMap[meeting.agm_id] = meeting;
+          });
+          setAGMMeetings(meetingsMap);
+        }
       } catch (error) {
-        console.error('Error loading AGM meetings:', error);
+        console.error('Error loading AGM data:', error);
+        setMeetingError('Failed to load AGM meeting data. Please refresh the page.');
       }
     };
 
-    loadAGMMeetings();
+    loadAGMData();
   }, [buildingId]);
 
   // Handle creating a new meeting
@@ -345,6 +359,33 @@ const AGMs = () => {
         </div>
       </div>
 
+      {/* Migration Status Display */}
+      {migrationStatus && !migrationStatus.isReady && (
+        <Card>
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex items-start">
+              <AlertCircle className="h-5 w-5 text-yellow-600 mr-3 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-yellow-800 mb-2">
+                  Video Conferencing Setup Required
+                </h3>
+                <p className="text-sm text-yellow-700 mb-3">
+                  The AGM video conferencing feature requires database setup. Missing: {migrationStatus.missingComponents.join(', ')}
+                </p>
+                <div className="text-xs text-yellow-600 bg-yellow-100 p-2 rounded font-mono">
+                  <p className="font-semibold mb-1">To enable video conferencing:</p>
+                  <p>1. Apply migration: supabase/migrations/20250808000000_agm_meetings_schema.sql</p>
+                  <p>2. Or run: npx supabase db reset (if using local development)</p>
+                </div>
+                <p className="text-xs text-yellow-600 mt-2">
+                  AGMs will work normally, but video conferencing will be unavailable until setup is complete.
+                </p>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Error Display */}
       {meetingError && (
         <Card>
@@ -458,8 +499,8 @@ const AGMs = () => {
                   </>
                 ) : (
                   <>
-                    {/* Video Meeting Actions */}
-                    {canHostMeeting && !agmMeetings[agm.id] && (
+                    {/* Video Meeting Actions - only show if database is ready */}
+                    {migrationStatus?.isReady && canHostMeeting && !agmMeetings[agm.id] && (
                       <Button
                         variant="primary"
                         size="sm"
@@ -471,7 +512,7 @@ const AGMs = () => {
                       </Button>
                     )}
 
-                    {agmMeetings[agm.id] && (
+                    {migrationStatus?.isReady && agmMeetings[agm.id] && (
                       <>
                         {isMeetingActive(agm) ? (
                           <Button
@@ -499,6 +540,13 @@ const AGMs = () => {
                           </div>
                         )}
                       </>
+                    )}
+
+                    {/* Show setup message for directors when database isn't ready */}
+                    {!migrationStatus?.isReady && canHostMeeting && (
+                      <div className="text-xs text-yellow-600 text-center p-2 bg-yellow-50 rounded">
+                        Video conferencing requires database setup
+                      </div>
                     )}
 
                     <Button

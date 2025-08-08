@@ -25,18 +25,26 @@ export class AGMMeetingService {
         throw new Error('User not authenticated');
       }
 
-      // Generate unique room name using the database function
-      const { data: roomNameData, error: roomNameError } = await supabase
-        .rpc('generate_agm_room_name', {
-          p_building_id: request.building_id,
-          p_agm_id: request.agm_id
-        });
+      // Generate unique room name - try database function first, fallback to client-side generation
+      let roomName: string;
 
-      if (roomNameError) {
-        throw new Error(`Failed to generate room name: ${roomNameError.message}`);
+      try {
+        const { data: roomNameData, error: roomNameError } = await supabase
+          .rpc('generate_agm_room_name', {
+            p_building_id: request.building_id,
+            p_agm_id: request.agm_id
+          });
+
+        if (roomNameError) {
+          throw new Error(`Database function error: ${roomNameError.message}`);
+        }
+
+        roomName = roomNameData as string;
+      } catch (dbError) {
+        console.warn('Database function not available, using client-side room name generation:', dbError);
+        // Fallback to client-side room name generation
+        roomName = await this.generateRoomNameClientSide(request.building_id, request.agm_id);
       }
-
-      const roomName = roomNameData as string;
 
       // Create meeting record
       const meetingData = {
@@ -370,6 +378,80 @@ export class AGMMeetingService {
       return data?.role === 'rtm-director' || data?.role === 'rmc-director';
     } catch (error) {
       console.error('Error checking host permissions:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Generate room name on client side (fallback when database function is not available)
+   */
+  private static async generateRoomNameClientSide(buildingId: string, agmId: number): Promise<string> {
+    try {
+      // Get building name
+      const { data: building, error: buildingError } = await supabase
+        .from('buildings')
+        .select('name')
+        .eq('id', buildingId)
+        .single();
+
+      if (buildingError) {
+        console.warn('Could not fetch building name, using building ID:', buildingError);
+        // Use building ID as fallback
+        const cleanBuildingId = buildingId.replace(/[^a-z0-9]/gi, '').toLowerCase();
+        return `agm-${cleanBuildingId.substring(0, 8)}-${agmId}`;
+      }
+
+      // Clean building name for room name
+      const cleanBuildingName = building.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '')
+        .substring(0, 20); // Limit length
+
+      // Generate base room name
+      let roomName = `agm-${cleanBuildingName}-${agmId}`;
+      let counter = 1;
+      let finalRoomName = roomName;
+
+      // Ensure uniqueness by checking existing meetings
+      while (await this.roomNameExists(finalRoomName)) {
+        finalRoomName = `${roomName}-${counter}`;
+        counter++;
+
+        // Prevent infinite loop
+        if (counter > 100) {
+          finalRoomName = `agm-${Date.now()}-${agmId}`;
+          break;
+        }
+      }
+
+      return finalRoomName;
+    } catch (error) {
+      console.error('Error generating room name client-side:', error);
+      // Ultimate fallback - use timestamp
+      return `agm-${Date.now()}-${agmId}`;
+    }
+  }
+
+  /**
+   * Check if room name already exists
+   */
+  private static async roomNameExists(roomName: string): Promise<boolean> {
+    try {
+      const { data, error } = await supabase
+        .from('agm_meetings')
+        .select('id')
+        .eq('room_name', roomName)
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.warn('Error checking room name existence:', error);
+        return false; // Assume it doesn't exist if we can't check
+      }
+
+      return data !== null;
+    } catch (error) {
+      console.warn('Error checking room name existence:', error);
       return false;
     }
   }
