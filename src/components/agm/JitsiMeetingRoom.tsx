@@ -110,23 +110,25 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
 
       const domain = 'meet.jit.si';
 
-      // COMPLETELY BYPASS LOBBY ISSUE - Use a format that Jitsi doesn't recognize as needing lobby
-      // Jitsi's lobby detection looks for certain patterns, so we'll use a completely different approach
+      // FINAL LOBBY BYPASS STRATEGY - Use the most basic room name possible
+      // Based on research, Jitsi's lobby detection is very sophisticated
+      // Let's use the simplest possible room name format
       const timestamp = Date.now();
-      const randomId = Math.random().toString(36).substring(2, 15);
-      const userSuffix = userEmail?.substring(0, 6).replace(/[^a-zA-Z0-9]/g, '') || 'guest';
+      const randomId = Math.random().toString(36).substring(2, 8);
 
-      // Use a format that looks like a regular meeting room, not an AGM
-      // Avoid words like 'agm', 'meeting', 'conference' that might trigger lobby
-      let roomName = `room${timestamp}${randomId}${userSuffix}${retryCount}`;
+      // Use the absolute simplest format - just random characters
+      // This mimics how regular Jitsi rooms are created
+      let roomName = `${randomId}${timestamp.toString().slice(-8)}${retryCount}`;
 
-      console.log('🚀 BYPASS LOBBY - ROOM NAME:', roomName);
+      console.log('🚀 FINAL LOBBY BYPASS - ROOM NAME:', roomName);
       console.log('📝 Original meeting room name was:', meeting.room_name);
       console.log('🔄 Retry count:', retryCount);
       console.log('⏰ Timestamp:', timestamp);
-      console.log('🎯 User suffix:', userSuffix);
+      console.log('🎲 Random ID:', randomId);
       console.log('👤 User display name:', userDisplayName);
       console.log('📧 User email:', userEmail);
+      console.log('🎭 Is host:', isHost);
+      console.log('⚙️ Full config:', JSON.stringify(options, null, 2));
 
       const options = {
         roomName: roomName,
@@ -143,13 +145,14 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           disableAudioLevels: false,
           channelLastN: 20, // Limit video streams for performance
           enableLayerSuspension: true,
-          // AGGRESSIVE LOBBY BYPASS SETTINGS
-          enableLobbyChat: false,
-          enableKnockingParticipants: false,
-          enableLobby: false,
-          lobbyEnabled: false,
-          enableAutoKnocking: false,
+          // OFFICIAL LOBBY DISABLE SETTINGS FROM JITSI DOCS
+          lobby: {
+            autoKnock: false,
+            enableChat: false
+          },
+          // Additional lobby-related settings
           autoKnockLobby: false,
+          enableLobbyChat: false,
           p2p: {
             enabled: false // Disable P2P for larger meetings
           },
@@ -158,6 +161,11 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           },
           remoteVideoMenu: {
             disabled: false
+          },
+          // SECURITY UI SETTINGS TO HIDE LOBBY FEATURES
+          securityUi: {
+            hideLobbyButton: true,
+            disableLobbyPassword: true
           },
           disableRemoteMute: !isHost, // Only hosts can mute others
           enableClosePage: false,
@@ -212,9 +220,10 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           MOBILE_APP_PROMO: false,
           CONNECTION_INDICATOR_DISABLED: false,
           VIDEO_QUALITY_LABEL_DISABLED: false,
-          // DISABLE LOBBY UI ELEMENTS
+          // DISABLE LOBBY UI ELEMENTS COMPLETELY
           ENABLE_LOBBY_CHAT: false,
           ENABLE_LOBBY_SOUNDS: false,
+          HIDE_LOBBY_BUTTON: true,
           RECENT_LIST_ENABLED: false,
           AUTO_PIN_LATEST_SCREEN_SHARE: true,
           DISABLE_DOMINANT_SPEAKER_INDICATOR: false,
@@ -231,7 +240,9 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           email: userEmail,
           // Add additional user info to avoid guest detection
           id: userEmail?.replace(/[^a-zA-Z0-9]/g, '') || 'user',
-          avatarURL: undefined
+          avatarURL: undefined,
+          // Try to set user as moderator to bypass lobby
+          role: isHost ? 'moderator' : 'participant'
         }
       };
 
