@@ -128,7 +128,6 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
       console.log('👤 User display name:', userDisplayName);
       console.log('📧 User email:', userEmail);
       console.log('🎭 Is host:', isHost);
-      console.log('⚙️ Full config:', JSON.stringify(options, null, 2));
 
       const options = {
         roomName: roomName,
@@ -251,6 +250,7 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
         Object.assign(options, meeting.jitsi_config);
       }
 
+      console.log('⚙️ Full config:', JSON.stringify(options, null, 2));
       console.log('🎬 INITIALIZING JITSI MEETING');
       console.log('🏠 Domain:', domain);
       console.log('🏢 Room Name:', options.roomName);
