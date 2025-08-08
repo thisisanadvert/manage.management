@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
+import React, { useState, useEffect } from 'react';
+import {
+  Plus,
+  Search,
+  Filter,
   Calendar,
   Clock,
   Video,
@@ -12,17 +12,128 @@ import {
   ChevronRight,
   CheckCircle2,
   Play,
-  MessageSquare
+  MessageSquare,
+  VideoIcon,
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
+import JitsiMeetingRoom from '../components/agm/JitsiMeetingRoom';
+import { useAuth } from '../contexts/AuthContext';
+import { useEffectiveBuildingId } from '../contexts/BuildingContext';
+import { AGMMeetingService } from '../services/agmMeetingService';
+import { AGMMeeting, AGMData } from '../types/agm';
 
 const AGMs = () => {
+  const { user } = useAuth();
+  const buildingId = useEffectiveBuildingId();
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeMeeting, setActiveMeeting] = useState<AGMMeeting | null>(null);
+  const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
+  const [meetingError, setMeetingError] = useState<string | null>(null);
+  const [agmMeetings, setAGMMeetings] = useState<{ [key: number]: AGMMeeting }>({});
 
-  const agms = [
+  // Check if user can host meetings
+  const canHostMeeting = user?.role === 'rtm-director' || user?.role === 'rmc-director';
+
+  // Load existing meetings for AGMs
+  useEffect(() => {
+    const loadAGMMeetings = async () => {
+      if (!buildingId) return;
+
+      try {
+        const meetings = await AGMMeetingService.getMeetingsForBuilding(buildingId);
+        const meetingsMap: { [key: number]: AGMMeeting } = {};
+        meetings.forEach(meeting => {
+          meetingsMap[meeting.agm_id] = meeting;
+        });
+        setAGMMeetings(meetingsMap);
+      } catch (error) {
+        console.error('Error loading AGM meetings:', error);
+      }
+    };
+
+    loadAGMMeetings();
+  }, [buildingId]);
+
+  // Handle creating a new meeting
+  const handleCreateMeeting = async (agm: AGMData) => {
+    if (!buildingId || !canHostMeeting) return;
+
+    setIsCreatingMeeting(true);
+    setMeetingError(null);
+
+    try {
+      const meeting = await AGMMeetingService.createMeeting({
+        agm_id: agm.id,
+        building_id: buildingId,
+        title: agm.title,
+        description: agm.description,
+        start_time: new Date().toISOString(), // Start immediately
+        max_participants: 50,
+        recording_enabled: true
+      });
+
+      setAGMMeetings(prev => ({ ...prev, [agm.id]: meeting }));
+      setActiveMeeting(meeting);
+    } catch (error) {
+      console.error('Error creating meeting:', error);
+      setMeetingError(error instanceof Error ? error.message : 'Failed to create meeting');
+    } finally {
+      setIsCreatingMeeting(false);
+    }
+  };
+
+  // Handle joining an existing meeting
+  const handleJoinMeeting = async (agm: AGMData) => {
+    const meeting = agmMeetings[agm.id];
+    if (!meeting) return;
+
+    try {
+      // Join the meeting as a participant
+      await AGMMeetingService.joinMeeting({
+        meeting_id: meeting.id,
+        display_name: user?.metadata?.firstName && user?.metadata?.lastName
+          ? `${user.metadata.firstName} ${user.metadata.lastName}`
+          : user?.email || 'Anonymous',
+        email: user?.email,
+        role: canHostMeeting ? 'host' : 'participant'
+      });
+
+      setActiveMeeting(meeting);
+    } catch (error) {
+      console.error('Error joining meeting:', error);
+      setMeetingError(error instanceof Error ? error.message : 'Failed to join meeting');
+    }
+  };
+
+  // Handle ending a meeting
+  const handleEndMeeting = async () => {
+    if (!activeMeeting) return;
+
+    try {
+      await AGMMeetingService.endMeeting(activeMeeting.id);
+      setActiveMeeting(null);
+
+      // Refresh meetings
+      if (buildingId) {
+        const meetings = await AGMMeetingService.getMeetingsForBuilding(buildingId);
+        const meetingsMap: { [key: number]: AGMMeeting } = {};
+        meetings.forEach(meeting => {
+          meetingsMap[meeting.agm_id] = meeting;
+        });
+        setAGMMeetings(meetingsMap);
+      }
+    } catch (error) {
+      console.error('Error ending meeting:', error);
+      setMeetingError(error instanceof Error ? error.message : 'Failed to end meeting');
+    }
+  };
+
+  const agms: AGMData[] = [
     {
       id: 1,
       title: 'Annual General Meeting 2025',
@@ -121,6 +232,69 @@ const AGMs = () => {
     }
   };
 
+  // Get meeting status for an AGM
+  const getMeetingStatus = (agm: AGMData) => {
+    const meeting = agmMeetings[agm.id];
+    if (!meeting) return null;
+    return meeting.status;
+  };
+
+  // Check if meeting is active
+  const isMeetingActive = (agm: AGMData) => {
+    const meeting = agmMeetings[agm.id];
+    return meeting?.status === 'active';
+  };
+
+  // If there's an active meeting, show the meeting room
+  if (activeMeeting && user) {
+    const userDisplayName = user.metadata?.firstName && user.metadata?.lastName
+      ? `${user.metadata.firstName} ${user.metadata.lastName}`
+      : user.email || 'Anonymous';
+
+    return (
+      <div className="space-y-6 pb-16 lg:pb-0">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">AGM Video Meeting</h1>
+            <p className="text-gray-600 mt-1">{activeMeeting.title}</p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => setActiveMeeting(null)}
+          >
+            Back to AGMs
+          </Button>
+        </div>
+
+        {meetingError && (
+          <Card>
+            <div className="flex items-center p-4 text-red-700 bg-red-50 rounded-lg">
+              <AlertCircle className="h-5 w-5 mr-2" />
+              <span>{meetingError}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-auto"
+                onClick={() => setMeetingError(null)}
+              >
+                Dismiss
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        <JitsiMeetingRoom
+          meeting={activeMeeting}
+          userDisplayName={userDisplayName}
+          userEmail={user.email}
+          isHost={canHostMeeting}
+          onMeetingEnd={handleEndMeeting}
+          onError={(error) => setMeetingError(error.message)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 pb-16 lg:pb-0">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -171,6 +345,24 @@ const AGMs = () => {
         </div>
       </div>
 
+      {/* Error Display */}
+      {meetingError && (
+        <Card>
+          <div className="flex items-center p-4 text-red-700 bg-red-50 rounded-lg">
+            <AlertCircle className="h-5 w-5 mr-2" />
+            <span>{meetingError}</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto"
+              onClick={() => setMeetingError(null)}
+            >
+              Dismiss
+            </Button>
+          </div>
+        </Card>
+      )}
+
       <div className="space-y-4">
         {agms.map((agm) => (
           <Card key={agm.id} hoverable className="animate-slide-up">
@@ -188,6 +380,17 @@ const AGMs = () => {
                   <Badge variant={getStatusColor(agm.status)} size="sm">
                     {agm.status === 'upcoming' ? 'Upcoming' : 'Completed'}
                   </Badge>
+
+                  {/* Meeting Status Badge */}
+                  {agmMeetings[agm.id] && (
+                    <Badge
+                      variant={isMeetingActive(agm) ? 'success' : 'gray'}
+                      size="sm"
+                    >
+                      {isMeetingActive(agm) ? 'Meeting Active' : 'Meeting Available'}
+                    </Badge>
+                  )}
+
                   <div className="flex items-center text-sm text-gray-500">
                     <Clock size={14} className="mr-1" />
                     <span>{agm.date} at {agm.time}</span>
@@ -238,15 +441,15 @@ const AGMs = () => {
               <div className="flex flex-col gap-2">
                 {agm.status === 'completed' ? (
                   <>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       leftIcon={<Play size={16} />}
                     >
                       Watch Recording
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       leftIcon={<Download size={16} />}
                     >
@@ -254,13 +457,58 @@ const AGMs = () => {
                     </Button>
                   </>
                 ) : (
-                  <Button 
-                    variant="primary" 
-                    size="sm"
-                    rightIcon={<ChevronRight size={16} />}
-                  >
-                    View Details
-                  </Button>
+                  <>
+                    {/* Video Meeting Actions */}
+                    {canHostMeeting && !agmMeetings[agm.id] && (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        leftIcon={isCreatingMeeting ? <Loader2 size={16} className="animate-spin" /> : <VideoIcon size={16} />}
+                        onClick={() => handleCreateMeeting(agm)}
+                        disabled={isCreatingMeeting}
+                      >
+                        {isCreatingMeeting ? 'Creating...' : 'Start Video Meeting'}
+                      </Button>
+                    )}
+
+                    {agmMeetings[agm.id] && (
+                      <>
+                        {isMeetingActive(agm) ? (
+                          <Button
+                            variant="accent"
+                            size="sm"
+                            leftIcon={<Video size={16} />}
+                            onClick={() => handleJoinMeeting(agm)}
+                          >
+                            Join Active Meeting
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            leftIcon={<Video size={16} />}
+                            onClick={() => handleJoinMeeting(agm)}
+                          >
+                            Join Meeting
+                          </Button>
+                        )}
+
+                        {canHostMeeting && (
+                          <div className="text-xs text-gray-500 text-center">
+                            Room: {agmMeetings[agm.id].room_name}
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      rightIcon={<ChevronRight size={16} />}
+                    >
+                      View Details
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
