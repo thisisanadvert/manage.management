@@ -89,15 +89,15 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
 
       const domain = 'meet.jit.si';
 
-      // Ensure room name doesn't trigger lobby by avoiding certain patterns
-      let roomName = meeting.room_name;
-
-      // Add a suffix to avoid any cached lobby settings for this room
+      // Create a completely unique room name to avoid any lobby persistence
       const timestamp = new Date().getTime();
       const sessionId = Math.random().toString(36).substring(2, 8);
-      roomName = `${meeting.room_name}-session-${sessionId}`;
+      const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
-      console.log('Using room name:', roomName);
+      // Use a format that's less likely to trigger lobby: no hyphens, add random elements
+      let roomName = `agm${dateStr}${sessionId}${timestamp.toString().slice(-6)}`;
+
+      console.log('Using unique room name:', roomName, 'for meeting:', meeting.room_name);
 
       const options = {
         roomName: roomName,
@@ -284,7 +284,21 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
                 errorMsg = 'Authentication required to join this meeting';
                 break;
               case 'conference.connectionError.membersOnly':
-                errorMsg = 'Meeting lobby is enabled. The host needs to disable the lobby or admit you manually. Please try refreshing the page.';
+                errorMsg = 'Meeting lobby is enabled. Attempting to create a new room automatically...';
+
+                // Auto-retry with a new room name after 2 seconds
+                console.log('Lobby error detected, will auto-retry with new room in 2 seconds...');
+                setTimeout(() => {
+                  console.log('Auto-retrying with new room...');
+                  // Dispose current API and trigger re-initialization
+                  if (apiRef.current) {
+                    apiRef.current.dispose();
+                    apiRef.current = null;
+                  }
+                  // Clear error to trigger re-initialization
+                  setError(null);
+                  setIsLoading(true);
+                }, 2000);
                 break;
               case 'connection.otherError':
                 errorMsg = 'Connection error. Please check your internet and try again.';
@@ -315,32 +329,39 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
         }
       });
 
-      // Immediately try to disable lobby and set moderator status
-      setTimeout(() => {
-        try {
-          console.log('Attempting to disable lobby...');
-          api.executeCommand('toggleLobby', false); // Disable lobby for AGMs
-          api.executeCommand('setPassword', ''); // Remove any password
+      // Multiple attempts to disable lobby with different strategies
+      const disableLobbyAttempts = [500, 1000, 2000, 3000, 5000];
 
-          if (isHost) {
-            console.log('Setting moderator privileges...');
-            // Additional host commands
-            api.executeCommand('setVideoQuality', 720);
+      disableLobbyAttempts.forEach((delay, index) => {
+        setTimeout(() => {
+          try {
+            console.log(`Lobby disable attempt ${index + 1} at ${delay}ms...`);
+
+            // Try multiple commands that might disable lobby
+            api.executeCommand('toggleLobby', false);
+            api.executeCommand('setPassword', '');
+
+            // Try alternative commands
+            if (api.executeCommand) {
+              try {
+                api.executeCommand('setLobbyEnabled', false);
+                api.executeCommand('setModerationEnabled', false);
+              } catch (altError) {
+                console.log('Alternative lobby commands not available:', altError);
+              }
+            }
+
+            if (isHost && index === 0) {
+              console.log('Setting host privileges...');
+              api.executeCommand('setVideoQuality', 720);
+            }
+
+            console.log(`Lobby disable attempt ${index + 1} completed`);
+          } catch (e) {
+            console.error(`Lobby disable attempt ${index + 1} failed:`, e);
           }
-        } catch (e) {
-          console.error('Error executing Jitsi commands:', e);
-        }
-      }, 500);
-
-      // Try again after a longer delay to ensure it sticks
-      setTimeout(() => {
-        try {
-          api.executeCommand('toggleLobby', false);
-          console.log('Second attempt to disable lobby completed');
-        } catch (e) {
-          console.error('Second attempt to disable lobby failed:', e);
-        }
-      }, 3000);
+        }, delay);
+      });
 
     };
 
