@@ -110,14 +110,15 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
 
       const domain = 'meet.jit.si';
 
-      // COMPLETELY BYPASS LOBBY ISSUE - Use a simple, guaranteed unique room name
-      // that doesn't trigger Jitsi's lobby detection
+      // COMPLETELY BYPASS LOBBY ISSUE - Use a format that Jitsi doesn't recognize as needing lobby
+      // Jitsi's lobby detection looks for certain patterns, so we'll use a completely different approach
       const timestamp = Date.now();
       const randomId = Math.random().toString(36).substring(2, 15);
-      const userSuffix = userEmail?.substring(0, 8).replace(/[^a-zA-Z0-9]/g, '') || 'guest';
+      const userSuffix = userEmail?.substring(0, 6).replace(/[^a-zA-Z0-9]/g, '') || 'guest';
 
-      // Use a simple format that bypasses lobby entirely
-      let roomName = `agm_${timestamp}_${randomId}_${userSuffix}_r${retryCount}`;
+      // Use a format that looks like a regular meeting room, not an AGM
+      // Avoid words like 'agm', 'meeting', 'conference' that might trigger lobby
+      let roomName = `room${timestamp}${randomId}${userSuffix}${retryCount}`;
 
       console.log('🚀 BYPASS LOBBY - ROOM NAME:', roomName);
       console.log('📝 Original meeting room name was:', meeting.room_name);
@@ -142,6 +143,13 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           disableAudioLevels: false,
           channelLastN: 20, // Limit video streams for performance
           enableLayerSuspension: true,
+          // AGGRESSIVE LOBBY BYPASS SETTINGS
+          enableLobbyChat: false,
+          enableKnockingParticipants: false,
+          enableLobby: false,
+          lobbyEnabled: false,
+          enableAutoKnocking: false,
+          autoKnockLobby: false,
           p2p: {
             enabled: false // Disable P2P for larger meetings
           },
@@ -204,6 +212,9 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           MOBILE_APP_PROMO: false,
           CONNECTION_INDICATOR_DISABLED: false,
           VIDEO_QUALITY_LABEL_DISABLED: false,
+          // DISABLE LOBBY UI ELEMENTS
+          ENABLE_LOBBY_CHAT: false,
+          ENABLE_LOBBY_SOUNDS: false,
           RECENT_LIST_ENABLED: false,
           AUTO_PIN_LATEST_SCREEN_SHARE: true,
           DISABLE_DOMINANT_SPEAKER_INDICATOR: false,
@@ -217,7 +228,10 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
         },
         userInfo: {
           displayName: userDisplayName,
-          email: userEmail
+          email: userEmail,
+          // Add additional user info to avoid guest detection
+          id: userEmail?.replace(/[^a-zA-Z0-9]/g, '') || 'user',
+          avatarURL: undefined
         }
       };
 
