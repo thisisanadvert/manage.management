@@ -76,7 +76,17 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
       return;
     }
 
-    try {
+    let connectionTimeout: NodeJS.Timeout;
+
+    const initializeJitsi = async () => {
+      // Check for media permissions early to provide better error messages
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+      } catch (permissionError) {
+        console.warn('Media permission check failed:', permissionError);
+        // Continue anyway - Jitsi will handle this gracefully
+      }
+
       const domain = 'meet.jit.si';
       const options = {
         roomName: meeting.room_name,
@@ -89,7 +99,7 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           enableWelcomePage: false,
           requireDisplayName: true,
           prejoinPageEnabled: false,
-          enableNoisyMicDetection: true,
+          enableNoisyMicDetection: false, // Disable to avoid issues
           disableAudioLevels: false,
           channelLastN: 20, // Limit video streams for performance
           enableLayerSuspension: true,
@@ -103,23 +113,30 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
             disabled: false
           },
           disableRemoteMute: !isHost, // Only hosts can mute others
-          enableClosePage: false
+          enableClosePage: false,
+          // Add these to fix common issues
+          disableDeepLinking: true,
+          disableInviteFunctions: false,
+          doNotStoreRoom: true,
+          enableEmailInStats: false,
+          enableUserRolesBasedOnToken: false,
+          enableFeaturesBasedOnToken: false,
+          // Lobby and moderation settings
+          enableLobby: false, // Disable lobby for AGMs
+          enableModeratedMode: false, // Disable moderated mode
+          enableAutoModeration: false,
+          disableLobbyPassword: true,
+          // Additional security and access settings
+          enableGuestDomain: true,
+          enableNoAudioSignal: false
         },
         interfaceConfigOverwrite: {
           TOOLBAR_BUTTONS: [
-            'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
-            'fodeviceselection', 'hangup', 'profile', 'chat', 'recording',
-            'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
-            'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
-            'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone'
-          ].filter(button => {
-            // Remove certain buttons for non-hosts
-            if (!isHost && ['recording', 'livestreaming', 'mute-everyone'].includes(button)) {
-              return false;
-            }
-            return true;
-          }),
-          SETTINGS_SECTIONS: ['devices', 'language', 'moderator', 'profile', 'calendar'],
+            'microphone', 'camera', 'desktop', 'fullscreen',
+            'fodeviceselection', 'hangup', 'chat', 'settings', 'raisehand',
+            'videoquality', 'filmstrip', 'invite', 'tileview'
+          ].concat(isHost ? ['recording', 'mute-everyone'] : []),
+          SETTINGS_SECTIONS: ['devices', 'language'].concat(isHost ? ['moderator'] : []),
           VIDEO_LAYOUT_FIT: 'both',
           filmStripOnly: false,
           SHOW_JITSI_WATERMARK: false,
@@ -137,7 +154,12 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           AUTO_PIN_LATEST_SCREEN_SHARE: true,
           DISABLE_DOMINANT_SPEAKER_INDICATOR: false,
           DISABLE_FOCUS_INDICATOR: false,
-          TILE_VIEW_MAX_COLUMNS: 5
+          TILE_VIEW_MAX_COLUMNS: 5,
+          // Additional settings to reduce errors
+          DISABLE_RINGING: true,
+          DISABLE_POLYFILLS: false,
+          OPTIMAL_BROWSERS: ['chrome', 'chromium', 'firefox', 'safari', 'edge'],
+          UNSUPPORTED_BROWSERS: []
         },
         userInfo: {
           displayName: userDisplayName,
@@ -150,9 +172,24 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
         Object.assign(options, meeting.jitsi_config);
       }
 
+      console.log('Initializing Jitsi with options:', {
+        roomName: options.roomName,
+        domain,
+        userDisplayName,
+        userEmail
+      });
+
       const JitsiAPI = window.JitsiMeetExternalAPI as JitsiMeetExternalAPIConstructor;
       const api = new JitsiAPI(domain, options);
       apiRef.current = api;
+
+      // Set a timeout to catch hanging connections
+      connectionTimeout = setTimeout(() => {
+        if (isLoading) {
+          setError('Connection timeout. Please check your internet connection and try again.');
+          setIsLoading(false);
+        }
+      }, 30000); // 30 second timeout
 
       // Set up event listeners
       api.addEventListeners({
@@ -167,9 +204,27 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           setParticipantCount(prev => Math.max(0, prev - 1));
           onParticipantLeft?.(participant);
         },
+        participantKickedOut: (participant: Record<string, unknown>) => {
+          console.log('Participant was kicked out:', participant);
+          if (participant.id === 'local') {
+            setError('You were removed from the meeting by the host.');
+          }
+        },
+        knockingParticipant: (participant: Record<string, unknown>) => {
+          console.log('Participant knocking:', participant);
+          // Auto-admit participants for AGMs (if host)
+          if (isHost) {
+            setTimeout(() => {
+              api.executeCommand('answerKnockingParticipant', participant.id, true);
+            }, 500);
+          }
+        },
         videoConferenceJoined: () => {
+          clearTimeout(connectionTimeout);
           setIsLoading(false);
+          setError(null); // Clear any previous errors
           setParticipantCount(1); // Current user joined
+          console.log('Successfully joined Jitsi meeting:', meeting.room_name);
         },
         videoConferenceLeft: () => {
           handleMeetingEnd();
@@ -183,27 +238,92 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
         endpointTextMessageReceived: () => {
           // Handle chat messages if needed
         },
-        errorOccurred: (error: { message?: string }) => {
+        errorOccurred: (error: { message?: string; error?: string; name?: string }) => {
+          clearTimeout(connectionTimeout);
           console.error('Jitsi error:', error);
-          setError(`Meeting error: ${error.message || 'Unknown error'}`);
-          onError?.(new Error(error.message || 'Jitsi meeting error'));
+
+          let errorMsg = 'Meeting error occurred';
+          const errorCode = error.name || error.error || error.message;
+
+          if (errorCode) {
+            switch (errorCode) {
+              case 'connection.passwordRequired':
+                errorMsg = 'This meeting requires a password';
+                break;
+              case 'connection.connectionDropped':
+                errorMsg = 'Connection was lost. Please rejoin the meeting.';
+                break;
+              case 'conference.max_users':
+                errorMsg = 'Meeting is full. Maximum participants reached.';
+                break;
+              case 'conference.authenticationRequired':
+                errorMsg = 'Authentication required to join this meeting';
+                break;
+              case 'conference.connectionError.membersOnly':
+                errorMsg = 'Meeting lobby is enabled. Please wait for the host to admit you, or try refreshing the page.';
+                break;
+              case 'connection.otherError':
+                errorMsg = 'Connection error. Please check your internet and try again.';
+                break;
+              case 'gum.permission_denied':
+                errorMsg = 'Camera/microphone access denied. Please allow permissions and refresh.';
+                break;
+              default:
+                errorMsg = `Meeting error: ${errorCode}`;
+            }
+          }
+
+          setError(errorMsg);
+          setIsLoading(false);
+          onError?.(new Error(errorMsg));
+        },
+        connectionFailed: (event: any) => {
+          clearTimeout(connectionTimeout);
+          console.error('Connection failed:', event);
+          setError('Failed to connect to the meeting. Please check your internet connection and try again.');
+          setIsLoading(false);
+        },
+        conferenceError: (event: any) => {
+          clearTimeout(connectionTimeout);
+          console.error('Conference error:', event);
+          setError('Conference connection error. Please try rejoining the meeting.');
+          setIsLoading(false);
         }
       });
 
-      // Set moderator status for hosts
+      // Set moderator status and disable lobby for hosts
       if (isHost) {
-        api.executeCommand('toggleLobby', false); // Disable lobby for AGMs
+        // Execute commands after a short delay to ensure API is ready
+        setTimeout(() => {
+          api.executeCommand('toggleLobby', false); // Disable lobby for AGMs
+          api.executeCommand('setPassword', ''); // Remove any password
+        }, 1000);
+      } else {
+        // For non-hosts, also try to disable lobby after joining
+        setTimeout(() => {
+          try {
+            api.executeCommand('toggleLobby', false);
+          } catch (e) {
+            console.log('Non-host cannot disable lobby, which is expected');
+          }
+        }, 2000);
       }
 
-    } catch (err) {
+    };
+
+    // Call the async initialization function
+    initializeJitsi().catch((err) => {
       console.error('Failed to initialize Jitsi Meet:', err);
       setError('Failed to initialize video meeting. Please try again.');
       setIsLoading(false);
       onError?.(err as Error);
-    }
+    });
 
     // Cleanup function
     return () => {
+      if (connectionTimeout) {
+        clearTimeout(connectionTimeout);
+      }
       if (apiRef.current) {
         apiRef.current.dispose();
         apiRef.current = null;
@@ -237,6 +357,12 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
     }
   };
 
+  const retryConnection = () => {
+    setError(null);
+    setIsLoading(true);
+    // The useEffect will trigger again and reinitialize Jitsi
+  };
+
   if (error) {
     return (
       <Card className={`${className}`}>
@@ -245,12 +371,20 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">Meeting Error</h3>
             <p className="text-gray-600 mb-4">{error}</p>
-            <Button 
-              variant="primary" 
-              onClick={() => window.location.reload()}
-            >
-              Reload Page
-            </Button>
+            <div className="flex gap-3 justify-center">
+              <Button
+                variant="outline"
+                onClick={retryConnection}
+              >
+                Try Again
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => window.location.reload()}
+              >
+                Reload Page
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
