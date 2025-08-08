@@ -18,7 +18,13 @@ import AGMParticipantList from './AGMParticipantList';
 declare global {
   interface Window {
     JitsiMeetExternalAPI: typeof JitsiMeetExternalAPI;
+    activeJitsiInstances: Set<string>;
   }
+}
+
+// Global instance tracker to prevent multiple instances
+if (!window.activeJitsiInstances) {
+  window.activeJitsiInstances = new Set();
 }
 
 // Define the Jitsi constructor type
@@ -39,6 +45,7 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
 }) => {
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
   const apiRef = useRef<JitsiMeetExternalAPI | null>(null);
+  const instanceIdRef = useRef<string>(`instance_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`);
   const [isLoading, setIsLoading] = useState(true);
   const [isJitsiLoaded, setIsJitsiLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +87,19 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
     let connectionTimeout: NodeJS.Timeout;
 
     const initializeJitsi = async () => {
+      const instanceId = instanceIdRef.current;
+
+      // Check if this instance is already active
+      if (window.activeJitsiInstances.has(instanceId)) {
+        console.log('⚠️ Instance already active, skipping initialization:', instanceId);
+        return;
+      }
+
+      // Mark this instance as active
+      window.activeJitsiInstances.add(instanceId);
+      console.log('✅ Marked instance as active:', instanceId);
+      console.log('🔢 Total active instances:', window.activeJitsiInstances.size);
+
       // Check for media permissions early to provide better error messages
       try {
         await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
@@ -90,20 +110,20 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
 
       const domain = 'meet.jit.si';
 
-      // Create a completely unique room name to avoid any lobby persistence
-      const timestamp = new Date().getTime();
-      const sessionId = Math.random().toString(36).substring(2, 8);
-      const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-      const randomSuffix = Math.random().toString(36).substring(2, 8);
+      // COMPLETELY BYPASS LOBBY ISSUE - Use a simple, guaranteed unique room name
+      // that doesn't trigger Jitsi's lobby detection
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 15);
+      const userSuffix = user?.id?.substring(0, 8) || 'guest';
 
-      // Use retry count to ensure each attempt gets a truly unique room
-      let roomName = `meeting${dateStr}${sessionId}${randomSuffix}${timestamp.toString().slice(-6)}r${retryCount}`;
+      // Use a simple format that bypasses lobby entirely
+      let roomName = `agm_${timestamp}_${randomId}_${userSuffix}_r${retryCount}`;
 
-      console.log('🚀 USING UNIQUE ROOM NAME:', roomName);
+      console.log('🚀 BYPASS LOBBY - ROOM NAME:', roomName);
       console.log('📝 Original meeting room name was:', meeting.room_name);
       console.log('🔄 Retry count:', retryCount);
       console.log('⏰ Timestamp:', timestamp);
-      console.log('🎲 Session ID:', sessionId);
+      console.log('🎯 User suffix:', userSuffix);
 
       const options = {
         roomName: roomName,
@@ -381,6 +401,8 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
 
     // Cleanup function
     return () => {
+      const instanceId = instanceIdRef.current;
+
       if (connectionTimeout) {
         clearTimeout(connectionTimeout);
       }
@@ -388,14 +410,31 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
         apiRef.current.dispose();
         apiRef.current = null;
       }
+
+      // Remove this instance from active tracking
+      if (window.activeJitsiInstances.has(instanceId)) {
+        window.activeJitsiInstances.delete(instanceId);
+        console.log('🧹 Removed instance from tracking:', instanceId);
+        console.log('🔢 Remaining active instances:', window.activeJitsiInstances.size);
+      }
     };
   }, [isJitsiLoaded, meeting.room_name, userDisplayName, userEmail, isHost, retryCount]);
 
   const handleMeetingEnd = () => {
+    const instanceId = instanceIdRef.current;
+
     if (apiRef.current) {
       apiRef.current.dispose();
       apiRef.current = null;
     }
+
+    // Remove this instance from active tracking
+    if (window.activeJitsiInstances.has(instanceId)) {
+      window.activeJitsiInstances.delete(instanceId);
+      console.log('🧹 Meeting ended - removed instance from tracking:', instanceId);
+      console.log('🔢 Remaining active instances:', window.activeJitsiInstances.size);
+    }
+
     onMeetingEnd?.();
   };
 
@@ -420,6 +459,8 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
   const retryConnection = () => {
     console.log('🔄 Manual retry initiated - disposing current API and creating new room');
 
+    const currentInstanceId = instanceIdRef.current;
+
     // Properly dispose of current API instance
     if (apiRef.current) {
       try {
@@ -430,6 +471,16 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
       }
       apiRef.current = null;
     }
+
+    // Remove current instance from tracking
+    if (window.activeJitsiInstances.has(currentInstanceId)) {
+      window.activeJitsiInstances.delete(currentInstanceId);
+      console.log('🧹 Removed old instance from tracking during retry:', currentInstanceId);
+    }
+
+    // Create a completely new instance ID for the retry
+    instanceIdRef.current = `instance_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    console.log('🆔 Created new instance ID for retry:', instanceIdRef.current);
 
     // Clear the container
     if (jitsiContainerRef.current) {
@@ -444,6 +495,7 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
     setIsLoading(true);
 
     console.log('🚀 Retry will create new room with fresh timestamp and retry count');
+    console.log('🔢 Active instances before retry:', window.activeJitsiInstances.size);
     // The useEffect will trigger again and reinitialize Jitsi with a new room name
   };
 
