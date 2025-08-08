@@ -93,11 +93,15 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
       const timestamp = new Date().getTime();
       const sessionId = Math.random().toString(36).substring(2, 8);
       const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const randomSuffix = Math.random().toString(36).substring(2, 8);
 
-      // Use a format that's less likely to trigger lobby: no hyphens, add random elements
-      let roomName = `agm${dateStr}${sessionId}${timestamp.toString().slice(-6)}`;
+      // Use a format that's completely different and less likely to trigger lobby
+      let roomName = `meeting${dateStr}${sessionId}${randomSuffix}${timestamp.toString().slice(-6)}`;
 
-      console.log('Using unique room name:', roomName, 'for meeting:', meeting.room_name);
+      console.log('🚀 USING UNIQUE ROOM NAME:', roomName);
+      console.log('📝 Original meeting room name was:', meeting.room_name);
+      console.log('⏰ Timestamp:', timestamp);
+      console.log('🎲 Session ID:', sessionId);
 
       const options = {
         roomName: roomName,
@@ -132,14 +136,17 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           enableEmailInStats: false,
           enableUserRolesBasedOnToken: false,
           enableFeaturesBasedOnToken: false,
-          // Lobby and moderation settings - multiple approaches to ensure lobby is disabled
+          // AGGRESSIVE LOBBY PREVENTION - multiple approaches
           enableLobby: false, // Disable lobby for AGMs
           enableModeratedMode: false, // Disable moderated mode
           enableAutoModeration: false,
           disableLobbyPassword: true,
           lobbyEnabled: false, // Alternative lobby setting
-          moderatedRoomServiceUrl: '', // Disable moderated room service
-          // Additional security and access settings
+          moderatedRoomServiceUrl: null, // Disable moderated room service
+          // Additional lobby prevention
+          'lobby.enabled': false,
+          'lobby.autoKnock': false,
+          // Security and access settings
           enableGuestDomain: true,
           enableNoAudioSignal: false,
           // Force disable lobby at multiple levels
@@ -147,7 +154,11 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           hideDisplayName: false,
           // Room creation settings
           createRoom: true,
-          openBridgeChannel: true
+          openBridgeChannel: true,
+          // Additional anti-lobby settings
+          disablePolls: false,
+          disableReactions: false,
+          disableProfile: false
         },
         interfaceConfigOverwrite: {
           TOOLBAR_BUTTONS: [
@@ -191,11 +202,15 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
         Object.assign(options, meeting.jitsi_config);
       }
 
-      console.log('Initializing Jitsi with options:', {
-        roomName: options.roomName,
-        domain,
-        userDisplayName,
-        userEmail
+      console.log('🎬 INITIALIZING JITSI MEETING');
+      console.log('🏠 Domain:', domain);
+      console.log('🏢 Room Name:', options.roomName);
+      console.log('👤 User:', userDisplayName, userEmail);
+      console.log('👑 Is Host:', isHost);
+      console.log('⚙️ Config Preview:', {
+        enableLobby: options.configOverwrite.enableLobby,
+        enableModeratedMode: options.configOverwrite.enableModeratedMode,
+        lobbyEnabled: options.configOverwrite.lobbyEnabled
       });
 
       const JitsiAPI = window.JitsiMeetExternalAPI as JitsiMeetExternalAPIConstructor;
