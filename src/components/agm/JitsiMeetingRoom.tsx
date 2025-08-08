@@ -114,7 +114,7 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
       // that doesn't trigger Jitsi's lobby detection
       const timestamp = Date.now();
       const randomId = Math.random().toString(36).substring(2, 15);
-      const userSuffix = user?.id?.substring(0, 8) || 'guest';
+      const userSuffix = userEmail?.substring(0, 8).replace(/[^a-zA-Z0-9]/g, '') || 'guest';
 
       // Use a simple format that bypasses lobby entirely
       let roomName = `agm_${timestamp}_${randomId}_${userSuffix}_r${retryCount}`;
@@ -124,6 +124,8 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
       console.log('🔄 Retry count:', retryCount);
       console.log('⏰ Timestamp:', timestamp);
       console.log('🎯 User suffix:', userSuffix);
+      console.log('👤 User display name:', userDisplayName);
+      console.log('📧 User email:', userEmail);
 
       const options = {
         roomName: roomName,
