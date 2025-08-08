@@ -16,6 +16,7 @@ import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import CreateIssueModal from '../../components/modals/CreateIssueModal';
+import HomeownerAGMWidget from '../../components/agm/HomeownerAGMWidget';
 import OnboardingWizard from '../../components/onboarding/OnboardingWizard';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -229,6 +230,9 @@ const LeaseholderDashboard = () => {
           </p>
         </div>
       </Card>
+
+      {/* Upcoming AGMs */}
+      <HomeownerAGMWidget />
 
       {/* Active Polls */}
       <Card className="lg:col-span-2">

@@ -10,6 +10,8 @@ import Documents from './pages/Documents';
 import Announcements from './pages/Announcements';
 import Voting from './pages/Voting';
 import AGMs from './pages/AGMs';
+import HomeownerAGMs from './pages/HomeownerAGMs';
+import AGMJoin from './pages/AGMJoin';
 import RTMManagement from './pages/RTMManagement';
 import ShareCertificates from './pages/ShareCertificates';
 import SupplierNetwork from './pages/SupplierNetwork';
@@ -415,7 +417,7 @@ function App() {
         <Route path="building-setup" element={<BuildingSetup />} />
         <Route path="announcements" element={<Announcements />} />
         <Route path="voting" element={<Voting />} />
-        <Route path="agms" element={<AGMs />} />
+        <Route path="agms" element={<HomeownerAGMs />} />
         <Route path="user-impersonation" element={<UserImpersonationDashboard />} />
       </Route>
 
@@ -501,6 +503,9 @@ function App() {
           </>
         )
       } />
+
+      {/* AGM Join Route - Public access with authentication check */}
+      <Route path="/agm/join/:token" element={<AGMJoin />} />
     </Routes>
   );
 }

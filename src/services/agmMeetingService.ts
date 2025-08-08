@@ -4,14 +4,15 @@
  */
 
 import { supabase } from '../lib/supabase';
-import { 
-  AGMMeeting, 
-  AGMMeetingParticipant, 
-  CreateAGMMeetingRequest, 
+import {
+  AGMMeeting,
+  AGMMeetingParticipant,
+  CreateAGMMeetingRequest,
   UpdateAGMMeetingRequest,
   JoinMeetingRequest,
-  AGMMeetingStatus 
+  AGMMeetingStatus
 } from '../types/agm';
+import { AGMLinkService } from './agmLinkService';
 
 export class AGMMeetingService {
   /**
@@ -72,10 +73,38 @@ export class AGMMeetingService {
         throw new Error(`Failed to create meeting: ${error.message}`);
       }
 
-      return data as AGMMeeting;
+      const meeting = data as AGMMeeting;
+
+      // Generate a unique access link for the meeting
+      try {
+        const expiresAt = new Date(meeting.start_time || new Date());
+        expiresAt.setHours(expiresAt.getHours() + 24); // Expire 24 hours after meeting start
+
+        await AGMLinkService.generateMeetingLink({
+          meeting_id: meeting.id,
+          expires_at: expiresAt.toISOString()
+        });
+      } catch (linkError) {
+        console.warn('Failed to generate meeting link:', linkError);
+        // Don't fail the meeting creation if link generation fails
+      }
+
+      return meeting;
     } catch (error) {
       console.error('Error creating AGM meeting:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Get the shareable link for a meeting
+   */
+  static async getMeetingLink(meetingId: string): Promise<string | null> {
+    try {
+      return await AGMLinkService.generateHomeownerLink(meetingId);
+    } catch (error) {
+      console.error('Error getting meeting link:', error);
+      return null;
     }
   }
 

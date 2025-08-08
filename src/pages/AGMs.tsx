@@ -21,6 +21,8 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import JitsiMeetingRoom from '../components/agm/JitsiMeetingRoom';
+import CreateAGMModal from '../components/agm/CreateAGMModal';
+import ShareAGMModal from '../components/agm/ShareAGMModal';
 import { useAuth } from '../contexts/AuthContext';
 import { useEffectiveBuildingId } from '../contexts/BuildingContext';
 import { AGMMeetingService } from '../services/agmMeetingService';
@@ -41,6 +43,10 @@ const AGMs = () => {
     missingComponents: string[];
     instructions: string[];
   } | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [customAGMs, setCustomAGMs] = useState<AGMData[]>([]);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [selectedAGMForShare, setSelectedAGMForShare] = useState<{ id: string; title: string } | null>(null);
 
   // Check if user can host meetings
   const canHostMeeting = user?.role === 'rtm-director' || user?.role === 'rmc-director';
@@ -147,7 +153,25 @@ const AGMs = () => {
     }
   };
 
-  const agms: AGMData[] = [
+  // Handle creating a new AGM
+  const handleAGMCreated = (newAGM: AGMData) => {
+    setCustomAGMs(prev => [newAGM, ...prev]);
+    setMeetingError(null);
+  };
+
+  // Handle sharing AGM
+  const handleShareAGM = (agm: AGMData) => {
+    const meeting = agmMeetings[agm.id];
+    if (meeting) {
+      setSelectedAGMForShare({
+        id: meeting.id,
+        title: agm.title
+      });
+      setShowShareModal(true);
+    }
+  };
+
+  const defaultAGMs: AGMData[] = [
     {
       id: 1,
       title: 'Annual General Meeting 2025',
@@ -235,6 +259,9 @@ const AGMs = () => {
     }
   ];
 
+  // Combine custom AGMs with default AGMs
+  const agms: AGMData[] = [...customAGMs, ...defaultAGMs];
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'upcoming':
@@ -316,12 +343,15 @@ const AGMs = () => {
           <h1 className="text-2xl font-bold text-gray-900">Annual General Meetings</h1>
           <p className="text-gray-600 mt-1">Schedule and manage building AGMs</p>
         </div>
-        <Button 
-          leftIcon={<Plus size={16} />}
-          variant="primary"
-        >
-          Schedule AGM
-        </Button>
+        {canHostMeeting && (
+          <Button
+            leftIcon={<Plus size={16} />}
+            variant="primary"
+            onClick={() => setShowCreateModal(true)}
+          >
+            Schedule AGM
+          </Button>
+        )}
       </div>
       
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -535,9 +565,19 @@ const AGMs = () => {
                         )}
 
                         {canHostMeeting && (
-                          <div className="text-xs text-gray-500 text-center">
-                            Room: {agmMeetings[agm.id].room_name}
-                          </div>
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              leftIcon={<Users size={16} />}
+                              onClick={() => handleShareAGM(agm)}
+                            >
+                              Share with Homeowners
+                            </Button>
+                            <div className="text-xs text-gray-500 text-center">
+                              Room: {agmMeetings[agm.id].room_name}
+                            </div>
+                          </>
                         )}
                       </>
                     )}
@@ -563,6 +603,26 @@ const AGMs = () => {
           </Card>
         ))}
       </div>
+
+      {/* Create AGM Modal */}
+      <CreateAGMModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onAGMCreated={handleAGMCreated}
+      />
+
+      {/* Share AGM Modal */}
+      {selectedAGMForShare && (
+        <ShareAGMModal
+          isOpen={showShareModal}
+          onClose={() => {
+            setShowShareModal(false);
+            setSelectedAGMForShare(null);
+          }}
+          meetingId={selectedAGMForShare.id}
+          meetingTitle={selectedAGMForShare.title}
+        />
+      )}
     </div>
   );
 };
