@@ -42,6 +42,7 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isJitsiLoaded, setIsJitsiLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0); // Track retries for unique room names
   const [participantCount, setParticipantCount] = useState(0);
   const [isAudioMuted, setIsAudioMuted] = useState(true); // Start muted for AGMs
   const [isVideoMuted, setIsVideoMuted] = useState(false);
@@ -95,11 +96,12 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
       const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
       const randomSuffix = Math.random().toString(36).substring(2, 8);
 
-      // Use a format that's completely different and less likely to trigger lobby
-      let roomName = `meeting${dateStr}${sessionId}${randomSuffix}${timestamp.toString().slice(-6)}`;
+      // Use retry count to ensure each attempt gets a truly unique room
+      let roomName = `meeting${dateStr}${sessionId}${randomSuffix}${timestamp.toString().slice(-6)}r${retryCount}`;
 
       console.log('🚀 USING UNIQUE ROOM NAME:', roomName);
       console.log('📝 Original meeting room name was:', meeting.room_name);
+      console.log('🔄 Retry count:', retryCount);
       console.log('⏰ Timestamp:', timestamp);
       console.log('🎲 Session ID:', sessionId);
 
@@ -299,21 +301,10 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
                 errorMsg = 'Authentication required to join this meeting';
                 break;
               case 'conference.connectionError.membersOnly':
-                errorMsg = 'Meeting lobby is enabled. Attempting to create a new room automatically...';
+                errorMsg = 'Meeting lobby is enabled. Please use the "Try Again" button to create a new room.';
 
-                // Auto-retry with a new room name after 2 seconds
-                console.log('Lobby error detected, will auto-retry with new room in 2 seconds...');
-                setTimeout(() => {
-                  console.log('Auto-retrying with new room...');
-                  // Dispose current API and trigger re-initialization
-                  if (apiRef.current) {
-                    apiRef.current.dispose();
-                    apiRef.current = null;
-                  }
-                  // Clear error to trigger re-initialization
-                  setError(null);
-                  setIsLoading(true);
-                }, 2000);
+                // Don't auto-retry to prevent multiple instances
+                console.log('Lobby error detected. User should manually retry to avoid multiple connections.');
                 break;
               case 'connection.otherError':
                 errorMsg = 'Connection error. Please check your internet and try again.';
@@ -398,7 +389,7 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
         apiRef.current = null;
       }
     };
-  }, [isJitsiLoaded, meeting.room_name, userDisplayName, userEmail, isHost]);
+  }, [isJitsiLoaded, meeting.room_name, userDisplayName, userEmail, isHost, retryCount]);
 
   const handleMeetingEnd = () => {
     if (apiRef.current) {
@@ -427,9 +418,33 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
   };
 
   const retryConnection = () => {
+    console.log('🔄 Manual retry initiated - disposing current API and creating new room');
+
+    // Properly dispose of current API instance
+    if (apiRef.current) {
+      try {
+        apiRef.current.dispose();
+        console.log('✅ Previous API instance disposed');
+      } catch (e) {
+        console.log('⚠️ Error disposing API:', e);
+      }
+      apiRef.current = null;
+    }
+
+    // Clear the container
+    if (jitsiContainerRef.current) {
+      jitsiContainerRef.current.innerHTML = '';
+    }
+
+    // Increment retry count for unique room name
+    setRetryCount(prev => prev + 1);
+
+    // Reset state and trigger re-initialization with new room
     setError(null);
     setIsLoading(true);
-    // The useEffect will trigger again and reinitialize Jitsi
+
+    console.log('🚀 Retry will create new room with fresh timestamp and retry count');
+    // The useEffect will trigger again and reinitialize Jitsi with a new room name
   };
 
   if (error) {
