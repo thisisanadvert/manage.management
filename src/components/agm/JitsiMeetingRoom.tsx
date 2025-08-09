@@ -250,16 +250,19 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
         Object.assign(options, meeting.jitsi_config);
       }
 
-      console.log('⚙️ Full config:', JSON.stringify(options, null, 2));
       console.log('🎬 INITIALIZING JITSI MEETING');
       console.log('🏠 Domain:', domain);
       console.log('🏢 Room Name:', options.roomName);
       console.log('👤 User:', userDisplayName, userEmail);
       console.log('👑 Is Host:', isHost);
-      console.log('⚙️ Config Preview:', {
+      console.log('⚙️ Lobby Config Preview:', {
         enableLobby: options.configOverwrite.enableLobby,
         enableModeratedMode: options.configOverwrite.enableModeratedMode,
-        lobbyEnabled: options.configOverwrite.lobbyEnabled
+        lobbyEnabled: options.configOverwrite.lobbyEnabled,
+        autoKnockLobby: options.configOverwrite.autoKnockLobby,
+        enableLobbyChat: options.configOverwrite.enableLobbyChat,
+        lobby: options.configOverwrite.lobby,
+        securityUi: options.configOverwrite.securityUi
       });
 
       const JitsiAPI = window.JitsiMeetExternalAPI as JitsiMeetExternalAPIConstructor;
