@@ -124,11 +124,9 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
       console.log('🏢 AGM MEETING SETUP');
       console.log('🏠 Room Name:', roomName);
       console.log('👤 User:', userDisplayName, userEmail);
-      console.log('👑 Is Host:', isHost);
+      console.log('👑 Is Host:', isHost, '(based on meeting.host_id)');
       console.log('🔄 Retry Count:', retryCount);
-      console.log('🚪 Lobby Strategy:', isHost ?
-        (retryCount === 0 ? 'Host creates room first' : 'Host bypass lobby completely') :
-        'Participant uses lobby');
+      console.log('🚪 Lobby Strategy: Natural Jitsi lobby system - first person becomes moderator');
 
       const options = {
         roomName: roomName,
@@ -145,21 +143,14 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           disableAudioLevels: false,
           channelLastN: 20, // Limit video streams for performance
           enableLayerSuspension: true,
-          // CONDITIONAL LOBBY CONFIGURATION - hosts create room without lobby restrictions
-          lobby: isHost && retryCount === 0 ? {
-            autoKnock: false, // Host doesn't need to knock
-            enableChat: false // No lobby chat needed for host
-          } : !isHost ? {
+          // SIMPLE LOBBY CONFIGURATION - let Jitsi handle it naturally
+          // The first person to join becomes the moderator automatically
+          // Subsequent participants will be put in lobby if enabled
+          enableLobbyChat: true, // Always enable lobby chat for AGMs
+          lobby: {
             autoKnock: true, // Participants auto-knock when joining
-            enableChat: true // Allow lobby chat for participants
-          } : undefined, // On retry, don't set lobby config for hosts
-          enableLobbyChat: !isHost, // Only enable for participants
-          // For hosts on retry, aggressively disable lobby
-          ...(isHost && retryCount > 0 ? {
-            enableLobby: false,
-            lobbyEnabled: false,
-            autoKnockLobby: false
-          } : {}),
+            enableChat: true // Allow lobby chat for AGMs
+          },
           p2p: {
             enabled: false // Disable P2P for larger meetings
           },
@@ -297,19 +288,7 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           setError(null); // Clear any previous errors
           setParticipantCount(1); // Current user joined
           console.log('Successfully joined Jitsi meeting:', meeting.room_name);
-
-          // If host, enable lobby after joining to control subsequent participants
-          if (isHost) {
-            setTimeout(() => {
-              try {
-                console.log('🚪 Host enabling lobby for participant control...');
-                api.executeCommand('toggleLobby', true);
-                console.log('✅ Lobby enabled for incoming participants');
-              } catch (e) {
-                console.log('⚠️ Could not enable lobby:', e);
-              }
-            }, 2000); // Wait 2 seconds after joining
-          }
+          console.log('🎉 Meeting joined successfully! Jitsi will handle lobby automatically.');
         },
         videoConferenceLeft: () => {
           handleMeetingEnd();
@@ -351,11 +330,11 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
                 break;
               case 'conference.connectionError.membersOnly':
                 if (isHost) {
-                  errorMsg = 'Room creation issue. Please try again to create the meeting room as host.';
-                  console.log('Host unable to create room - will retry with different configuration');
+                  errorMsg = 'Unable to create meeting room. Please try again.';
+                  console.log('Host unable to create room - this should not happen with proper host detection');
                 } else {
-                  errorMsg = 'This meeting has a lobby. Please wait for the host to admit you, or contact the meeting organizer.';
-                  console.log('Participant waiting in lobby - this is expected');
+                  errorMsg = 'This meeting has a lobby. Please wait for the host to admit you.';
+                  console.log('Participant waiting in lobby - this is expected for AGM meetings');
                 }
                 break;
               case 'connection.otherError':

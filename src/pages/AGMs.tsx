@@ -328,7 +328,7 @@ const AGMs = () => {
           meeting={activeMeeting}
           userDisplayName={userDisplayName}
           userEmail={user.email}
-          isHost={canHostMeeting}
+          isHost={user.id === activeMeeting.host_id} // Check if user is the actual host of THIS meeting
           onMeetingEnd={handleEndMeeting}
           onError={(error) => setMeetingError(error.message)}
         />

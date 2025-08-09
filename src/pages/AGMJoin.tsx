@@ -167,7 +167,7 @@ const AGMJoin: React.FC = () => {
           meeting={meeting}
           userDisplayName={user?.user_metadata?.full_name || user?.email || 'Anonymous'}
           userEmail={user?.email}
-          isHost={false} // Participants joining via link are not hosts
+          isHost={user?.id === meeting.host_id} // Check if user is the actual host of THIS meeting
           onMeetingEnd={handleMeetingEnd}
           onError={(error) => setError(error.message)}
         />
