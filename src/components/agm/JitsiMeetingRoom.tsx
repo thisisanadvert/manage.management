@@ -110,24 +110,22 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
 
       const domain = 'meet.jit.si';
 
-      // FINAL LOBBY BYPASS STRATEGY - Use the most basic room name possible
-      // Based on research, Jitsi's lobby detection is very sophisticated
-      // Let's use the simplest possible room name format
-      const timestamp = Date.now();
-      const randomId = Math.random().toString(36).substring(2, 8);
+      // Use the meeting's room name or create a proper AGM room name
+      // This will work with Jitsi's lobby system as intended
+      let roomName = meeting.room_name;
 
-      // Use the absolute simplest format - just random characters
-      // This mimics how regular Jitsi rooms are created
-      let roomName = `${randomId}${timestamp.toString().slice(-8)}${retryCount}`;
+      // If no room name exists, create one that's appropriate for AGMs
+      if (!roomName) {
+        const timestamp = Date.now();
+        const randomId = Math.random().toString(36).substring(2, 8);
+        roomName = `AGM-${meeting.building_id}-${timestamp}-${randomId}`;
+      }
 
-      console.log('🚀 FINAL LOBBY BYPASS - ROOM NAME:', roomName);
-      console.log('📝 Original meeting room name was:', meeting.room_name);
-      console.log('🔄 Retry count:', retryCount);
-      console.log('⏰ Timestamp:', timestamp);
-      console.log('🎲 Random ID:', randomId);
-      console.log('👤 User display name:', userDisplayName);
-      console.log('📧 User email:', userEmail);
-      console.log('🎭 Is host:', isHost);
+      console.log('🏢 AGM MEETING SETUP');
+      console.log('🏠 Room Name:', roomName);
+      console.log('👤 User:', userDisplayName, userEmail);
+      console.log('👑 Is Host:', isHost);
+      console.log('🚪 Lobby Mode: Enabled (working with Jitsi as intended)');
 
       const options = {
         roomName: roomName,
@@ -140,18 +138,16 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           enableWelcomePage: false,
           requireDisplayName: true,
           prejoinPageEnabled: false,
-          enableNoisyMicDetection: false, // Disable to avoid issues
+          enableNoisyMicDetection: false,
           disableAudioLevels: false,
           channelLastN: 20, // Limit video streams for performance
           enableLayerSuspension: true,
-          // OFFICIAL LOBBY DISABLE SETTINGS FROM JITSI DOCS
+          // PROPER LOBBY CONFIGURATION FOR AGMs
           lobby: {
-            autoKnock: false,
-            enableChat: false
+            autoKnock: true, // Participants auto-knock when joining
+            enableChat: true // Allow lobby chat for AGMs
           },
-          // Additional lobby-related settings
-          autoKnockLobby: false,
-          enableLobbyChat: false,
+          enableLobbyChat: true, // Enable lobby chat
           p2p: {
             enabled: false // Disable P2P for larger meetings
           },
@@ -161,40 +157,21 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           remoteVideoMenu: {
             disabled: false
           },
-          // SECURITY UI SETTINGS TO HIDE LOBBY FEATURES
+          // Security settings appropriate for AGMs
           securityUi: {
-            hideLobbyButton: true,
-            disableLobbyPassword: true
+            hideLobbyButton: false, // Show lobby button for hosts
+            disableLobbyPassword: false // Allow password protection
           },
           disableRemoteMute: !isHost, // Only hosts can mute others
           enableClosePage: false,
-          // Add these to fix common issues
           disableDeepLinking: true,
           disableInviteFunctions: false,
           doNotStoreRoom: true,
           enableEmailInStats: false,
-          enableUserRolesBasedOnToken: false,
-          enableFeaturesBasedOnToken: false,
-          // AGGRESSIVE LOBBY PREVENTION - multiple approaches
-          enableLobby: false, // Disable lobby for AGMs
-          enableModeratedMode: false, // Disable moderated mode
-          enableAutoModeration: false,
-          disableLobbyPassword: true,
-          lobbyEnabled: false, // Alternative lobby setting
-          moderatedRoomServiceUrl: null, // Disable moderated room service
-          // Additional lobby prevention
-          'lobby.enabled': false,
-          'lobby.autoKnock': false,
-          // Security and access settings
+          // Proper AGM settings
+          disableModeratorIndicator: false,
           enableGuestDomain: true,
           enableNoAudioSignal: false,
-          // Force disable lobby at multiple levels
-          disableModeratorIndicator: false,
-          hideDisplayName: false,
-          // Room creation settings
-          createRoom: true,
-          openBridgeChannel: true,
-          // Additional anti-lobby settings
           disablePolls: false,
           disableReactions: false,
           disableProfile: false
@@ -204,7 +181,7 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
             'microphone', 'camera', 'desktop', 'fullscreen',
             'fodeviceselection', 'hangup', 'chat', 'settings', 'raisehand',
             'videoquality', 'filmstrip', 'invite', 'tileview'
-          ].concat(isHost ? ['recording', 'mute-everyone'] : []),
+          ].concat(isHost ? ['recording', 'mute-everyone', 'security'] : []),
           SETTINGS_SECTIONS: ['devices', 'language'].concat(isHost ? ['moderator'] : []),
           VIDEO_LAYOUT_FIT: 'both',
           filmStripOnly: false,
@@ -219,10 +196,10 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
           MOBILE_APP_PROMO: false,
           CONNECTION_INDICATOR_DISABLED: false,
           VIDEO_QUALITY_LABEL_DISABLED: false,
-          // DISABLE LOBBY UI ELEMENTS COMPLETELY
-          ENABLE_LOBBY_CHAT: false,
-          ENABLE_LOBBY_SOUNDS: false,
-          HIDE_LOBBY_BUTTON: true,
+          // ENABLE LOBBY UI ELEMENTS FOR PROPER AGM MANAGEMENT
+          ENABLE_LOBBY_CHAT: true,
+          ENABLE_LOBBY_SOUNDS: true,
+          HIDE_LOBBY_BUTTON: false, // Show lobby button for hosts
           RECENT_LIST_ENABLED: false,
           AUTO_PIN_LATEST_SCREEN_SHARE: true,
           DISABLE_DOMINANT_SPEAKER_INDICATOR: false,
@@ -237,12 +214,11 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
         userInfo: {
           displayName: userDisplayName,
           email: userEmail,
-          // Add additional user info to avoid guest detection
           id: userEmail?.replace(/[^a-zA-Z0-9]/g, '') || 'user',
-          avatarURL: undefined,
-          // Try to set user as moderator to bypass lobby
-          role: isHost ? 'moderator' : 'participant'
-        }
+          avatarURL: undefined
+        },
+        // Set JWT token for proper authentication if host
+        jwt: isHost ? undefined : undefined // We'll implement proper JWT later if needed
       };
 
       // Apply custom Jitsi config if provided
@@ -255,14 +231,12 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
       console.log('🏢 Room Name:', options.roomName);
       console.log('👤 User:', userDisplayName, userEmail);
       console.log('👑 Is Host:', isHost);
-      console.log('⚙️ Lobby Config Preview:', {
-        enableLobby: options.configOverwrite.enableLobby,
-        enableModeratedMode: options.configOverwrite.enableModeratedMode,
-        lobbyEnabled: options.configOverwrite.lobbyEnabled,
-        autoKnockLobby: options.configOverwrite.autoKnockLobby,
+      console.log('⚙️ AGM Lobby Config:', {
+        lobbyAutoKnock: options.configOverwrite.lobby.autoKnock,
+        lobbyChat: options.configOverwrite.lobby.enableChat,
         enableLobbyChat: options.configOverwrite.enableLobbyChat,
-        lobby: options.configOverwrite.lobby,
-        securityUi: options.configOverwrite.securityUi
+        securityUi: options.configOverwrite.securityUi,
+        isHost: isHost
       });
 
       const JitsiAPI = window.JitsiMeetExternalAPI as JitsiMeetExternalAPIConstructor;
@@ -351,10 +325,12 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
                 errorMsg = 'Authentication required to join this meeting';
                 break;
               case 'conference.connectionError.membersOnly':
-                errorMsg = 'Meeting lobby is enabled. Please use the "Try Again" button to create a new room.';
-
-                // Don't auto-retry to prevent multiple instances
-                console.log('Lobby error detected. User should manually retry to avoid multiple connections.');
+                if (isHost) {
+                  errorMsg = 'You are the host. Please wait a moment for the meeting to initialize, then participants can join through the lobby.';
+                } else {
+                  errorMsg = 'This meeting has a lobby. Please wait for the host to admit you, or contact the meeting organizer.';
+                }
+                console.log('Lobby mode detected - this is expected for AGM meetings.');
                 break;
               case 'connection.otherError':
                 errorMsg = 'Connection error. Please check your internet and try again.';
@@ -385,39 +361,23 @@ const JitsiMeetingRoom: React.FC<JitsiMeetingRoomProps> = ({
         }
       });
 
-      // Multiple attempts to disable lobby with different strategies
-      const disableLobbyAttempts = [500, 1000, 2000, 3000, 5000];
-
-      disableLobbyAttempts.forEach((delay, index) => {
+      // Set up proper lobby management for AGMs
+      if (isHost) {
+        // Host setup - enable lobby management features
         setTimeout(() => {
           try {
-            console.log(`Lobby disable attempt ${index + 1} at ${delay}ms...`);
-
-            // Try multiple commands that might disable lobby
-            api.executeCommand('toggleLobby', false);
-            api.executeCommand('setPassword', '');
-
-            // Try alternative commands
-            if (api.executeCommand) {
-              try {
-                api.executeCommand('setLobbyEnabled', false);
-                api.executeCommand('setModerationEnabled', false);
-              } catch (altError) {
-                console.log('Alternative lobby commands not available:', altError);
-              }
-            }
-
-            if (isHost && index === 0) {
-              console.log('Setting host privileges...');
-              api.executeCommand('setVideoQuality', 720);
-            }
-
-            console.log(`Lobby disable attempt ${index + 1} completed`);
+            console.log('🏠 Setting up host lobby management...');
+            // Hosts can manage lobby, set video quality, etc.
+            api.executeCommand('setVideoQuality', 720);
+            console.log('✅ Host privileges configured');
           } catch (e) {
-            console.error(`Lobby disable attempt ${index + 1} failed:`, e);
+            console.error('❌ Host setup failed:', e);
           }
-        }, delay);
-      });
+        }, 1000);
+      } else {
+        // Participant setup - they'll wait in lobby if needed
+        console.log('👥 Participant joining - will wait in lobby if required');
+      }
 
     };
 
